@@ -6,6 +6,8 @@
 \usepackage[russian,english]{babel}
 \usepackage[T2A]{fontenc}
 \usepackage[utf8]{inputenc}
+\usepackage{caption}
+\usepackage{subcaption}
 \usepackage{titlesec}
 \usepackage{indentfirst}
 \usepackage[hidelinks]{hyperref}
@@ -32,9 +34,11 @@
     linktoc=all,
 }
 
-\titleformat{\chapter}{\normalfont\Large\bfseries\filcenter}{Глава \thechapter}{1em}{}
+\titleformat{\chapter}{\normalfont\Large\bfseries\filcenter}{Глава \thechapter}{1em}{}\titlespacing*{\chapter}{0pt}{-50pt}{30pt}
+
 \titleformat{\section}{\normalfont\large\bfseries\filcenter}{\thesection}{1em}{}
 \titleformat{\subsection}{\normalfont\bfseries\filcenter}{\thesubsection}{1em}{}
+    
 
 
 \graphicspath{ {./images/} }
@@ -43,7 +47,7 @@
 \bibliographystyle{gost71u} 
 
 \let\oldtabularx\tabularx 
-\renewcommand{\tabularx}{\footnotesize\oldtabularx}
+\renewcommand{\tabularx}{\small\oldtabularx}
 
 \lstdefinestyle{csql}{
     belowcaptionskip=1\baselineskip,
@@ -59,6 +63,10 @@
 }
 \lstset{extendedchars=\true}
 
+\captionsetup[figure]{labelformat=simple, labelsep=space}
+\captionsetup[table]{labelformat=simple, labelsep=space, justification=raggedleft}
+\captionsetup[subtable]{labelformat=empty, labelsep=space, justification=centering}
+\captionsetup{singlelinecheck=false}
 %===========================================
 
 
@@ -70,6 +78,7 @@
     \begin{figure}
         \center\includegraphics[width=4cm]{stankin.png}
     \end{figure}
+    \begin{small}
     \textbf {МИНОБРНАУКИ РОССИИ}\par
     {\textbf{федеральное государственное бюджетное образовательное \\учреждение
     высшего образования\\
@@ -82,18 +91,19 @@
     {\textbf {Отчёт по самостоятельной работе}\par}
     {по дисциплине {\textbf{«Управление данными»}}\par}
     на тему: \textbf{Проектирование базы данных поликлиники}
-    \vspace{3cm}
+    \vspace{5cm}
     \begin{flushleft}
         {\textbf{Студент}  \hfill \rule{2cm}{0.4pt}\phantom{00}Махмудов Б.Н.\phantom{-0}}\par
         {группа ИДБ-16-07\hfill
-        \small{подпись}\phantom{0000000000000000000000}}\par
+        \footnotesize{подпись}\phantom{00000000000000000000000}}\par
         \vspace{1cm}
         {\textbf{Руководитель}\hfill \rule{2cm}{0.4pt}\phantom{00}Быстрикова
         В.А.}\par
         {Старший преподователь\hfill
-        \small{подпись}\phantom{0000000000000000000000}}\par
+        \footnotesize{подпись}\phantom{00000000000000000000000}}\par
     \end{flushleft} 
     {\vfill Москва 2018}
+    \end{small}
 \end{titlepage}
 %==============END TITLEPAGE=============
 
@@ -663,20 +673,22 @@ SQLite. Такой выбор обоснован спецификой предм
 \setcounter{lstlisting}{0}
 
 \begin{table}[h!]
-    \centering
-    \begin{tabularx}{\textwidth}{| c | c | c | X | X | X | c |}
+    \caption{ } 
+    \begin{subtable}[t]{\textwidth}
+        \caption{Структура таблицы «Пациент»}
+    \begin{tabularx}{\textwidth}{| X | X | X | c | c | c | X |}
         \hline
         \textbf{Столбец} & \textbf{Тип данных} & \textbf{Нуль?} & \textbf{Ключ} & \textbf{По
         умолч.} & \textbf{Огранич.} & \textbf{Ссылка} \\ \hline
         regid & integer & not null & первичный & & & \\ \hline
         fio & text & not null & & & & \\ \hline
         birthdate & date & not null & & & < date('now') & \\ \hline
-        gender & char(1) & not null & & & like `М' or \newline like `Ж' & \\ \hline
+        gender & char(1) & not null & & & `М' или `Ж' & \\ \hline
         address & text & & & & & \\ \hline
         pnumber & text & & & & & \\ \hline
         password & text & not null & & abs(random()) & & \\ \hline
     \end{tabularx}
-    \caption{Структура таблицы «Пациент» Листинги \ref{list:cpat},\ref{list:fcpat}}
+    \end{subtable}
     \label{table:pat}
 \end{table}
 
