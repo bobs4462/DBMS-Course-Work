@@ -9,6 +9,9 @@
 \usepackage{titlesec}
 \usepackage{indentfirst}
 \usepackage[hidelinks]{hyperref}
+\usepackage{tabularx}
+\usepackage{listings}
+\usepackage{xcolor}
 %===========================================
 
 %===========================================
@@ -38,6 +41,24 @@
 \setlist[enumerate]{label*=\arabic*.}
 
 \bibliographystyle{gost71u} 
+
+\let\oldtabularx\tabularx 
+\renewcommand{\tabularx}{\footnotesize\oldtabularx}
+
+\lstdefinestyle{csql}{
+    belowcaptionskip=1\baselineskip,
+    breaklines=true,
+    xleftmargin=\parindent,
+    language=SQL,
+    frame=single,
+    showstringspaces=false,
+    basicstyle=\footnotesize\ttfamily,
+    keywordstyle=\bfseries\color{red},
+    identifierstyle=\color{blue},
+    stringstyle=\color{cyan},
+}
+\lstset{extendedchars=\true}
+
 %===========================================
 
 
@@ -272,12 +293,12 @@
 \begin{enumerate}[noitemsep]
     \item Функции для пациентов:
         \begin{enumerate}[noitemsep]
-            \item бронировани услуг предоставляемых поликлиникой;
+            \item бронирование услуг предоставляемых поликлиникой;
             \item запись на приём к врачу;
             \item просмотр личных медицинских карт;
             \item просмотр результатов анализов;
-            \item ознакомиться с графиком работы врачей.
-            \item прамая связь с сотрудником поликлиники
+            \item ознакомление с графиком работы врачей.
+            \item прямая связь с сотрудником поликлиники
             \item оставить отзыв о работе врачей и поликлиники в целом;
         \end{enumerate}
     \item Функции для сотрудников:
@@ -296,7 +317,7 @@
 \chapter{Концептуальное проектирование}
 \section{Определение концептуального проектирования}
 Концептуальное проектирование технических систем — начальная стадия проектирования, на которой
-принимаются решения определяющие последующий облик, и проводится исследование и согласование
+принимаются решения определяющие послеяующий облик, и проводится исследование и согласование
 параметров созданных технических решений с возможной их организацией. Термин «концепция»
 применяется для описания принципа действия не только в технических системах, но и в научных,
 художественных и прочих видах деятельности. «Концепт» (лат.) — содержание понятия, смысл. Таким
@@ -335,7 +356,7 @@
     \item разработка подсистемы связи между пользователеми с хранением истории непосредственно в
         самой базе данных.
 \end{enumerate}
-Если же рассматривать данныю ИС с точки зрения возможных вариантов использования, то можно выделить
+Если же рассматривать данную ИС с точки зрения возможных вариантов использования, то можно выделить
 два действующих лица, сотрудник и пациент. Такое небольшое количество действующих лиц объясняется
 тем, что функции, которые будет предоставлять система, подразделены на две основные категории, в то
 время как возможности пользователей внутри своей группы будут разграничены при помощи вышестоящего
@@ -371,7 +392,7 @@
             \item информация о пациентах;
             \item информация о сотрудниках поликлиники;
         \end{enumerate}
-    \item условно-переменные:
+    \item изменяемые:
         \begin{enumerate}[noitemsep]
             \item информация о медицинских картах, т.е. их цифровые копии;
             \item информация о записях пациентов;
@@ -549,34 +570,34 @@ ER-модель (от англ. entity-relationship model, модель «сущ
             \item Сотрудник(\underline{Табельный номер}, ...);
             \item Запись(\underline{Табельный номер, Регистрационный номер}, ...).
         \end{itemize}
-    \item Связь ``Владеет'' удовлетворяет условиям правила 4, откуда получаются следующие
+    \item Связь ``Владеет'' удовлетворяет условиям правила 4, откуда получаются следующие таблицы
         \begin{itemize}
             \item Пациент(\underline{Регистрационный номер}, ...);
-            \item Медицинская карта(\underline{Номер медкарты}, Регистрационный номер, ...).
+            \item Медкарта(\underline{Номер медкарты}, Регистрационный номер, ...).
         \end{itemize}
     \item Связь ``Прикрепление'' удовлетворяет условиям правила 4, откуда получаются следующие
-        таблицы.
+        таблицы
         \begin{itemize}
-            \item Медицинская карта(\underline{Номер медкарты}, ...);
+            \item Медкарта(\underline{Номер медкарты}, ...);
             \item Результат анализов(\underline{Номер анализа}, Номер медкарты, ...).
         \end{itemize}
     \item Связь ``Связывается с пациентом'' удовлетворяет условиям правила 6, откуда получаются
-        следующие таблицы.
+        следующие таблицы
         \begin{itemize}
             \item Пациент(\underline{Регистрационный номер}, ...);
             \item Сотрудник(\underline{Табельный номер}, ...);
             \item СвязьCПациентом(\underline{Табельный номер, Регистрационный номер}, ...).
         \end{itemize}
     \item Связь ``Связывается с сотрудником'' удовлетворяет условиям правила 6, откуда получаются
-        следующие таблицы.
+        следующие таблицы
         \begin{itemize}
             \item Сотрудник(\underline{Табельный номер}, ...);
             \item СвязьCСотрудником(\underline{Табельный номер, Табельный номер}, ...).
         \end{itemize}
-    \item Связь ``Лечение'' удовлетворяет условиям правила 6, откуда получаются
+    \item Связь ``Лечение'' удовлетворяет условиям правила 6, откуда получаются следующие таблицы
         \begin{itemize}
             \item Сотрудник(\underline{Табельный номер}, ...);
-            \item Медицинская карта(\underline{Номер медкарты}, ...);
+            \item Медкарта(\underline{Номер медкарты}, ...);
             \item Лечение(\underline{Табельный номер, номер медкарты}, ...).
         \end{itemize}
     \item Связь ``Бронирует'' удовлетворяет условиям правила 6, откуда получаются следующие
@@ -590,12 +611,11 @@ ER-модель (от англ. entity-relationship model, модель «сущ
 В итоге получается 10 таблиц, которые приведены ниже с перечнем всех относящихся к ним атрибутам.
 \begin{enumerate}
             \item Пациент(\underline{Регистрационный номер}, ФИО, дата рождения, пол, адрес
-                проживания, контактный телефон);
+                проживания, контактный телефон, пароль от ЛК);
             \item Сотрудник(\underline{Табельный номер}, ФИО, должность, стаж, дата рождения, пол, адрес
-                проживания, контактный телефон);
-            \item Запись(\underline{Табельный номер, Регистрационный номер}, дата записи, время
-                записи).
-            \item Медицинская карта(\underline{Номер медкарты}, Регистрационный номер, дата, 
+                проживания, контактный телефон, пароль от ЛК);
+            \item Запись(\underline{Табельный номер, Регистрационный номер}, дата и время записи).
+            \item Медкарта(\underline{Номер медкарты}, Регистрационный номер, дата, 
                 заведения, тип).
             \item Результат анализов(\underline{Номер анализа}, Номер медкарты, вид анализа, дата сдачи,
                 результат).
@@ -605,9 +625,9 @@ ER-модель (от англ. entity-relationship model, модель «сущ
                 история связи).
             \item Лечение(\underline{Табельный номер, номер медкарты}, дата назначения,
                 заболевание, назначенное лечение).
+            \item Услуга(\underline{Номер услуги}, название, описание, стоимость).
             \item Бронь(\underline{Номер услуги, Регистрационный номер}, дата бронирования, дата
-                оказания, статус);
-            \item Услуга(\underline{Номер услуги}, Описание,).
+                и время оказания, статус);
 \end{enumerate}
 
 
@@ -635,9 +655,255 @@ SQLite. Такой выбор обоснован спецификой предм
 
 
 \section{Схема БД поликлиники}
-На основании информации, полученной в конце предыдущей главы, касательно таблиц и их атрибутов
-далее приведены окончательные структуры таблиц, какими они будут в СУБД SQL.
+На основании информации, полученной в конце предыдущей главы, касательно таблиц и их атрибутов,
+далее приведены окончательные структуры таблиц, какими они будут в СУБД SQLite. Поля перечислены в
+том же порядке, который был описан ранее. SQL операторы
+использованные для создания таблиц приведены в приложенни А, там же приведены примеры их
+заполнения.
+\setcounter{lstlisting}{0}
 
+\begin{table}[h!]
+    \centering
+    \begin{tabularx}{\textwidth}{| c | c | c | X | X | X | c |}
+        \hline
+        \textbf{Столбец} & \textbf{Тип данных} & \textbf{Нуль?} & \textbf{Ключ} & \textbf{По
+        умолч.} & \textbf{Огранич.} & \textbf{Ссылка} \\ \hline
+        regid & integer & not null & первичный & & & \\ \hline
+        fio & text & not null & & & & \\ \hline
+        birthdate & date & not null & & & < date('now') & \\ \hline
+        gender & char(1) & not null & & & like `М' or \newline like `Ж' & \\ \hline
+        address & text & & & & & \\ \hline
+        pnumber & text & & & & & \\ \hline
+        password & text & not null & & abs(random()) & & \\ \hline
+    \end{tabularx}
+    \caption{Структура таблицы «Пациент» Листинги \ref{list:cpat},\ref{list:fcpat}}
+    \label{table:pat}
+\end{table}
+
+\begin{table}[h!]
+    \centering
+    \begin{tabularx}{\textwidth}{| c | c | c | X | X | X | c |}
+        \hline
+        \textbf{Столбец} & \textbf{Тип данных} & \textbf{Нуль?} & \textbf{Ключ} & \textbf{По
+        умолч.} & \textbf{Огранич.} & \textbf{Ссылка} \\ \hline
+        tabid & integer & not null & первичный & & &  \\ \hline
+        fio & text & not null & & & & \\ \hline
+        position & text & not null & & & & \\ \hline
+        experien & integer & not null & & 0 & < 100 & \\ \hline
+        birthdate & date & not null & & & < date('now') & \\ \hline
+        gender & char(1) & not null & & & like `М' or \newline like `Ж' & \\ \hline
+        address & text & & & & & \\ \hline
+        pnumber & text & & & & & \\ \hline
+        password & text & not null & & abs(random()) & & \\ \hline
+    \end{tabularx}
+    \caption{Структура таблицы «Сотрудник» Листинги \ref{list:cemp}, \ref{list:fcemp}}
+    \label{table:emp}
+\end{table}
+
+\begin{table}[h!]
+    \centering
+    \begin{tabularx}{\textwidth}{| c | c | c | X | X | X | c |}
+        \hline
+        \textbf{Столбец} & \textbf{Тип данных} & \textbf{Нуль?} & \textbf{Ключ} & \textbf{По
+        умолч.} & \textbf{Огранич.} & \textbf{Ссылка} \\ \hline
+        tabid & integer & not null & первичный, внешний & & & tabid в «Сотрудник» \\ \hline
+        regid & integer & not null & первичный, внешний & & & regid в «Пациент» \\ \hline
+        recdatetime & datetime & not null & & & & \\ \hline
+        \multicolumn{7}{| c |}{ограничения на таблицу: unique(tabid, recdatetime),
+        unique(regid, recdatetime)} \\ \hline
+    \end{tabularx}
+    \caption{Структура таблицы «Запись» Листинги \ref{list:rec}, \ref{list:frec}}
+    \label{table:rec}
+\end{table}
+
+\begin{table}[h!]
+    \centering
+    \begin{tabularx}{\textwidth}{| c | c | c | X | X | X | c |}
+        \hline
+        \textbf{Столбец} & \textbf{Тип данных} & \textbf{Нуль?} & \textbf{Ключ} & \textbf{По
+        умолч.} & \textbf{Огранич.} & \textbf{Ссылка} \\ \hline
+        cardid & integer & not null & первичный & & & \\ \hline
+        regid & integer & not null & внешний & & & regid в «Пациент» \\ \hline
+        crdate & date & not null & & date('now') & & \\ \hline
+        type & text & & & & & \\ \hline
+        \multicolumn{7}{| c |}{ограничения на таблицу: unique(regid, type)} \\ \hline
+    \end{tabularx}
+    \caption{Структура таблицы «Медкарта» Листинги \ref{list:medc} \ref{list:fmedc}}
+    \label{table:medcard}
+\end{table}
+
+\begin{table}[h!]
+    \centering
+    \begin{tabularx}{\textwidth}{| c | c | c | X | X | X | c |}
+        \hline
+        \textbf{Столбец} & \textbf{Тип данных} & \textbf{Нуль?} & \textbf{Ключ} & \textbf{По
+        умолч.} & \textbf{Огранич.} & \textbf{Ссылка} \\ \hline
+        resid & integer & not null & первичный & & & \\ \hline
+        cardid & integer & not null & внешний & & & cardid в «Медкарта» \\ \hline
+        type & text & not null & & & & \\ \hline
+        passdate & date & not null & & date('now') & & \\ \hline
+        result & text & & & & & \\ \hline
+    \end{tabularx}
+    \caption{Структура таблицы «Результат анализов» Листинги \ref{list:res}, \ref{list:fres}}
+    \label{table:res}
+\end{table}
+
+\begin{table}[h!]
+    \centering
+    \begin{tabularx}{\textwidth}{| c | c | c | X | c | X | c |}
+        \hline
+        \textbf{Столбец} & \textbf{Тип данных} & \textbf{Нуль?} & \textbf{Ключ} & \textbf{По
+        умолч.} & \textbf{Огранич.} & \textbf{Ссылка} \\ \hline
+        stabid & integer & not null & первичный, внешний & & & tabid в «Сотрудник» \\ \hline
+        dtabid & integer & not null & первичный, внешний & & & tabid в «Сотрудник» \\ \hline
+        crtime & datetime & not null & & datetime('now') &  & \\ \hline
+        lhist & text & & & & & \\ \hline
+    \end{tabularx}
+    \caption{Структура таблицы «СвязьССотрудником», Листинги \ref{list:emplink}, \ref{list:femplink}}
+    \label{table:emplink}
+\end{table}
+
+\begin{table}[h!]
+    \centering
+    \begin{tabularx}{\textwidth}{| c | c | c | X | c | X | c |}
+        \hline
+        \textbf{Столбец} & \textbf{Тип данных} & \textbf{Нуль?} & \textbf{Ключ} & \textbf{По
+        умолч.} & \textbf{Огранич.} & \textbf{Ссылка} \\ \hline
+        tabid & integer & not null & первичный, внешний & & & tabid в «Сотрудник» \\ \hline
+        regid & integer & not null & первичный, внешний & & & regid в «Пациент» \\ \hline
+        crtime & datetime & not null & & datetime('now') &  & \\ \hline
+        lhist & text & & & & & \\ \hline
+    \end{tabularx}
+    \caption{Структура таблицы «СвязьСПациентом» Листинги \ref{list:patlink}, \ref{list:fpatlink}}
+    \label{table:patlink}
+\end{table}
+
+\begin{table}[h!]
+    \centering
+    \begin{tabularx}{\textwidth}{| c | c | c | X | X | X | c |}
+        \hline
+        \textbf{Столбец} & \textbf{Тип данных} & \textbf{Нуль?} & \textbf{Ключ} & \textbf{По
+        умолч.} & \textbf{Огранич.} & \textbf{Ссылка} \\ \hline
+        tabid & integer & not null & первичный, внешний & & & tabid в «Сотрудник» \\ \hline
+        cardid & integer & not null & первичный, внешний & & & cardid в «Медкарта» \\ \hline
+        trdate & date & not null & & date('now') & & \\ \hline 
+        illness & text & & & & & \\ \hline
+        treatment & text & & & & & \\ \hline
+    \end{tabularx}
+    \caption{Структура таблицы «Лечение» Листинги \ref{list:treat}, \ref{list:ftreat}}
+    \label{table:treat}
+\end{table}
+
+\begin{table}[h!]
+    \centering
+    \begin{tabularx}{\textwidth}{| c | c | c | X | X | X | X |}
+        \hline
+        \textbf{Столбец} & \textbf{Тип данных} & \textbf{Нуль?} & \textbf{Ключ} & \textbf{По
+        умолч.} & \textbf{Огранич.} & \textbf{Ссылка} \\ \hline
+        servid & integer & not null & первичный & & & \\ \hline
+        name & text & not null & & & unique & \\ \hline
+        descrip & text & not null & & & & \\ \hline
+        cost & integer & not null & & 0 & & \\ \hline
+    \end{tabularx}
+    \caption{Структура таблицы «Услуга» Листинги \ref{list:serv}, \ref{list:fserv}}
+    \label{table:serv}
+\end{table}
+
+\begin{table}[h!]
+    \centering
+    \begin{tabularx}{\textwidth}{| c | c | c | X | X | c | c |}
+        \hline
+        \textbf{Столбец} & \textbf{Тип данных} & \textbf{Нуль?} & \textbf{Ключ} & \textbf{По
+        умолч.} & \textbf{Огранич.} & \textbf{Ссылка} \\ \hline
+        servid & integer & not null & первичный, внешний & & & servid в «Услуга»\\ \hline
+        regid & integer & not null & первичный, внешний & & & regid в «Пациент» \\ \hline
+        rdate & date & not null & & date('now') & & \\ \hline
+        pdate & datetime & not null & & & & \\ \hline
+        status & text & not null & & & & \\ \hline
+    \end{tabularx}
+    \caption{Структура таблицы «Бронь» Листинги \ref{list:reserv},\ref{list:freserv}}
+    \label{table:reserv}
+\end{table}
+
+\cleardoublepage
+На Рис. \ref{fig:clinic} можно ознакомиться с общей схемой БД. Визуализаация была
+произведена средствами программного продукта DataGrip версия 2017.2.
+
+\begin{figure}[b!]
+        \includegraphics[scale=0.6]{clinic}
+        \caption{Схема базы данных поликлиники}
+        \label{fig:clinic}
+\end{figure}
+
+
+\chapter*{Заключение}
+\addcontentsline{toc}{chapter}{Заключение}
+Целью данной курсовой работы было проектирование базы данных для поликлиники, эта задача
+была решена в 4 этапа:
+\begin{enumerate}[noitemsep]
+    \item Была проанализирована предметная область поликлиника и её особенности, также были
+        приведены аргументы в пользу необходимости в автоматизации. Были рассмотрены 2 существующих
+        продукта, которые в той или иной мере решают проблему автоматизации, предоставляемые ими
+        функции и их специфика. На основании анализа предметной области был выделен перечень
+        функций для будущей реализации.
+    \item Следующим этапом являлось концептуальное проектирование, в ходе которого были выделены 2
+        действующих лица (сотрудник, пациент), для которыx была составлена
+        диаграмма вариантов использования.
+    \item Далее в ходе логического проектирования была создана ER-модель базы данных, где были
+        определены основные сущности и их взаимодействия. Для визуализации ER-модели были
+        использованы ER-диаграммы. В завершении данного этапа были определены таблицы БД путём
+        преобразования ER-модели в реляционную.
+    \item Завершающим этапом стало физическое проектирование, в ходе которого в СУБД SQLite была
+        создана база данных поликлиники со всеми таблицами, определенных на предыдущем этапе.
+\end{enumerate}
+
+\addcontentsline{toc}{chapter}{Литература}
 \bibliography{b}{}
+
+\chapter*{Приложение А}
+\addcontentsline{toc}{chapter}{Приложение А}
+
+\setcounter{chapter}{5}
+\setcounter{lstlisting}{0}
+
+
+\section*{SQL операторы создания таблиц}
+\addcontentsline{toc}{section}{SQL операторы создания таблиц}
+
+\lstinputlisting[caption=Создание таблицы «Пациент», label=list:cpat, style=csql]{code/cpat.sql}
+\lstinputlisting[caption=Создание таблицы «Сотрудник», label=list:cemp, style=csql]{code/cemp.sql}
+\lstinputlisting[caption=Создание таблицы «Запись», label=list:rec, style=csql]{code/rec.sql}
+\lstinputlisting[caption=Создание таблицы «Медкарта», label=list:medc, style=csql]{code/medc.sql}
+\lstinputlisting[caption=Создание таблицы «Результат анализов», label=list:res,
+style=csql]{code/res.sql}
+\newpage
+\lstinputlisting[caption=Создание таблицы «СвязьСПациентом», label=list:patlink,
+style=csql]{code/patlink.sql}
+\lstinputlisting[caption=Создание таблицы «СвязьССотрудником», label=list:emplink,
+style=csql]{code/emplink.sql}
+\lstinputlisting[caption=Создание таблицы «Лечение», label=list:treat, style=csql]{code/treat.sql}
+\newpage
+\lstinputlisting[caption=Создание таблицы «Услуга», label=list:serv, style=csql]{code/serv.sql}
+\lstinputlisting[caption=Создание таблицы «Бронь», label=list:reserv, style=csql]{code/reserv.sql}
+
+
+\section*{Примеры заполнения таблиц}
+\addcontentsline{toc}{section}{Примеры заполнения таблиц}
+
+\lstinputlisting[caption=Заполнение таблицы «Пациент», label=list:fcpat, style=csql]{code/fcpat.sql}
+\lstinputlisting[caption=Заполнение таблицы «Сотрудник», label=list:fcemp, style=csql]{code/fcemp.sql}
+\lstinputlisting[caption=Заполнение таблицы «Запись», label=list:frec, style=csql]{code/frec.sql}
+\lstinputlisting[caption=Заполнение таблицы «Медкарта», label=list:fmedc, style=csql]{code/fmedc.sql}
+\newpage
+\lstinputlisting[caption=Заполнение таблицы «Результат анализов», label=list:fres,
+style=csql]{code/fres.sql}
+\lstinputlisting[caption=Заполнение таблицы «СвязьСПациентом», label=list:fpatlink,
+style=csql]{code/fpatlink.sql}
+\lstinputlisting[caption=Заполнение таблицы «СвязьССотрудником», label=list:femplink,
+style=csql]{code/femplink.sql}
+\newpage
+\lstinputlisting[caption=Заполнение таблицы «Лечение», label=list:ftreat, style=csql]{code/ftreat.sql}
+\lstinputlisting[caption=Заполнение таблицы «Услуга», label=list:fserv, style=csql]{code/fserv.sql}
+\lstinputlisting[caption=Заполнение таблицы «Бронь», label=list:freserv, style=csql]{code/freserv.sql}
 \end{document}
 
