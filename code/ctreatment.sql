@@ -4,5 +4,5 @@ CREATE TABLE treatment (
     trdate date NOT NULL DEFAULT (date('now')),
     illness text,
     treatment text,
-    PRIMARY KEY(tabid, cardid)
+    PRIMARY KEY(tabid, cardid, trdate)
 );
