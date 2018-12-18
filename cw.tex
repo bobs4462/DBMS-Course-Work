@@ -14,6 +14,7 @@
 \usepackage{tabularx}
 \usepackage{listings}
 \usepackage{xcolor}
+\usepackage{setspace}
 %===========================================
 
 %===========================================
@@ -34,12 +35,13 @@
     linktoc=all,
 }
 
-\titleformat{\chapter}{\normalfont\Large\bfseries\filcenter}{Глава \thechapter}{1em}{}\titlespacing*{\chapter}{0pt}{-43pt}{23pt}
+\titleformat{\chapter}{\normalfont\Large\bfseries\filcenter}{Глава \thechapter}{1em}{}\titlespacing*{\chapter}{0pt}{-43pt}{19pt}
 
 \titleformat{\section}{\normalfont\large\bfseries\filcenter}{\thesection}{1em}{}
 \titleformat{\subsection}{\normalfont\bfseries\filcenter}{\thesubsection}{1em}{}
     
-
+\setlist[itemize]{noitemsep, topsep=0pt}
+\setlist[enumerate]{noitemsep, topsep=0pt}
 
 \graphicspath{ {./images/} }
 
@@ -53,7 +55,7 @@
     xleftmargin=\parindent,
     language=SQL,
     showstringspaces=false,
-    basicstyle=\footnotesize\ttfamily,
+    basicstyle=\linespread{1.2}\footnotesize\ttfamily,
     keywordstyle=\bfseries\color{red},
     identifierstyle=\color{blue},
     stringstyle=\color{cyan},
@@ -61,7 +63,7 @@
 \lstset{extendedchars=\true}
 
 \captionsetup[figure]{labelformat=simple, labelsep=space}
-\captionsetup[table]{labelformat=simple, labelsep=space, justification=raggedleft, singlelinecheck=false}
+\captionsetup[table]{labelformat=simple, labelsep=space, justification=raggedleft, singlelinecheck=false, skip=7pt}
 \captionsetup[subtable]{labelformat=empty, labelsep=space, justification=centering, singlelinecheck=false}
 \captionsetup[lstlisting]{labelformat=simple, labelsep=space, justification=raggedright, singlelinecheck=false}
 %===========================================
@@ -107,8 +109,10 @@
 \addtocounter{page}{1}
 
 \selectlanguage{russian}
-
+\begingroup
+\onehalfspace
 \tableofcontents{}
+\endgroup
 
 \newpage
 
@@ -129,7 +133,7 @@
 данных, реализацию и т.д.  Анализ предметной области, позволяет выделить ее сущности, определить
 первоначальные требования к функциональности и определить границы проекта.
 
-Предметной областью данной работы является поликлиника, далее следует анализ деятельности
+Предметной областью данной работы является деятельность поликлиники. Далее следует анализ деятельности
 поликлиники, выявление требований к разрабатываемой системе, а также определение функций, которые
 данная система должна будет предоставлять пользователям.
 
@@ -139,7 +143,7 @@
 оказания амбулаторной медицинской помощи больным на приёме и на дому.  На территории России
 распределены по территориальному признаку, и являются базовым уровнем медицинского обслуживания
 населения.  По мощности городские поликлиники делятся на 5 групп. В структуре городской поликлиники
-предусматриваются различные подразделения.
+предусматриваются различные подразделения:
 
 \begin{enumerate}[noitemsep]
     \item регистратура,
@@ -148,8 +152,8 @@
     \item отделение восстановительного лечения,
     \item отделения по оказанию специализированных видов медицинской помощи (хирургическое,
         гинекологическое) с кабинетами соответствующих специалистов (кардиологический,
-        ревматологический, неврологический, урологический, офтальмологический,
-        оториноларингологический).
+        ревматологический, неврологический, урологический, офтальмологический и т.п.
+        
 \end{enumerate}
 
 Число отделений и кабинетов, их потенциальные возможности определяются мощностью поликлиники и
@@ -172,7 +176,7 @@
 оказании медицинских услуг.
 
 
-\section{Существующие продукты решающие проблему автоматизации}
+\section{Существующие продукты, решающие проблему автоматизации}
 
 \subsection{1С : Медицина. Поликлиника}
 Прикладное решение «1С:Медицина. Поликлиника» предназначено для автоматизации основных процессов
@@ -247,7 +251,6 @@
         \caption{Форма записи на приём к врачу в «СМ-Клиника»}
         \label{fig:appdoc}
 \end{figure}
-\cleardoublepage
 \begin{figure}[t!]
         \includegraphics[width=\textwidth]{lkcm}
         \caption{Страница с перечнем предостваляемых услуг}
@@ -257,8 +260,9 @@
 Функция «Личный кабинет» предоставляет широкий перечень возможностей для зарегистрированных
 пользователей:
 
-\begin{enumerate}[noitemsep]
-    \item получить доступ к своей медицинской карте - увидеть детальную историю всех посещений
+\begin{itemize}[noitemsep]
+\renewcommand\labelitemi{--}
+    \item Получить доступ к своей медицинской карте - увидеть детальную историю всех посещений
         клиники, фамилии лечащих докторов, их специализации, точные даты посещений и другую
         полезную информацию;
 
@@ -277,7 +281,7 @@
 
     \item оставить отзыв о враче или клинике.\cite{smclin}
 
-\end{enumerate}
+\end{itemize}
 Функция «Услуги» позволяет подробно ознакомится c перечнем услуг предостваляемых поликлиникой
 (рис. \ref{fig:lkcm}).
 
@@ -286,6 +290,7 @@
 Оба рассмотренных продукта, хотя и ориентированы на разные категории пользователей, имеют перечень
 общих функций:
 \begin{itemize}[noitemsep]
+\renewcommand\labelitemi{--}
     \item доступ к электронной медицинской карте,
     \item запись на прием к врачу,
     \item ознакомиться с графиком лечащего врача,
@@ -296,8 +301,10 @@
 взамодейстивия пациентов с сотрудниками поликлиники. Проанализировав программные продукты решающие
 схожие задачи в данной предметной области, можно выделить ряд функций которые необходимо
 реализовать в процессе разработки:
-\begin{enumerate}
-            \item просмотр и/или редактирование медицинских карт,
+\begin{itemize}[noitemsep]
+		
+\renewcommand\labelitemi{--}
+            \item Просмотр и/или редактирование медицинских карт,
             \item просмотр и/или редактирование результатов анализов,
             \item запись на приём к врачу,
             \item проcмотр и/или редактирование записей к врачам,
@@ -306,12 +313,12 @@
             \item поиск всей информации касательно пациента,
             \item доступ к графику работы врачей,
             \item ознакомление с перечнем услуг, предоставляемых поликлиникой.
-\end{enumerate}
+\end{itemize}
 
 
 \chapter{Концептуальное проектирование}
 \section{Определение концептуального проектирования}
-Концептуальное (инфологическое) проектирование — построение семантической модели предметной
+Концептуальное проектирование — построение семантической модели предметной
 области, то есть информационной модели наиболее высокого уровня абстракции. Такая модель создаётся
 без ориентации на какую-либо конкретную СУБД и модель данных.
 Чаще всего концептуальная модель базы данных включает в себя описание информационных объектов 
@@ -332,19 +339,21 @@
 
 
 \section{Концептуальная модель базы данных поликлиники}
-В завершении анализа предметной области был выделен перечень функций которые необходимо реализовать
+В завершении анализа предметной области был выделен перечень функций, которые необходимо реализовать
 в рамках данной работы, и рассматривая данную ИС с точки зрения возможных вариантов использования, можно 
 разделить эти функции между действующими лицами.\par
-\noindent\textbf{Действующие лица:}
+\noindent Действующими лицами разрабатываемой системы являются:
 \begin{enumerate}[noitemsep]
     \item сотрудник регистратуры,
     \item врач,
     \item пациент.    
 \end{enumerate}
-Далее приведены варианты использования ИС каждым из действующих лиц. Сама же диаграмма показана на
+
+
+Далее приведены варианты использования для каждого из действующих лиц. Сама же диаграмма показана на
 рис. \ref{fig:ClinicDB}.
 \begin{itemize}[noitemsep]
-    \item Сотрудник регистратуры:
+    \item Сотрудник регистратуры может выполнять в системе следующие действия:
         \begin{enumerate}[noitemsep]
             \item поиск по медицинским картам пациентов,
             \item выдача информации по графику работы врачей,
@@ -352,7 +361,7 @@
             \item создание медицинской карты пациента,
             \item запись пациента к врачу.
         \end{enumerate}
-    \item Врач:
+    \item Врач может выполнять в системе следующие действия:
         \begin{enumerate}[noitemsep]
             \item промотр истории болезней пациента.
             \item назначение лечения,
@@ -360,7 +369,7 @@
             \item выписка рецептов пациентам,
             \item выписка листков нетрудоспособности.
         \end{enumerate}
-    \item Пациент:
+    \item Пациент может выполнять в системе следующие действия:
         \begin{enumerate}[noitemsep]
             \item ознакомление с графиком работы врачей,
             \item запись на приём к врачу,
@@ -374,8 +383,9 @@
         \label{fig:ClinicDB}
 \end{figure}
 
-Приняв во внимание всё вышесказанное, можно выделить данные, которые необходимо хранить в проектируемой базе данных.
-\begin{enumerate}[noitemsep]
+Приняв во внимание всё вышесказанное, можно выделить данные, которые необходимо хранить в проектируемой базе данных:
+\begin{itemize}[noitemsep]
+\renewcommand\labelitemi{--}
     \item информация о предоставляемых услугах,
     \item информация о пациентах,
     \item информация о сотрудниках поликлиники,
@@ -386,7 +396,7 @@
     \item информация о выписанных рецептах,
     \item информация о выданных листках нетрудоспособности,
     \item информация о назначенных лечениях.
-\end{enumerate}
+\end{itemize}
 
 Перечисленные данные можно подразделить на две группы:
 \begin{itemize}[noitemsep]
@@ -420,7 +430,6 @@ ER-модель (от англ. entity-relationship model, модель «сущ
 спроектировать ER-модель данной предметной области, и представить полученую модель с
 помощью стандартной графической нотации ER-диаграммы (диаграммы сущность-связь).
 
-\cleardoublepage
 \begin{figure}[h!]
         \includegraphics[width=\textwidth]{patappemp}
         \caption{Запись пациента к сотруднику (врачу)}
@@ -521,69 +530,70 @@ ER-модель (от англ. entity-relationship model, модель «сущ
 один или более графиков (например на каждый день недели).
 
 \section{Преобразование ER-модели в реляционную}
-\begin{enumerate}
+\begin{enumerate}[noitemsep]
+\renewcommand\labelitemi{--}
     \item Связь ``Запись'' удовлетворяет условиям правила 6, откуда получаются следующие
         таблицы
-        \begin{itemize}
+	\begin{itemize}[noitemsep]
             \item Пациент(\underline{Регистрационный номер}, ...);
             \item Сотрудник(\underline{Табельный номер}, ...);
             \item Запись(\underline{Табельный номер, Регистрационный номер}, ...).
         \end{itemize}
     \item Связь ``Посещения'' удовлетворяет условиям правила 6, откуда получаются следующие
         таблицы
-        \begin{itemize}
+	\begin{itemize}[noitemsep]
             \item Пациент(\underline{Регистрационный номер}, ...);
             \item Сотрудник(\underline{Табельный номер}, ...);
             \item Посещения(\underline{Табельный номер, Регистрационный номер}, ...).
         \end{itemize}
 
     \item Связь ``Владеет'' удовлетворяет условиям правила 4, откуда получаются следующие таблицы
-        \begin{itemize}
+    \begin{itemize}[noitemsep]
             \item Пациент(\underline{Регистрационный номер}, ...);
             \item Медкарта(\underline{Номер медкарты}, Регистрационный номер, ...).
         \end{itemize}
     \item Связь ``Анализ'' удовлетворяет условиям правила 6, откуда получаются следующие
         таблицы
-        \begin{itemize}
+	\begin{itemize}[noitemsep]
             \item Сотрудник(\underline{Табельный номер}, ...);
             \item Медкарта(\underline{Номер медкарты}, ...).
             \item Анализ(\underline{Номер анализа},Табельный номер, номер медкарты, ...).
         \end{itemize}
     \item Связь ``Лечение'' удовлетворяет условиям правила 6, откуда получаются следующие таблицы
-        \begin{itemize}
+    \begin{itemize}[noitemsep]
             \item Сотрудник(\underline{Табельный номер}, ...);
             \item Медкарта(\underline{Номер медкарты}, ...);
             \item Лечение(\underline{Табельный номер, номер медкарты, дата назначения}, ...).
         \end{itemize}
     \item Связь ``Рецепт'' удовлетворяет условиям правила 6, откуда получаются следующие таблицы
-        \begin{itemize}
+    \begin{itemize}[noitemsep]
             \item Сотрудник(\underline{Табельный номер}, ...);
             \item Пациент(\underline{Регистрационный номер}, ...);
             \item Рецепт(\underline{Табельный номер, Регистрационный номер, дата выписки}, ...).
         \end{itemize}
     \item Связь ``Оказывается'' удовлетворяет условиям правила 6, откуда получаются следующие
         таблицы
-        \begin{itemize}
+	\begin{itemize}[noitemsep]
             \item Услуга(\underline{Номер услуги}, ...).
             \item Медкарта(\underline{Номер медкарты}, ...);
             \item Оказание(\underline{Название,Номер медкарты, дата оказания} ...);
         \end{itemize}
     \item Связь ``Больничный'' удовлетворяет условиям правила 6, откуда получаются следующие
         таблицы
-        \begin{itemize}
+	\begin{itemize}[noitemsep]
             \item Пациент(\underline{Регистрационный номер}, ...);
             \item Сотрудник(\underline{Табельный номер}, ...);
             \item Больничный(\underline{Табельный номер, Регистрационный номер, дата выдачи}, ...);
         \end{itemize}
     \item Связь ``Принадлежит'' удовлетворяет условиям правила 4, откуда получаются следующие
         таблицы
-        \begin{itemize}
+	\begin{itemize}[noitemsep]
             \item Сотрудник(\underline{Табельный номер}, ...);
             \item График(\underline{День недели, Табельный номер}, ...);
         \end{itemize}
 \end{enumerate}
 В итоге получается 12 таблиц, которые приведены ниже с перечнем всех относящихся к ним атрибутам.
-\begin{enumerate}
+\begin{enumerate}[noitemsep]
             \item Пациент(\underline{Регистрационный номер}, ФИО, дата рождения, пол, адрес
                 проживания, контактный телефон, пароль от ЛК);
             \item Сотрудник(\underline{Табельный номер}, ФИО, должность, стаж, дата рождения, пол, адрес
@@ -631,7 +641,7 @@ SQLite. Такой выбор обоснован спецификой предм
 
 \section{Схема БД поликлиники}
 На основании ER-модели, полученной в конце предыдущей главы, где были описаны таблицы и их атрибуты,
-далее приведены окончательные структуры таблиц, какими они будут в СУБД SQLite. Поля перечислены в
+далее приведены окончательные структуры таблиц (табл. 4.1 - 4.12), представленных в СУБД SQLite. Поля перечислены в
 том же порядке, который был описан ранее. SQL операторы
 использованные для создания таблиц приведены в приложении А, в приложении Б приведены примеры их
 заполнения.
@@ -640,7 +650,7 @@ SQLite. Такой выбор обоснован спецификой предм
 \begin{table}[h]
     \caption{ } 
     \begin{subtable}[t]{\textwidth}
-        \caption{\textbf{«Пациент»}}
+        \caption{\textbf{структура таблицы «Пациент»}}
     \begin{tabularx}{\textwidth}{| X | X | X | c | c | c | X |}
         \hline
         \textbf{Столбец} & \textbf{Тип данных} & \textbf{Нуль?} & \textbf{Ключ} & \textbf{По
@@ -660,7 +670,7 @@ SQLite. Такой выбор обоснован спецификой предм
 \begin{table}[h]
     \caption{ } 
     \begin{subtable}[t]{\textwidth}
-        \caption{\textbf{«Медкарта»}}
+        \caption{\textbf{структура таблицы «Медкарта»}}
     \begin{tabularx}{\textwidth}{| X | X | c | c | c | c | X |}
         \hline
         \textbf{Столбец} & \textbf{Тип данных} & \textbf{Нуль?} & \textbf{Ключ} & \textbf{По
@@ -677,7 +687,7 @@ SQLite. Такой выбор обоснован спецификой предм
 \begin{table}[h]
     \caption{ } 
     \begin{subtable}[t]{\textwidth}
-        \caption{\textbf{«Сотрудник»}}
+        \caption{\textbf{структура таблицы «Сотрудник»}}
     \begin{tabularx}{\textwidth}{| X | X | X | c | c | c | X |}
         \hline
         \textbf{Столбец} & \textbf{Тип данных} & \textbf{Нуль?} & \textbf{Ключ} & \textbf{По
@@ -699,7 +709,7 @@ SQLite. Такой выбор обоснован спецификой предм
 \begin{table}[h]
     \caption{ } 
     \begin{subtable}[t]{\textwidth}
-        \caption{\textbf{«Анализ»}}
+        \caption{\textbf{структура таблицы «Анализ»}}
     \begin{tabularx}{\textwidth}{| X | X | c | c | c | c | X |}
         \hline
         \textbf{Столбец} & \textbf{Тип данных} & \textbf{Нуль?} & \textbf{Ключ} & \textbf{По
@@ -718,7 +728,7 @@ SQLite. Такой выбор обоснован спецификой предм
 \begin{table}[h]
     \caption{ } 
     \begin{subtable}[t]{\textwidth}
-        \caption{\textbf{«Запись»}}
+        \caption{\textbf{структура таблицы «Запись»}}
     \begin{tabularx}{\textwidth}{| X | X | X | X | X | X | X |}
         \hline
         \textbf{Столбец} & \textbf{Тип данных} & \textbf{Нуль?} & \textbf{Ключ} & \textbf{По
@@ -736,7 +746,7 @@ SQLite. Такой выбор обоснован спецификой предм
 \begin{table}[h]
     \caption{ }
     \begin{subtable}[t]{\textwidth}
-        \caption{\textbf{«Посещения»}}
+        \caption{\textbf{структура таблицы «Посещения»}}
     \begin{tabularx}{\textwidth}{| X | X | c | X | c | c | X |}
         \hline
         \textbf{Столбец} & \textbf{Тип данных} & \textbf{Нуль?} & \textbf{Ключ} & \textbf{По умолч.} & \textbf{Огранич.} & \textbf{Ссылка} \\ \hline
@@ -753,7 +763,7 @@ SQLite. Такой выбор обоснован спецификой предм
 \begin{table}[h]
     \caption{ } 
     \begin{subtable}[t]{\textwidth}
-        \caption{\textbf{«Рецепт»}}
+        \caption{\textbf{структура таблицы «Рецепт»}}
     \begin{tabularx}{\textwidth}{| X | X | c | X | c | c | X |}
         \hline
         \textbf{Столбец} & \textbf{Тип данных} & \textbf{Нуль?} & \textbf{Ключ} & \textbf{По
@@ -771,7 +781,7 @@ SQLite. Такой выбор обоснован спецификой предм
 \begin{table}[h]
     \caption{ } 
     \begin{subtable}[t]{\textwidth}
-        \caption{\textbf{«Услуга»}}
+        \caption{\textbf{структура таблицы «Услуга»}}
     \begin{tabularx}{\textwidth}{| X | X | c | X | c | c | X |}
         \hline
         \textbf{Столбец} & \textbf{Тип данных} & \textbf{Нуль?} & \textbf{Ключ} & \textbf{По
@@ -788,7 +798,7 @@ SQLite. Такой выбор обоснован спецификой предм
 \begin{table}[h]
     \caption{ } 
     \begin{subtable}[t]{\textwidth}
-        \caption{\textbf{«Оказание»}}
+        \caption{\textbf{структура таблицы «Оказание»}}
     \begin{tabularx}{\textwidth}{| X | X | c | X | c | c | X |}
         \hline
         \textbf{Столбец} & \textbf{Тип данных} & \textbf{Нуль?} & \textbf{Ключ} & \textbf{По
@@ -806,7 +816,7 @@ SQLite. Такой выбор обоснован спецификой предм
 \begin{table}[h]
     \caption{ } 
     \begin{subtable}[t]{\textwidth}
-        \caption{\textbf{«Лечение»}}
+        \caption{\textbf{структура таблицы «Лечение»}}
     \begin{tabularx}{\textwidth}{| X | X | c | X | c | c | X |}
         \hline
         \textbf{Столбец} & \textbf{Тип данных} & \textbf{Нуль?} & \textbf{Ключ} & \textbf{По
@@ -825,7 +835,7 @@ SQLite. Такой выбор обоснован спецификой предм
 \begin{table}[t!]
     \caption{ } 
     \begin{subtable}[t]{\textwidth}
-        \caption{\textbf{«Больничный»}}
+        \caption{\textbf{структура таблицы «Больничный»}}
     \begin{tabularx}{\textwidth}{| X | X | c | X | c | X | X |}
         \hline
         \textbf{Столбец} & \textbf{Тип данных} & \textbf{Нуль?} & \textbf{Ключ} & \textbf{По
@@ -845,7 +855,7 @@ SQLite. Такой выбор обоснован спецификой предм
 \begin{table}[h]
     \caption{ } 
     \begin{subtable}[t]{\textwidth}
-        \caption{\textbf{«График»}}
+        \caption{\textbf{структура таблицы «График»}}
     \begin{tabularx}{\textwidth}{| X | X | X | X | X | X | X |}
         \hline
         \textbf{Столбец} & \textbf{Тип данных} & \textbf{Нуль?} & \textbf{Ключ} & \textbf{По
@@ -913,17 +923,19 @@ SQLite. Такой выбор обоснован спецификой предм
         функции и их специфика. На основании анализа предметной области был выделен перечень
         функций для будущей реализации.
     \item Следующим этапом стало концептуальное проектирование, в ходе которого были выделены
-        два 
-        действующих лица (сотрудник, пациент), для которыx была составлена
-        диаграмма вариантов использования.
+        три 
+        действующих лица (врач, сотрудник регистратуры, пациент), для которыx была составлена
+        диаграмма вариантов использования, с целью формализации функциональных требований к разрабатываемой системе.
     \item Далее в ходе логического проектирования была создана ER-модель базы данных, где были
         определены основные сущности и их взаимодействия. Для визуализации ER-модели были
         использованы ER-диаграммы. В завершении данного этапа были построена схема БД в виде набора
-        схем отношений.
+        схем отношений. А именно двенадцати отношений: 
     \item Завершающим этапом стало физическое проектирование, в ходе которого в СУБД SQLite была
         создана база данных поликлиники со всеми таблицами, определенных на предыдущем этапе, после
         чего все таблицы были заполнены данными.
 \end{enumerate}
+
+
     В дальнейшем планируется создание программного продукта, который предоставляет
         пользователю интерфейс для работы с созданной в данной работе базой данных.
 
@@ -939,14 +951,12 @@ SQLite. Такой выбор обоснован спецификой предм
 \lstinputlisting[title=1. Создание таблицы «Пациент», label=list:cpat, style=csql]{code/cpatient.sql}
 \lstinputlisting[title=2. Создание таблицы «Сотрудник», label=list:cemp, style=csql]{code/cemployee.sql}
 \lstinputlisting[title=3. Создание таблицы «Запись», label=list:rec, style=csql]{code/cappointment.sql}
-\newpage
 \lstinputlisting[title=4. Создание таблицы «Медкарта», label=list:medc, style=csql]{code/cmedcard.sql}
 \lstinputlisting[title=5. Создание таблицы «Посещения», label=list:medc, style=csql]{code/cvisit.sql}
 \lstinputlisting[title=6. Создание таблицы «Анализ», label=list:res,
 style=csql]{code/canalysis.sql}
 \lstinputlisting[title=7. Создание таблицы «Услуга», label=list:patlink,
 style=csql]{code/cservice.sql}
-\newpage
 \lstinputlisting[title=8. Создание таблицы «Оказание», label=list:emplink,
 style=csql]{code/cserviceprovision.sql}
 \lstinputlisting[title=9. Создание таблицы «Лечение», label=list:treat, style=csql]{code/ctreatment.sql}
@@ -1022,7 +1032,7 @@ style=csql]{code/ctimetable.sql}
 \vspace{0.00mm}
 
 \begin{figure}[h]
-        \center\includegraphics[scale=1]{sickleave}
+        \center\includegraphics[scale=1]{medcard}
         \caption{Заполнение таблицы «Больничный»}
         \label{fig:sickleave}
 \end{figure}
@@ -1039,7 +1049,7 @@ style=csql]{code/ctimetable.sql}
 
 \cleardoublepage
 \begin{figure}[!h]
-        \center\includegraphics[scale=1]{service}
+        \center\includegraphics[scale=1]{treatment}
         \caption{Заполнение таблицы «Услуга»}
         \label{fig:service}
 \end{figure}
