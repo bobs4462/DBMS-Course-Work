@@ -55,7 +55,7 @@
     xleftmargin=\parindent,
     language=SQL,
     showstringspaces=false,
-    basicstyle=\linespread{1.2}\footnotesize\ttfamily,
+    basicstyle=\linespread{1.3}\footnotesize\ttfamily,
     keywordstyle=\bfseries\color{red},
     identifierstyle=\color{blue},
     stringstyle=\color{cyan},
@@ -63,7 +63,7 @@
 \lstset{extendedchars=\true}
 
 \captionsetup[figure]{labelformat=simple, labelsep=space}
-\captionsetup[table]{labelformat=simple, labelsep=space, justification=raggedleft, singlelinecheck=false, skip=7pt}
+\captionsetup[table]{labelformat=simple, labelsep=space, justification=raggedleft, singlelinecheck=false, skip=10pt}
 \captionsetup[subtable]{labelformat=empty, labelsep=space, justification=centering, singlelinecheck=false}
 \captionsetup[lstlisting]{labelformat=simple, labelsep=space, justification=raggedright, singlelinecheck=false}
 %===========================================
@@ -299,7 +299,7 @@
 
 В рамках данной работы планируется создание единой платформы для
 взамодейстивия пациентов с сотрудниками поликлиники. Проанализировав программные продукты решающие
-схожие задачи в данной предметной области, можно выделить ряд функций которые необходимо
+схожие задачи в данной предметной области, можно выделить ряд функций, которые необходимо
 реализовать в процессе разработки:
 \begin{itemize}[noitemsep]
 		
@@ -386,7 +386,6 @@
 Приняв во внимание всё вышесказанное, можно выделить данные, которые необходимо хранить в проектируемой базе данных:
 \begin{itemize}[noitemsep]
 \renewcommand\labelitemi{--}
-    \item информация о предоставляемых услугах,
     \item информация о пациентах,
     \item информация о сотрудниках поликлиники,
     \item информация о медицинских картах, т.е. их цифровые копии,
@@ -400,7 +399,7 @@
 
 Перечисленные данные можно подразделить на две группы:
 \begin{itemize}[noitemsep]
-    \item условно-постоянные(предоставляемые услуги, данные пациентов),
+    \item условно-постоянные(данные пациентов, сотрудников),
     \item оперативно-обновляемые(медицинские карты, график приема пациентов врачами, информация об
         анализах и т.д.).
 \end{itemize}
@@ -410,8 +409,10 @@
 \section{Определение логического проектирования}
 Логическое проектирование — создание схемы базы данных на основе конкретной модели
 данных, например, реляционной модели данных. Для реляционной модели данных, логическая модель это
-набор схем отношений, обычно с указанием первичных ключей, а также «связей» между
-отношениями, представляющих собой внешние ключи.
+набор схем отношений, обычно с указанием первичных ключей, а также «связей»
+между отношениями, представляющих собой внешние ключи. Логическая модель
+описывает понятия предметной области, их взаимосвязь, а также ограничения на
+данные, налагаемые предметной областью.
 
 Опираясь на концептуальную модель, проектируется логическая модель. Часто для выполнения этой
 задачи используются различные модели данных, например ER-модель.
@@ -429,16 +430,16 @@ ER-модель (от англ. entity-relationship model, модель «сущ
 На основе концептуальной модели поликлиники, описанной в конце предыдущей главы, можно
 спроектировать ER-модель данной предметной области, и представить полученую модель с
 помощью стандартной графической нотации ER-диаграммы (диаграммы сущность-связь).
-
+\cleardoublepage
 \begin{figure}[h!]
         \includegraphics[width=\textwidth]{patappemp}
         \caption{Запись пациента к сотруднику (врачу)}
         \label{fig:patappemp}
 \end{figure}
 
-\noindent Тип связи ``Запись'' - M:N.\\
+Тип связи ``Запись'' (рис. \ref{fig:patappemp}) - M:N.
 Класс принадлежности необязательный для обоих экземпляров сущностей.
-Обоснование: Пациент может записаться к нулю или более сотрудникам (врачам), сотрудник может принять ноль или более
+Пациент может записаться к нулю или более сотрудникам (врачам), сотрудник может принять ноль или более
 пациентов. 
 
 \begin{figure}[h!]
@@ -447,9 +448,9 @@ ER-модель (от англ. entity-relationship model, модель «сущ
         \label{fig:medcvisemp}
 \end{figure}
 
-\noindent Тип связи ``Посещения'' - M:N.\\
+Тип связи ``Посещения'' (рис. \ref{fig:medcvisemp}) - M:N.
 Класс принадлежности необязательный для обоих экземпляров сущностей.
-Обоснование: Сотрудник может принимать нуль или более пациентов по медкарте, медкарта может
+Сотрудник может принимать нуль или более пациентов по медкарте, медкарта может
 содержать информацию о нуль или более посещениях пациента.
 
 \begin{figure}[h!]
@@ -458,32 +459,52 @@ ER-модель (от англ. entity-relationship model, модель «сущ
         \label{fig:medcbelpat}
 \end{figure}
 
-\noindent Тип связи ``Владеет'' - 1:M.\\
-Класс принадлежности обязательный для обоих экземпляров сущностей.\\
-Обоснование: Пациент может владеть одной или более медкартами, медкарта должна принадлежать
+Тип связи ``Владеет'' (рис. \ref{fig:medcbelpat}) - 1:M.
+Класс принадлежности обязательный для обоих экземпляров сущностей.
+Пациент может владеть одной или более медкартами, медкарта должна принадлежать
 только одному пациенту.
+\cleardoublepage
 
 \begin{figure}[h!]
         \includegraphics[width=\textwidth]{cardan}
         \caption{Назначение анализов пациенту по медкарте}
         \label{fig:cardan}
 \end{figure}
-
-\noindent Тип связи ``Анализ'' - M:N.\\
-Класс принадлежности необязательный для обоих экземпляров сущностей.
-Обоснование: Сотрудник может назначить анализ нуль или более пациентам по медкарте, по медкарте
-анализ могут назначить нуль или более сотрудников.
+Тип связи ``Назначает'' (рис. \ref{fig:cardan}) - 1:M.
+Класс принадлежности обязательный только для экземпляра сущности Анализ.
+Сотрудник может назначить нуль или более анализов, анализ может
+быть назначен только одним сотрудником.
 
 \begin{figure}[h!]
-        \includegraphics[width=\textwidth]{empcuremedc}
-        \caption{Назначение лечения пациенту по его медицинской карте}
-        \label{fig:empcuremedc}
+        \includegraphics[width=\textwidth]{newcardan}
+        \caption{Назначение анализов пациенту по медкарте}
+        \label{fig:newcardan}
 \end{figure}
-\noindent Тип связи ``Лечение'' - M:N.\\
-Класс принадлежности необязательный для обоих экземпляров сущностей.
-Обоснование: Сотрудник может лечить нуль или более пациентов по медицинской карте, по
-медицинской карте пациента могут лечить нуль или более сотрудников.
-.
+
+Тип связи ``Сдаётся по'' (рис. \ref{fig:newcardan}) - 1:M.
+Класс принадлежности обязательный только для экземпляра сущности Анализ.
+Анализ может быть сдан ровно одним пациентом по медкарте, по
+медкарте пациент может сдать нуль или более анализов
+
+\begin{figure}[h!]
+        \includegraphics[width=\textwidth]{empcure}
+        \caption{Назначение лечения врачом}
+        \label{fig:empcure}
+\end{figure}
+Тип связи ``Предписывает'' (рис. \ref{fig:empcure}) - 1:M.
+Класс принадлежности обязательный только для экземпляра сущности Лечение.
+Лечение может быть предписано ровно в одним сотрудником, сотрудник
+может предписать нуль или более лечений.
+
+\begin{figure}[h!]
+        \includegraphics[width=\textwidth]{medcure}
+        \caption{Внесение записи о лечении в медицинскую карту}
+        \label{fig:medcure}
+\end{figure}
+Тип связи ``Вносится в'' (рис. \ref{fig:medcure}) - 1:M.
+Класс принадлежности обязательный только для экземпляра сущности Лечение.
+Лечение может быть внесено ровно в одну медкарту, в медкарту можно
+внеси нуль или более лечений.
 
 \begin{figure}[h!]
         \includegraphics[width=\textwidth]{receipt}
@@ -491,32 +512,21 @@ ER-модель (от англ. entity-relationship model, модель «сущ
         \label{fig:receipt}
 \end{figure}
 
-\noindent Тип связи ``Рецепт'' - M:N.\\
-Класс принадлежности необязательный для обоих экземпляров сущностей.\\
-Обоснование: Сотрудник может выписать рецепты нуль или более пациентам,
-пациент могут получить рецепты от нуль или более врачей.\par
-
-\begin{figure}[h!]
-        \includegraphics[width=\textwidth]{servprovmedc}
-        \caption{Оказание услуги пациенту по медкарте}
-        \label{fig:servprovmedc}
-\end{figure}
-
-\noindent Тип связи ``Оказывается'' - M:N.\\
-Класс принадлежности необязательный для обоих экземпляров сущностей.\\
-Обоснование: Услуга может быть оказана нулю или более пациентам, пациент может получить нуль или
-более услуг. 
+Тип связи ``Выписывает'' (рис. \ref{fig:receipt}) - 1:M.
+Класс принадлежности обязательный только для экземпляра сущности Рецепт.
+Врач может выписать нуль или более рецептов,
+рецепт может быть выписан ровно одним врачом.\par
 
 \begin{figure}[h!]
         \includegraphics[width=\textwidth]{empbolpat}
-        \caption{Выписка больничного врачом пациенту}
+        \caption{Выдача больничного пациенту}
         \label{fig:empbolpat}
 \end{figure}
 
-\noindent Тип связи ``Больничный'' - M:N.\\
-Класс принадлежности необязательный для обоих экземпляров сущностей.\\
-Обоснование: Сотрудник может выписать больничные нуль или более пациентам, пациент может получить
-больничные от нуль или более сотрудников.
+Тип связи ``Выдаётся'' (рис. \ref{fig:empbolpat}) - 1:M.
+Класс принадлежности обязательный только для экземпляра сущности Больничный.
+Больничный (как документ) может быть выдан ровно одному пациенту,
+пациент может получить нуль или более больничных.
 
 \begin{figure}[h!]
         \includegraphics[width=\textwidth]{timetable}
@@ -524,10 +534,10 @@ ER-модель (от англ. entity-relationship model, модель «сущ
         \label{fig:timetable}
 \end{figure}
 
-\noindent Тип связи ``Принадлежит'' - 1:M.\\
-Класс принадлежности обязательный для обоих экземпляров сущностей.
-Обоснование: График работы может принадлежать только одному сотруднику, сотрудник может иметь
-один или более графиков (например на каждый день недели).
+Тип связи ``Работает по'' (рис. \ref{fig:timetable}) - M:N.
+Класс принадлежности обязательный для экземпляра сущности Сотрудник.
+Сотрудник может работать более одного дня в неделю, в один день
+могут работать нуль или более сотрудников.
 
 \section{Преобразование ER-модели в реляционную}
 \begin{enumerate}[noitemsep]
@@ -542,9 +552,9 @@ ER-модель (от англ. entity-relationship model, модель «сущ
     \item Связь ``Посещения'' удовлетворяет условиям правила 6, откуда получаются следующие
         таблицы
 	\begin{itemize}[noitemsep]
-            \item Пациент(\underline{Регистрационный номер}, ...);
+            \item Медкарта(\underline{Номер медкарты}, Регистрационный номер, ...);
             \item Сотрудник(\underline{Табельный номер}, ...);
-            \item Посещения(\underline{Табельный номер, Регистрационный номер}, ...).
+	    \item Посещения(\underline{Номер посещения}, Табельный номер, Номер медкарты, ...).
         \end{itemize}
 
     \item Связь ``Владеет'' удовлетворяет условиям правила 4, откуда получаются следующие таблицы
@@ -552,67 +562,66 @@ ER-модель (от англ. entity-relationship model, модель «сущ
             \item Пациент(\underline{Регистрационный номер}, ...);
             \item Медкарта(\underline{Номер медкарты}, Регистрационный номер, ...).
         \end{itemize}
-    \item Связь ``Анализ'' удовлетворяет условиям правила 6, откуда получаются следующие
+    \item Связь ``Назначает'' удовлетворяет условиям правила 4, откуда получаются следующие
         таблицы
 	\begin{itemize}[noitemsep]
             \item Сотрудник(\underline{Табельный номер}, ...);
-            \item Медкарта(\underline{Номер медкарты}, ...).
-            \item Анализ(\underline{Номер анализа},Табельный номер, номер медкарты, ...).
+            \item Анализ(\underline{Номер анализа}, Табельный номер, ...).
         \end{itemize}
-    \item Связь ``Лечение'' удовлетворяет условиям правила 6, откуда получаются следующие таблицы
+    \item Связь ``Вносится'' удовлетворяет условиям правила 4, откуда получаются следующие
+        таблицы
+	\begin{itemize}[noitemsep]
+            \item Медкарта(\underline{Номер медкарты}, ...);
+            \item Анализ(\underline{Номер анализа}, номер медкарты, ...).
+        \end{itemize}
+\item Связь ``Предписывает'' удовлетворяет условиям правила 4, откуда получаются следующие
+        таблицы
+	\begin{itemize}[noitemsep]
+            \item Сотрудник(\underline{Табельный номер}, ...);
+	    \item Лечение(\underline{Номер лечения}, Табельный номер, ...).
+        \end{itemize}
+\item Связь ``Вносится в'' удовлетворяет условиям правила 4, откуда получаются следующие
+        таблицы
+	\begin{itemize}[noitemsep]
+            \item Медкарта(\underline{Номер медкарты}, ...);
+	    \item Лечение(\underline{Номер лечения}, Номер медкарты, ...).
+        \end{itemize}
+\item Связь ``Рецепт'' удовлетворяет условиям правила 4, откуда получаются следующие таблицы
     \begin{itemize}[noitemsep]
             \item Сотрудник(\underline{Табельный номер}, ...);
-            \item Медкарта(\underline{Номер медкарты}, ...);
-            \item Лечение(\underline{Табельный номер, номер медкарты, дата назначения}, ...).
+            \item Рецепт(\underline{Номер рецепта}, Табельный номер, ...).
         \end{itemize}
-    \item Связь ``Рецепт'' удовлетворяет условиям правила 6, откуда получаются следующие таблицы
-    \begin{itemize}[noitemsep]
-            \item Сотрудник(\underline{Табельный номер}, ...);
-            \item Пациент(\underline{Регистрационный номер}, ...);
-            \item Рецепт(\underline{Табельный номер, Регистрационный номер, дата выписки}, ...).
-        \end{itemize}
-    \item Связь ``Оказывается'' удовлетворяет условиям правила 6, откуда получаются следующие
-        таблицы
-	\begin{itemize}[noitemsep]
-            \item Услуга(\underline{Номер услуги}, ...).
-            \item Медкарта(\underline{Номер медкарты}, ...);
-            \item Оказание(\underline{Название,Номер медкарты, дата оказания} ...);
-        \end{itemize}
-    \item Связь ``Больничный'' удовлетворяет условиям правила 6, откуда получаются следующие
+    \item Связь ``Выдаётся'' удовлетворяет условиям правила 4, откуда получаются следующие
         таблицы
 	\begin{itemize}[noitemsep]
             \item Пациент(\underline{Регистрационный номер}, ...);
-            \item Сотрудник(\underline{Табельный номер}, ...);
-            \item Больничный(\underline{Табельный номер, Регистрационный номер, дата выдачи}, ...);
+            \item Больничный(\underline{Номер больничного, Регистрационный номер}, ...).
         \end{itemize}
-    \item Связь ``Принадлежит'' удовлетворяет условиям правила 4, откуда получаются следующие
-        таблицы
+    \item Связь ``Работает по'' удовлетворяет условиям правила 6, но так как сущность «День недели» имеет только один атрибут, то в результате получаются две таблицы, с миграцией первичного ключа сущности «День недели» в дочернее отношение.
 	\begin{itemize}[noitemsep]
             \item Сотрудник(\underline{Табельный номер}, ...);
-            \item График(\underline{День недели, Табельный номер}, ...);
+            \item График(\underline{День недели, Табельный номер}, ...).
         \end{itemize}
 \end{enumerate}
-В итоге получается 12 таблиц, которые приведены ниже с перечнем всех относящихся к ним атрибутам.
+В итоге получается десять таблиц, которые приведены ниже с перечнем всех относящихся к ним атрибутам.
 \begin{enumerate}[noitemsep]
-            \item Пациент(\underline{Регистрационный номер}, ФИО, дата рождения, пол, адрес
+            \item Пациент(\underline{Регистрационный номер}, ФИО, страховая компания, договор страхования, дата рождения, пол, адрес
                 проживания, контактный телефон, пароль от ЛК);
             \item Сотрудник(\underline{Табельный номер}, ФИО, должность, стаж, дата рождения, пол, адрес
                 проживания, контактный телефон, пароль от ЛК);
-            \item Запись(\underline{Табельный номер, Регистрационный номер}, дата и время записи).
-            \item Посещения(\underline{Табельный номер, Регистрационный номер, дата посещения},
-                цель визита).
-            \item Медкарта(\underline{Номер медкарты}, Регистрационный номер, дата заведения, тип).
-            \item Анализ(\underline{Табельный номер, номер медкарты}, дата сдачи, вид анализа,
-                результат).
-            \item Лечение(\underline{Табельный номер, номер медкарты, дата назначения},
-                заболевание, назначенное лечение).
-            \item Услуга(\underline{Название}, описание, стоимость).
-            \item Оказание(\underline{Название,Номер медкарты, дата оказания}, комментарий).
-            \item Рецепт(\underline{Табельный номер, Регистрационный номер, дата выписки}, медикаменты).
-            \item Больничный(\underline{Табельный номер, Регистрационный номер, дата выдачи},
+            \item Запись(\underline{Табельный номер, Регистрационный номер}, дата и время записи);
+	    \item Посещения(\underline{Номер посещения}, Табельный номер, Номер медкарты, дата посещения,
+                цель визита);
+            \item Медкарта(\underline{Номер медкарты}, Регистрационный номер, дата заведения, тип);
+	    \item Анализ(\underline{Номер анализа}, Табельный номер, Номер медкарты, дата сдачи, вид анализа,
+                результат);
+	\item Лечение(\underline{Номер лечения}, Табельный номер, номер медкарты, дата назначения,
+                заболевание, назначенное лечение);
+            \item Рецепт(\underline{Номер рецепта}, Табельный номер, дата выписки, медикаменты);
+            \item Больничный(\underline{Номер больничного, Регистрационный номер}, дата выдачи,
                 начало больничного,окончание больничного, место работы/обучения);
             \item График(\underline{День недели, Табельный номер}, начало смены, конец смены,
-                перерыв);
+                перерыв).
 \end{enumerate}
 
 
@@ -634,60 +643,21 @@ SQLite. Такой выбор обоснован спецификой предм
 себя библиотеку с интерфейсами для многих языков программирования. Этот факт делает SQLite
 чрезвычайно компактным и быстрым, т.к. СУБД встраиваится напрямую в разрабатываемое приложение.
 Несмотря на свою простоту данная СУБД может обслуживать базы данных размером до 140 террабайт и
-поддерживает параллельный доступ к БД несколькими процессами. Помимо этого SQLite выполняет
-поддавляющее большинство требований изложенных в стандарте SQL, а также соблюдает ACID-требования
-(Atomicity, Consistency, Isolation, Durability).\cite{sqlite}
+поддерживает параллельный доступ к БД несколькими процессами. \cite{sqlite}
 
 
 \section{Схема БД поликлиники}
 На основании ER-модели, полученной в конце предыдущей главы, где были описаны таблицы и их атрибуты,
-далее приведены окончательные структуры таблиц (табл. 4.1 - 4.12), представленных в СУБД SQLite. Поля перечислены в
+далее приведены окончательные структуры таблиц (табл. 4.1 - 4.12), созданных в СУБД SQLite. Поля перечислены в
 том же порядке, который был описан ранее. SQL операторы
 использованные для создания таблиц приведены в приложении А, в приложении Б приведены примеры их
 заполнения.
 
 
-\begin{table}[h]
+\begin{table}[h!]
     \caption{ } 
     \begin{subtable}[t]{\textwidth}
-        \caption{\textbf{структура таблицы «Пациент»}}
-    \begin{tabularx}{\textwidth}{| X | X | X | c | c | c | X |}
-        \hline
-        \textbf{Столбец} & \textbf{Тип данных} & \textbf{Нуль?} & \textbf{Ключ} & \textbf{По
-        умолч.} & \textbf{Огранич.} & \textbf{Ссылка} \\ \hline
-        regid & integer & not null & первичный & & & \\ \hline
-        fio & text & not null & & & & \\ \hline
-        birthdate & date & not null & & & < date('now') & \\ \hline
-        gender & char(1) & not null & & & `М' или `Ж' & \\ \hline
-        address & text & & & & & \\ \hline
-        pnumber & text & & & & & \\ \hline
-        password & text & not null & & abs(random()) & & \\ \hline
-    \end{tabularx}
-    \end{subtable}
-    \label{table:pat}
-\end{table}
-
-\begin{table}[h]
-    \caption{ } 
-    \begin{subtable}[t]{\textwidth}
-        \caption{\textbf{структура таблицы «Медкарта»}}
-    \begin{tabularx}{\textwidth}{| X | X | c | c | c | c | X |}
-        \hline
-        \textbf{Столбец} & \textbf{Тип данных} & \textbf{Нуль?} & \textbf{Ключ} & \textbf{По
-        умолч.} & \textbf{Огранич.} & \textbf{Ссылка} \\ \hline
-        cardid & integer & not null & первичный & & & \\ \hline
-        regid & integer & not null & внешний & & & Пациент (regid) \\ \hline
-        crdate & date & not null & & date('now') & & \\ \hline
-        type & text & & & & & \\ \hline
-    \end{tabularx}
-    \end{subtable}
-    \label{table:medcard}
-\end{table}
-
-\begin{table}[h]
-    \caption{ } 
-    \begin{subtable}[t]{\textwidth}
-        \caption{\textbf{структура таблицы «Сотрудник»}}
+        \caption{\textbf{Структура таблицы «Сотрудник»}}
     \begin{tabularx}{\textwidth}{| X | X | X | c | c | c | X |}
         \hline
         \textbf{Столбец} & \textbf{Тип данных} & \textbf{Нуль?} & \textbf{Ключ} & \textbf{По
@@ -706,10 +676,163 @@ SQLite. Такой выбор обоснован спецификой предм
     \label{table:emp}
 \end{table}
 
-\begin{table}[h]
+\begin{table}[h!]
     \caption{ } 
     \begin{subtable}[t]{\textwidth}
-        \caption{\textbf{структура таблицы «Анализ»}}
+        \caption{\textbf{Структура таблицы «Пациент»}}
+    \begin{tabularx}{\textwidth}{| X | X | X | c | c | c | X |}
+        \hline
+        \textbf{Столбец} & \textbf{Тип данных} & \textbf{Нуль?} & \textbf{Ключ} & \textbf{По
+        умолч.} & \textbf{Огранич.} & \textbf{Ссылка} \\ \hline
+        regid & integer & not null & первичный & & & \\ \hline
+        fio & text & not null & & & & \\ \hline
+	insurcomp & text & & & & & \\ \hline
+	icontract & text  & & & & & \\ \hline
+        birthdate & date & not null & & & < date('now') & \\ \hline
+        gender & char(1) & not null & & & `М' или `Ж' & \\ \hline
+        address & text & & & & & \\ \hline
+        pnumber & text & & & & & \\ \hline
+        password & text & not null & & abs(random()) & & \\ \hline
+    \end{tabularx}
+    \end{subtable}
+    \label{table:pat}
+\end{table}
+
+\begin{table}[h!]
+    \caption{ } 
+    \begin{subtable}[t]{\textwidth}
+        \caption{\textbf{Структура таблицы «Запись»}}
+    \begin{tabularx}{\textwidth}{| X | X | X | X | X | X | X |}
+        \hline
+        \textbf{Столбец} & \textbf{Тип данных} & \textbf{Нуль?} & \textbf{Ключ} & \textbf{По
+        умолч.} & \textbf{Огранич.} & \textbf{Ссылка} \\ \hline
+        tabid & integer & not null & первичный, внешний & & & Сотрудник (tabid) \\ \hline
+        regid & integer & not null & первичный, внешний & & & Пациент (regid)  \\ \hline
+        recdatetime & datetime & not null & & & & \\ \hline
+    \end{tabularx}
+    \end{subtable}
+    \label{table:rec}
+\end{table}
+
+\begin{table}[h!]
+    \caption{ } 
+    \begin{subtable}[t]{\textwidth}
+        \caption{\textbf{Структура таблицы «Медкарта»}}
+    \begin{tabularx}{\textwidth}{| X | X | c | c | c | c | X |}
+        \hline
+        \textbf{Столбец} & \textbf{Тип данных} & \textbf{Нуль?} & \textbf{Ключ} & \textbf{По
+        умолч.} & \textbf{Огранич.} & \textbf{Ссылка} \\ \hline
+        cardid & integer & not null & первичный & & & \\ \hline
+        regid & integer & not null & внешний & & & Пациент (regid) \\ \hline
+        crdate & date & not null & & date('now') & & \\ \hline
+        type & text & & & & & \\ \hline
+    \end{tabularx}
+    \end{subtable}
+    \label{table:medcard}
+\end{table}
+
+
+\begin{table}[h!]
+    \caption{ }
+    \begin{subtable}[t]{\textwidth}
+        \caption{\textbf{Структура таблицы «Посещения»}}
+    \begin{tabularx}{\textwidth}{| X | X | c | X | c | c | X |}
+        \hline
+        \textbf{Столбец} & \textbf{Тип данных} & \textbf{Нуль?} & \textbf{Ключ} & \textbf{По умолч.} & \textbf{Огранич.} & \textbf{Ссылка} \\ \hline
+            visid & integer & not null & первичный & & & \\ \hline
+            tabid & integer & not null & внешний & & & Сотрудник (tabid) \\ \hline
+            cardid & integer & not null & внешний & & & Медкарта (cardid)\\ \hline
+            visdate & date & not null &  & date('now') & & \\ \hline
+            visgoal & text & not null & & & & \\ \hline
+    \end{tabularx}
+    \end{subtable}
+    \label{table:visit}
+\end{table}
+
+\begin{table}[h!]
+    \caption{ } 
+    \begin{subtable}[t]{\textwidth}
+        \caption{\textbf{Структура таблицы «Рецепт»}}
+    \begin{tabularx}{\textwidth}{| X | X | c | X | c | c | X |}
+        \hline
+        \textbf{Столбец} & \textbf{Тип данных} & \textbf{Нуль?} & \textbf{Ключ} & \textbf{По
+        умолч.} & \textbf{Огранич.} & \textbf{Ссылка} \\ \hline
+	    receiptid & integer & not null & первичный & & & \\ \hline
+            tabid & integer & not null & внешний & & & Сотрудник (tabid) \\ \hline
+
+            regid & integer & not null &  внешний & & & Пациент (regid)\\ \hline
+            issuedate & date & not null & & date('now') & & \\ \hline
+        medicine & text & not null & & & & \\ \hline
+    \end{tabularx}
+    \end{subtable}
+    \label{table:receipt}
+\end{table}
+
+\begin{table}[h!]
+    \caption{ } 
+    \begin{subtable}[t]{\textwidth}
+        \caption{\textbf{Структура таблицы «График»}}
+    \begin{tabularx}{\textwidth}{| X | X | X | X | X | X | X |}
+        \hline
+        \textbf{Столбец} & \textbf{Тип данных} & \textbf{Нуль?} & \textbf{Ключ} & \textbf{По
+        умолч.} & \textbf{Огранич.} & \textbf{Ссылка} \\ \hline
+        weekday & text & not null & первичный & & & \\ \hline
+        tabid & integer & not null & первичный, внешний & & & Сотрудник (tabid) \\ \hline
+        shiftst & integer & not null & & & & \\ \hline
+        shiftend & integer & not null & & & & \\ \hline
+        break & integer & not null & & & & \\ \hline
+    \end{tabularx}
+    \end{subtable}
+    \label{table:timetable}
+\end{table}
+
+
+\begin{table}[h!]
+    \caption{ } 
+    \begin{subtable}[t]{\textwidth}
+        \caption{\textbf{Структура таблицы «Лечение»}}
+    \begin{tabularx}{\textwidth}{| X | X | c | X | c | c | X |}
+        \hline
+        \textbf{Столбец} & \textbf{Тип данных} & \textbf{Нуль?} & \textbf{Ключ} & \textbf{По
+        умолч.} & \textbf{Огранич.} & \textbf{Ссылка} \\ \hline
+        treatid & integer & not null & первичный & & & \\ \hline
+        tabid & integer & not null &  внешний & & & Сотрудник (tabid) \\ \hline
+        cardid & integer & not null &  внешний & & & Медкарта (cardid) \\ \hline
+        trdate & date & not null & первичный & date('now') & & \\ \hline 
+        illness & text & & & & & \\ \hline
+        treatment & text & & & & & \\ \hline
+    \end{tabularx}
+    \end{subtable}
+    \label{table:treat}
+\end{table}
+
+
+\begin{table}[h!]
+    \caption{ } 
+    \begin{subtable}[t]{\textwidth}
+        \caption{\textbf{Структура таблицы «Больничный»}}
+    \begin{tabularx}{\textwidth}{| X | X | c | X | c | X | X |}
+        \hline
+        \textbf{Столбец} & \textbf{Тип данных} & \textbf{Нуль?} & \textbf{Ключ} & \textbf{По
+        умолч.} & \textbf{Огранич.} & \textbf{Ссылка} \\ \hline
+            sickid & integer & not null & первичный & & & \\ \hline
+            regid & integer & not null & внешний & & & Пациент (regid)\\ \hline
+            issuedate & date & not null & & date('now') & & \\ \hline
+        stdate & date & not null & & & & \\ \hline
+        endate & date & not null & & & endate > stdate & \\ \hline
+        destn & text & not null & & & & \\ \hline
+    \end{tabularx}
+    \end{subtable}
+    \label{table:sickleave}
+\end{table}
+
+
+
+
+\begin{table}[h!]
+    \caption{ } 
+    \begin{subtable}[t]{\textwidth}
+        \caption{\textbf{Структура таблицы «Анализ»}}
     \begin{tabularx}{\textwidth}{| X | X | c | c | c | c | X |}
         \hline
         \textbf{Столбец} & \textbf{Тип данных} & \textbf{Нуль?} & \textbf{Ключ} & \textbf{По
@@ -725,187 +848,45 @@ SQLite. Такой выбор обоснован спецификой предм
     \label{table:analysis}
 \end{table}
 
-\begin{table}[h]
-    \caption{ } 
-    \begin{subtable}[t]{\textwidth}
-        \caption{\textbf{структура таблицы «Запись»}}
-    \begin{tabularx}{\textwidth}{| X | X | X | X | X | X | X |}
-        \hline
-        \textbf{Столбец} & \textbf{Тип данных} & \textbf{Нуль?} & \textbf{Ключ} & \textbf{По
-        умолч.} & \textbf{Огранич.} & \textbf{Ссылка} \\ \hline
-        tabid & integer & not null & первичный, внешний & & & Сотрудник (tabid) \\ \hline
-        regid & integer & not null & первичный, внешний & & & Пациент (regid)  \\ \hline
-        recdatetime & datetime & not null & & & & \\ \hline
-    \end{tabularx}
-    \end{subtable}
-    \label{table:rec}
-\end{table}
 
 
 
-\begin{table}[h]
-    \caption{ }
-    \begin{subtable}[t]{\textwidth}
-        \caption{\textbf{структура таблицы «Посещения»}}
-    \begin{tabularx}{\textwidth}{| X | X | c | X | c | c | X |}
-        \hline
-        \textbf{Столбец} & \textbf{Тип данных} & \textbf{Нуль?} & \textbf{Ключ} & \textbf{По умолч.} & \textbf{Огранич.} & \textbf{Ссылка} \\ \hline
-            tabid & integer & not null & первичный, внешний & & & Сотрудник (tabid) \\ \hline
 
-            regid & integer & not null & первичный, внешний & & & Пациент (regid)\\ \hline
-            visdate & date & not null & первичный & date('now') & & \\ \hline
-            visgoal & text & not not & & & & \\ \hline
-    \end{tabularx}
-    \end{subtable}
-    \label{table:visit}
-\end{table}
-
-\begin{table}[h]
-    \caption{ } 
-    \begin{subtable}[t]{\textwidth}
-        \caption{\textbf{структура таблицы «Рецепт»}}
-    \begin{tabularx}{\textwidth}{| X | X | c | X | c | c | X |}
-        \hline
-        \textbf{Столбец} & \textbf{Тип данных} & \textbf{Нуль?} & \textbf{Ключ} & \textbf{По
-        умолч.} & \textbf{Огранич.} & \textbf{Ссылка} \\ \hline
-            tabid & integer & not null & первичный, внешний & & & Сотрудник (tabid) \\ \hline
-
-            regid & integer & not null & первичный, внешний & & & Пациент (regid)\\ \hline
-            issuedate & date & not null & первичный & date('now') & & \\ \hline
-        medicine & text & not null & & & & \\ \hline
-    \end{tabularx}
-    \end{subtable}
-    \label{table:receipt}
-\end{table}
-
-\begin{table}[h]
-    \caption{ } 
-    \begin{subtable}[t]{\textwidth}
-        \caption{\textbf{структура таблицы «Услуга»}}
-    \begin{tabularx}{\textwidth}{| X | X | c | X | c | c | X |}
-        \hline
-        \textbf{Столбец} & \textbf{Тип данных} & \textbf{Нуль?} & \textbf{Ключ} & \textbf{По
-        умолч.} & \textbf{Огранич.} & \textbf{Ссылка} \\ \hline
-        name & integer & not null & первичный & & & \\ \hline
-        descrip & text & not null & & & & \\ \hline
-        cost & integer & not null & & 0 & & \\ \hline
-    \end{tabularx}
-    \end{subtable}
-    \label{table:serv}
-\end{table}
-
-
-\begin{table}[h]
-    \caption{ } 
-    \begin{subtable}[t]{\textwidth}
-        \caption{\textbf{структура таблицы «Оказание»}}
-    \begin{tabularx}{\textwidth}{| X | X | c | X | c | c | X |}
-        \hline
-        \textbf{Столбец} & \textbf{Тип данных} & \textbf{Нуль?} & \textbf{Ключ} & \textbf{По
-        умолч.} & \textbf{Огранич.} & \textbf{Ссылка} \\ \hline
-        name & text & not null & первичный, внешний & & &  Услуга (name) \\ \hline
-        regid & integer & not null & первичный, внешний & & & Пациент (regid) \\ \hline
-        provdate & date & not null & первичный & datetime('now') &  & \\ \hline
-        comment & text & & & & & \\ \hline
-    \end{tabularx}
-    \end{subtable}
-    \label{table:servprovision}
-\end{table}
-
-
-\begin{table}[h]
-    \caption{ } 
-    \begin{subtable}[t]{\textwidth}
-        \caption{\textbf{структура таблицы «Лечение»}}
-    \begin{tabularx}{\textwidth}{| X | X | c | X | c | c | X |}
-        \hline
-        \textbf{Столбец} & \textbf{Тип данных} & \textbf{Нуль?} & \textbf{Ключ} & \textbf{По
-        умолч.} & \textbf{Огранич.} & \textbf{Ссылка} \\ \hline
-        tabid & integer & not null & первичный, внешний & & & Сотрудник (tabid) \\ \hline
-        cardid & integer & not null & первичный, внешний & & & Медкарта (cardid) \\ \hline
-        trdate & date & not null & первичный & date('now') & & \\ \hline 
-        illness & text & & & & & \\ \hline
-        treatment & text & & & & & \\ \hline
-    \end{tabularx}
-    \end{subtable}
-    \label{table:treat}
-\end{table}
-
-\cleardoublepage
-\begin{table}[t!]
-    \caption{ } 
-    \begin{subtable}[t]{\textwidth}
-        \caption{\textbf{структура таблицы «Больничный»}}
-    \begin{tabularx}{\textwidth}{| X | X | c | X | c | X | X |}
-        \hline
-        \textbf{Столбец} & \textbf{Тип данных} & \textbf{Нуль?} & \textbf{Ключ} & \textbf{По
-        умолч.} & \textbf{Огранич.} & \textbf{Ссылка} \\ \hline
-            tabid & integer & not null & первичный, внешний & & & Сотрудник (tabid) \\ \hline
-
-            regid & integer & not null & первичный, внешний & & & Пациент (regid)\\ \hline
-            issuedate & date & not null & первичный & date('now') & & \\ \hline
-        stdate & date & not null & & & & \\ \hline
-        endate & date & not null & & & endate > stdate & \\ \hline
-        destn & text & not null & & & & \\ \hline
-    \end{tabularx}
-    \end{subtable}
-    \label{table:sickleave}
-\end{table}
-
-\begin{table}[h]
-    \caption{ } 
-    \begin{subtable}[t]{\textwidth}
-        \caption{\textbf{структура таблицы «График»}}
-    \begin{tabularx}{\textwidth}{| X | X | X | X | X | X | X |}
-        \hline
-        \textbf{Столбец} & \textbf{Тип данных} & \textbf{Нуль?} & \textbf{Ключ} & \textbf{По
-        умолч.} & \textbf{Огранич.} & \textbf{Ссылка} \\ \hline
-        tabid & integer & not null & первичный, внешний & & & Сотрудник (tabid) \\ \hline
-        weekday & text & not null & первичный & & & \\ \hline
-        shiftst & integer & not null & & & & \\ \hline
-        shiftend & integer & not null & & & & \\ \hline
-        break & integer & not null & & & & \\ \hline
-    \end{tabularx}
-    \end{subtable}
-    \label{table:timetable}
-\end{table}
-
-Таблица «Пациент» содержит персональные данные пациентов поликлиники (см. табл.
-\ref{table:pat})\par
-Таблица «Медкарта» содержит информацию о медкартах пациентов, дополнительные ограничения на таблицу
-это требования уникальности регистрационного номера пациента и типа медкарты unique(regid, type) (см. табл.
-\ref{table:medcard}).\par
+\vfill
 Таблица «Сотрудник» содержит информацию о сотрудниках поликлиники (см. табл. \ref{table:emp}).\par
-Таблица «Анализ» содержит информацию об анализах назначенных врачамм пациентам поликлиники (см.
-табл. \ref{table:analysis}).\par
+Таблица «Пациент» содержит персональные данные и контактную информацию пациентов поликлиники (см. табл.
+\ref{table:pat})\par
 Таблица «Запись» содержит информацию о записях пациентов к врачам поликлиники,
 дополнительные ограничения на таблицу это требования уникальности табельного номера врача и времени
 записи unique(tabid, recdatetime), а также уникальность регистрационного номера пациента и времени
 записи unique(regid, recdatetime) (см. табл. \ref{table:rec}).\par
+Таблица «Медкарта» содержит информацию о медкартах пациентов, также на таблицу наложены дополнительные ограничения, такие как
+требования уникальности регистрационного номера пациента и типа медкарты unique(regid, type) (см. табл.
+\ref{table:medcard}).\par
 Таблица «Посещения» содержит информацию о факте посещения врача пациентом (см. табл.
 \ref{table:visit}).\par
 Таблица «Рецепт» содержит информацию о рецептах выписанных врачами пациентам (см. табл.
 \ref{table:receipt}).\par
-Таблица «Услуга» содержит информацию об услугах оказываемых поликлиникой (см. табл. \ref{table:serv}).\par
-Таблица «Оказание» содержит информацию о факте оказания услуги пациенту (см. табл.
-\ref{table:servprovision}).\par
+Таблица «График» содержит информацию о графиках сотрудников.
+(см. табл. \ref{table:timetable}).\par
 Таблица «Лечение» содержит информацию о лечениях назначаемых врачами пациентам (см. табл.
 \ref{table:treat}).\par
 Таблица «Больничный» содержит информацию о листках нетрудоспособности выданных врачами пациентам
 (см. табл. \ref{table:sickleave}).\par
-Таблица «График» содержит информацию о графиках сотрудников.
-(см. табл. \ref{table:timetable}).\par
+Таблица «Анализ» содержит информацию об анализах назначенных врачамм пациентам поликлиники (см.
+табл. \ref{table:analysis}).\par
 
 
-
-
-На рис. \ref{fig:clinic} можно ознакомиться с общей схемой БД. Визуализаация была
+На рис. \ref{fig:clinic} можно ознакомиться с общей схемой базы данных созданной в СУБД SQLite. Визуализаация схемы была
 произведена средствами программного продукта DataGrip версия 2017.2.
-\begin{figure}[h!]
-        \includegraphics[scale=0.52]{clinic}
+
+\begin{figure}[t!]
+        \includegraphics[width=\textwidth]{clinic}
         \caption{Схема базы данных поликлиники}
         \label{fig:clinic}
 \end{figure}
+\vfill
+\phantom{0}
 
 
 \chapter*{Заключение}
@@ -929,12 +910,12 @@ SQLite. Такой выбор обоснован спецификой предм
     \item Далее в ходе логического проектирования была создана ER-модель базы данных, где были
         определены основные сущности и их взаимодействия. Для визуализации ER-модели были
         использованы ER-диаграммы. В завершении данного этапа были построена схема БД в виде набора
-        схем отношений. А именно двенадцати отношений: 
+        схем отношений. А именно следующие десять отношений: Пациент, Сотрудник, Запись, 
+		Посещения, Больничный, Лечение, Анализ, График, Медкарта, Рецепт.
     \item Завершающим этапом стало физическое проектирование, в ходе которого в СУБД SQLite была
         создана база данных поликлиники со всеми таблицами, определенных на предыдущем этапе, после
         чего все таблицы были заполнены данными.
 \end{enumerate}
-
 
     В дальнейшем планируется создание программного продукта, который предоставляет
         пользователю интерфейс для работы с созданной в данной работе базой данных.
@@ -944,39 +925,35 @@ SQLite. Такой выбор обоснован спецификой предм
 
 \newpage
 \hfill\textbf{Приложение А}
-\addcontentsline{toc}{chapter}{Приложение А}
+\section*{SQL операторы создания таблиц}
+\addcontentsline{toc}{chapter}{Приложение А. SQL операторы создания таблиц}
 \setcounter{lstlisting}{0}
 
 
 \lstinputlisting[title=1. Создание таблицы «Пациент», label=list:cpat, style=csql]{code/cpatient.sql}
 \lstinputlisting[title=2. Создание таблицы «Сотрудник», label=list:cemp, style=csql]{code/cemployee.sql}
 \lstinputlisting[title=3. Создание таблицы «Запись», label=list:rec, style=csql]{code/cappointment.sql}
-\lstinputlisting[title=4. Создание таблицы «Медкарта», label=list:medc, style=csql]{code/cmedcard.sql}
-\lstinputlisting[title=5. Создание таблицы «Посещения», label=list:medc, style=csql]{code/cvisit.sql}
-\lstinputlisting[title=6. Создание таблицы «Анализ», label=list:res,
-style=csql]{code/canalysis.sql}
-\lstinputlisting[title=7. Создание таблицы «Услуга», label=list:patlink,
-style=csql]{code/cservice.sql}
-\lstinputlisting[title=8. Создание таблицы «Оказание», label=list:emplink,
-style=csql]{code/cserviceprovision.sql}
-\lstinputlisting[title=9. Создание таблицы «Лечение», label=list:treat, style=csql]{code/ctreatment.sql}
+\newpage
+\lstinputlisting[title=4. Создание таблицы «Больничный», label=list:reserv, style=csql]{code/csickleave.sql}
+\lstinputlisting[title=5. Создание таблицы «График», label=list:timetable, style=csql]{code/ctimetable.sql}
+\lstinputlisting[title=6. Создание таблицы «Анализ», label=list:res, style=csql]{code/canalysis.sql}
+\lstinputlisting[title=7. Создание таблицы «Лечение», label=list:treat, style=csql]{code/ctreatment.sql}
+\newpage
+\lstinputlisting[title=8. Создание таблицы «Медкарта», label=list:medc, style=csql]{code/cmedcard.sql}
+\lstinputlisting[title=9. Создание таблицы «Посещения», label=list:medc, style=csql]{code/cvisit.sql}
 \lstinputlisting[title=10. Создание таблицы «Рецепт», label=list:serv, style=csql]{code/creceipt.sql}
-\lstinputlisting[title=11. Создание таблицы «Больничный», label=list:reserv,
-style=csql]{code/csickleave.sql}
-\lstinputlisting[title=12. Создание таблицы «График», label=list:timetable,
-style=csql]{code/ctimetable.sql}
 
 
 \newpage
 \hfill\textbf{Приложение Б}
 \setcounter{figure}{0}
 \counterwithout{figure}{chapter}
-\addcontentsline{toc}{chapter}{Приложение Б}
+\addcontentsline{toc}{chapter}{Приложение Б. Примеры заполнение таблиц данными}
 
-\subsection*{Заполнение таблиц данными}
+\section*{Примеры заполнение таблиц данными}
 \setlength{\textfloatsep}{2pt}
 \begin{figure}[h!]
-        \center\includegraphics[scale=1]{patient}
+        \center\includegraphics[width=\textwidth]{patient}
         \caption{Заполнение таблицы «Пациент»}
         \label{fig:patient}
 \end{figure}
@@ -1002,7 +979,7 @@ style=csql]{code/ctimetable.sql}
 \begin{figure}[h!]
         \center\includegraphics[scale=1]{analysis}
         \caption{Заполнение таблицы «Анализ»}
-        \label{fig:employee}
+        \label{fig:analysis}
 \end{figure}
 
 \vspace{0.00mm}
@@ -1032,7 +1009,7 @@ style=csql]{code/ctimetable.sql}
 \vspace{0.00mm}
 
 \begin{figure}[h]
-        \center\includegraphics[scale=1]{medcard}
+        \center\includegraphics[scale=1]{sickleave}
         \caption{Заполнение таблицы «Больничный»}
         \label{fig:sickleave}
 \end{figure}
@@ -1045,27 +1022,8 @@ style=csql]{code/ctimetable.sql}
         \label{fig:appointment}
 \end{figure}
 
-\vspace{0.00mm}
-
-\cleardoublepage
-\begin{figure}[!h]
-        \center\includegraphics[scale=1]{treatment}
-        \caption{Заполнение таблицы «Услуга»}
-        \label{fig:service}
-\end{figure}
-
-\vspace{0.00mm}
-
 \begin{figure}[h!]
-        \center\includegraphics[scale=1]{serviceprovision}
-        \caption{Заполнение таблицы «Оказание»}
-        \label{fig:serviceprovision}
-\end{figure}
-
-\vspace{0.00mm}
-
-\begin{figure}[h!]
-        \center\includegraphics[scale=1]{treatment}
+        \center\includegraphics[width=\textwidth]{treatment}
         \caption{Заполнение таблицы «Лечение»}
         \label{fig:treatment}
 \end{figure}

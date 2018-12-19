@@ -1,4 +1,4 @@
-INSERT INTO patient 
+INSERT INTO treatment 
 (tabid, cardid, trdate, illness, treatment)
 VALUES 
 (
