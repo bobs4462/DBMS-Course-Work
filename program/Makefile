@@ -1,17 +1,16 @@
 CC := gcc 
-CPPFLAGS := -I includes
+CPPFLAGS := -I includes -g
 BUILD_DEBUG := yes
 
 vpath %.h includes
-LIBS := -lpanel -lmenu -lform -lncurses
+LIBS := -lpanel -lmenu -lform -lncursesw
 
 STLDFLAGS := $(LIBS)
 
 OBJ := main.o gui.o
 
 clinic: $(OBJ) $(LIBS)
-	$(CC) -o $@ $(OBJ) $(STLDFLAGS)
-	./$@
+	$(CC) -o $@ $(OBJ) $(STLDFLAGS) -g
 	
 
 $(OBJ): gui.h
