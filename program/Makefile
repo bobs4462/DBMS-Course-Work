@@ -3,7 +3,7 @@ CPPFLAGS := -I includes -g
 BUILD_DEBUG := yes
 
 vpath %.h includes
-LIBS := -lpanel -lmenu -lform -lncursesw
+LIBS := -lpanel -lmenu -lform -lncursesw -lsqlite3
 
 STLDFLAGS := $(LIBS)
 
