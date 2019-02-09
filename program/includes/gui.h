@@ -30,6 +30,9 @@ void registry_interface(sqlite3 *db);
 
 /*FUNCTION PROTOTYPES*/
 void init_menu(ITEM ***some_items, char **some_choices, size_t n_choices);
+void appointement(void);
+void timetable(void);
+void medical_cards(void);
 #endif
 
 

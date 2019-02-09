@@ -168,6 +168,13 @@ void patient_interface(sqlite3 *db)
 			case KEY_UP:
 				menu_driver(main_menu, REQ_UP_ITEM);
 				break;
+			case 10:
+				if (current_item(main_menu) == menu_items[0])
+					appointement();
+				else if (current_item(main_menu) == menu_items[1])
+					timetable();
+				else if (current_item(main_menu) == menu_items[2])
+					medical_cards();
 		}
 	}	
 	i = 0;
@@ -197,3 +204,22 @@ void init_menu(ITEM ***some_items, char **choices, size_t n_choices)
 	(*some_items)[n_choices] = NULL;
 }
 
+void appointement(void)
+{
+	mvprintw(LINES - 1, 2, "SUCCESS");
+	refresh();
+}
+void timetable(void)
+{
+	mvprintw(LINES - 1, 2, "SUCCESS");
+	refresh();
+}
+void medical_cards(int regid, sqlite3 db)
+{
+	char *sql;
+	sqlite3_mprintf(sql, "select count(*) from medcard where regid = %q", regid);
+	sqlite3_get_table(sql)	
+	PANEL * 
+	mvprintw(LINES - 1, 2, "SUCCESS");
+	refresh();
+}
