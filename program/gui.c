@@ -56,6 +56,9 @@ user_t login(void)
 			case KEY_DC:
 			case KEY_BACKSPACE:
 				form_driver(login_form, REQ_DEL_PREV);
+				if (current_field(login_form) == *(fields + 1))
+					if (tn > 0)
+						--tn;
 				break;
 			case 10:
 				tbuf[tn] = '\0';

@@ -13,7 +13,7 @@ clinic: $(OBJ) $(LIBS)
 	$(CC) -o $@ $(OBJ) $(STLDFLAGS) -g
 	
 
-$(OBJ): gui.h
+$(OBJ): gui.h sqlite_adapter.h
 
 clean: 
 	rm -f clinic $(OBJ) 
