@@ -5,6 +5,7 @@ typedef enum user_types user_t;
 #include <string.h>
 #include <stdlib.h>
 
+#define LOG_INCORRECT "Ошибка! Ввeдён неправильный логин или пароль!"
 
 #ifdef MAIN_H
 
@@ -15,7 +16,6 @@ void patient_interface(void);
 void doctor_interface(void);
 void registry_interface(void);
 
-#define LOG_INCORRECT "Ошибка! Ввдеден неправильный логин"
 
 #endif
 

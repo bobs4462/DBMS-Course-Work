@@ -63,7 +63,9 @@ user_t login(void)
 			case 10:
 				tbuf[tn] = '\0';
 				if (pass_verify(field_buffer(fields[0], 0), tbuf)) {
-					form_driver(login_form, REQ_CLR_FIELD);
+					mvprintw(LINES - 5, (COLS - strlen(LOG_INCORRECT) / 2) / 2, LOG_INCORRECT);
+					form_driver(login_form, REQ_END_LINE);
+					refresh();
 					continue;
 				}
 				switch(field_buffer(fields[0], 0)[0]) {

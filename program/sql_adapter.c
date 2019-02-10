@@ -13,7 +13,6 @@ int authenticate(int regid, char *pass)
 	if (sqlite3_step(stmt) == SQLITE_ROW)
 		rv = 0;
 	else {
-		fprintf(stderr, "ERROR: %s", sqlite3_errmsg(db));
 		rv = 1;
 	}
 	sqlite3_finalize(stmt);
