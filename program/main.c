@@ -1,12 +1,12 @@
 #define MAIN_H
 #include <sqlite3.h>
 #include <gui.h>
+sqlite3 *db;
 
 int main(void)
 {
-	sqlite3 *clinicdb;
-	if(sqlite3_open("clinic.db", &clinicdb)) {
-		fprintf(stderr, "Ошибка открытия базы данных: %s\n", sqlite3_errmsg(clinicdb));
+	if(sqlite3_open_v2("clinic.db", &db, SQLITE_OPEN_READWRITE, NULL)) {
+		fprintf(stderr, "Ошибка открытия базы данных: %s\n", sqlite3_errmsg(db));
 		exit(EXIT_FAILURE);
 	}
 	setlocale(LC_ALL, "");
@@ -14,7 +14,8 @@ int main(void)
 	initscr();
 	cbreak();
 	noecho();
-	user_t usertype = login(credentials);
+	user_t usertype = login();
+		
 	switch(usertype) {
 		case UNKNOWN :
 			mvprintw(LINES / 2, COLS / 2 - strlen(LOG_INCORRECT) / 4, LOG_INCORRECT);
@@ -22,11 +23,11 @@ int main(void)
 			getch();
 			goto EXIT;
 		case PATIENT:
-			patient_interface(clinicdb);
+			patient_interface();
 		case DOCTOR:
-			doctor_interface(clinicdb);
+			doctor_interface();
 		case REGISTRY:
-			registry_interface(clinicdb);
+			registry_interface();
 	}
 EXIT:
 	nocbreak();

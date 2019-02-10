@@ -7,7 +7,7 @@ LIBS := -lpanel -lmenu -lform -lncursesw -lsqlite3
 
 STLDFLAGS := $(LIBS)
 
-OBJ := main.o gui.o
+OBJ := main.o gui.o sql_adapter.o
 
 clinic: $(OBJ) $(LIBS)
 	$(CC) -o $@ $(OBJ) $(STLDFLAGS) -g

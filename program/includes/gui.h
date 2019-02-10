@@ -5,14 +5,15 @@ typedef enum user_types user_t;
 #include <string.h>
 #include <stdlib.h>
 
+
 #ifdef MAIN_H
 
 /*FUNCTION PROTOTYPES*/
 #include <locale.h>
-user_t login(char **);
-void patient_interface(sqlite3 *db);
-void doctor_interface(sqlite3 *db);
-void registry_interface(sqlite3 *db);
+user_t login(void);
+void patient_interface(void);
+void doctor_interface(void);
+void registry_interface(void);
 
 #define LOG_INCORRECT "Ошибка! Ввдеден неправильный логин"
 
@@ -30,9 +31,11 @@ void registry_interface(sqlite3 *db);
 
 /*FUNCTION PROTOTYPES*/
 void init_menu(ITEM ***some_items, char **some_choices, size_t n_choices);
+int pass_verify(char *, char *);
 void appointement(void);
 void timetable(void);
 void medical_cards(void);
 #endif
 
 
+extern sqlite3 *db;

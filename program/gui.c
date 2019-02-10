@@ -1,7 +1,8 @@
 #define GUI_H
 #include <gui.h>
+#include <sqlite_adapter.h>
 
-user_t login(char **credentials)
+user_t login(void)
 {
 	user_t ret_val; //return value, defines type of user being authenticated
 	WINDOW *login; 
@@ -35,7 +36,7 @@ user_t login(char **credentials)
 	mvwprintw(login, 4, 1, "ПАРОЛЬ: ");
 	post_form(login_form);
 	wrefresh(login);
-	while ((i = wgetch(login)) != KEY_F(1)) //control loop to manage form 
+	while (i = wgetch(login)) //control loop to manage form 
 		switch(i) {
 			case KEY_UP:
 				form_driver(login_form, REQ_PREV_FIELD);
@@ -58,6 +59,10 @@ user_t login(char **credentials)
 				break;
 			case 10:
 				tbuf[tn] = '\0';
+				if (pass_verify(field_buffer(fields[0], 0), tbuf)) {
+					form_driver(login_form, REQ_CLR_FIELD);
+					continue;
+				}
 				switch(field_buffer(fields[0], 0)[0]) {
 					case 'P':
 						ret_val = PATIENT;
@@ -83,10 +88,10 @@ user_t login(char **credentials)
 				break;
 		}
 EXIT:
-	credentials[0] = malloc(strlen(field_buffer(fields[0], 0)) + 1); //extracting inforamation from form
-	credentials[1] = malloc(++tn);
-	strcpy(credentials[0], field_buffer(fields[0], 0));
-	strcpy(credentials[1], tbuf);
+	//credentials[0] = malloc(strlen(field_buffer(fields[0], 0)) + 1); //extracting inforamation from form
+	//credentials[1] = malloc(++tn);
+	//strcpy(credentials[0], field_buffer(fields[0], 0));
+	//strcpy(credentials[1], tbuf);
 	i = 0;
 	while(*(fields + i)) //cleaning up
 		free_field(fields[i++]);
@@ -98,7 +103,7 @@ EXIT:
 	return ret_val;
 }
 
-void patient_interface(sqlite3 *db)
+void patient_interface(void)
 {
 	const char *sql = "SELECT * from name;";
 	char **result, *err, temp[1000];
@@ -185,12 +190,12 @@ void patient_interface(sqlite3 *db)
 	free_menu(main_menu);
 }
 
-void doctor_interface(sqlite3 *db)
+void doctor_interface(void)
 {
 	return;
 }
 
-void registry_interface(sqlite3 *db)
+void registry_interface(void)
 {
 	return;
 }
@@ -204,22 +209,75 @@ void init_menu(ITEM ***some_items, char **choices, size_t n_choices)
 	(*some_items)[n_choices] = NULL;
 }
 
+
 void appointement(void)
 {
 	mvprintw(LINES - 1, 2, "SUCCESS");
 	refresh();
 }
+
 void timetable(void)
 {
 	mvprintw(LINES - 1, 2, "SUCCESS");
 	refresh();
 }
-void medical_cards(int regid, sqlite3 db)
+
+void medical_cards()
 {
-	char *sql;
-	sqlite3_mprintf(sql, "select count(*) from medcard where regid = %q", regid);
-	sqlite3_get_table(sql)	
-	PANEL * 
-	mvprintw(LINES - 1, 2, "SUCCESS");
-	refresh();
+//	int rows, cols;
+//	char *sql, **result, *err;
+//	sqlite3_mprintf(sql, "select count(*) from medcard where regid" , )
+//	sqlite3_get_table(db, sql, &result, &rows, &cols, &err);	
+//	int cardnum = atoi(result[1]);
+//	PANEL *medcard[cardnum];
+//	mvprintw(LINES - 1, 2, "SUCCESS");
+//	refresh();
+return;
 }
+
+int pass_verify(char *login, char *pass)
+{
+	int regid, i = 1;
+	while (login[i++] == '0');
+	regid = atoi(login + (--i));
+	return authenticate(regid, pass);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
