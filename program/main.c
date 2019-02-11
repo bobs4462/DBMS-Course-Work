@@ -14,14 +14,10 @@ int main(void)
 	initscr();
 	cbreak();
 	noecho();
+	start_color();
 	user_t usertype = login();
 		
 	switch(usertype) {
-		case UNKNOWN :
-			mvprintw(LINES / 2, COLS / 2 - strlen(LOG_INCORRECT) / 4, LOG_INCORRECT);
-			refresh();
-			getch();
-			goto EXIT;
 		case PATIENT:
 			patient_interface();
 		case DOCTOR:

@@ -1,4 +1,4 @@
-enum user_types {PATIENT, DOCTOR, REGISTRY, UNKNOWN}; 
+enum user_types {PATIENT, DOCTOR, REGISTRY}; 
 typedef enum user_types user_t;
 /*INCLUDES*/
 #include <ncurses.h>
@@ -28,6 +28,9 @@ void registry_interface(void);
 /*MACRO DEFINITIONS*/
 #define LOG_WIDTH 35
 #define LOG_HIGHT 3
+
+
+enum colors {GREEN = 1, RED, CYAN, MAGENTA, BLUE};
 
 /*FUNCTION PROTOTYPES*/
 void init_menu(ITEM ***some_items, char **some_choices, size_t n_choices);

@@ -7,13 +7,20 @@ user_t login(void)
 	user_t ret_val; //return value, defines type of user being authenticated
 	WINDOW *login; 
 	FIELD *fields[3]; //form fields
+	FORM *login_form;
 
-	int i = 0, y = (LINES - LOG_HIGHT) / 2, x = (COLS - LOG_WIDTH) / 2; //where to print user prompts
+	init_pair(1, COLOR_GREEN, COLOR_BLACK);
+	init_pair(2, COLOR_RED, COLOR_BLACK);
+	init_pair(3, COLOR_CYAN, COLOR_BLACK);
+	init_pair(4, COLOR_MAGENTA, COLOR_BLACK);
+	init_pair(5, COLOR_BLUE, COLOR_BLACK);
+
+	int i = 0, y = (LINES - 8) / 2, x = (COLS - 41) / 2; //where to print user prompts
 	int rows, cols, tn = 0;
 	char tbuf[100];
-	refresh();
-	fields[0] = new_field(1,25, 1, 1, 0, 0);
-	fields[1] = new_field(1,25, 2, 1, 0, 0);
+
+	fields[0] = new_field(1,30, 2, 1, 0, 0);
+	fields[1] = new_field(1,30, 4, 1, 0, 0);
 	fields[2] = NULL;
 
 	/* Setting form field attributes */
@@ -22,20 +29,32 @@ user_t login(void)
 	set_field_back(fields[0], A_UNDERLINE);
 	set_field_back(fields[1], A_UNDERLINE);
 
-	FORM *login_form = new_form(fields); //creating new form using the fields
-	scale_form(login_form, &rows, &cols); //calculating necessary size for login form
-	login = newwin(rows + 3, cols + 11, y,  x); //special windows used for form
-    keypad(login, TRUE); //let every keystroke through
+	login_form = new_form(fields); //creating new form using the fields
 	form_opts_off(login_form, O_BS_OVERLOAD); //neccessary in order to prevent strange behaviour of backspace key
 
+	scale_form(login_form, &rows, &cols); //calculating necessary size for login form
+
+	refresh();
+
+	login = newwin(rows + 5, cols + 11, y,  x); //special windows used for form
+    keypad(login, TRUE); //let every keystroke through
+
 	set_form_win(login_form, login); //binding form to window
-	set_form_sub(login_form, derwin(login, rows, cols, 2, 8));
+	set_form_sub(login_form, derwin(login, rows, cols, 3, 8));
 	box(login, 0, 0); //visual stuff
+
+	mvwaddch(login, 2, 0, ACS_LTEE);
+	mvwhline(login, 2, 1, ACS_HLINE, cols + 11);
+	mvwaddch(login, 2, cols + 10, ACS_RTEE);
+	wattron(login, COLOR_PAIR(BLUE));
 	mvwprintw(login,  1, (cols + 11) / 2 - 2, "ВХОД");
-	mvwprintw(login,  3, 2, "ЛОГИН: ");
-	mvwprintw(login, 4, 1, "ПАРОЛЬ: ");
+	mvwprintw(login,  5, 2, "ЛОГИН: ");
+	mvwprintw(login, 7, 1, "ПАРОЛЬ: ");
+	wattroff(login, COLOR_PAIR(GREEN));
+
 	post_form(login_form);
 	wrefresh(login);
+
 	while (i = wgetch(login)) //control loop to manage form 
 		switch(i) {
 			case KEY_UP:
@@ -93,10 +112,6 @@ user_t login(void)
 				break;
 		}
 EXIT:
-	//credentials[0] = malloc(strlen(field_buffer(fields[0], 0)) + 1); //extracting inforamation from form
-	//credentials[1] = malloc(++tn);
-	//strcpy(credentials[0], field_buffer(fields[0], 0));
-	//strcpy(credentials[1], tbuf);
 	i = 0;
 	while(*(fields + i)) //cleaning up
 		free_field(fields[i++]);
