@@ -11,10 +11,10 @@ typedef enum user_types user_t;
 
 /*FUNCTION PROTOTYPES*/
 #include <locale.h>
-user_t login(void);
-void patient_interface(void);
-void doctor_interface(void);
-void registry_interface(void);
+user_t login(int regid);
+void patient_interface(int regid);
+void doctor_interface(int regid);
+void registry_interface(int regid);
 
 
 #endif
@@ -34,6 +34,7 @@ enum colors {GREEN = 1, RED, CYAN, MAGENTA, BLUE};
 
 /*FUNCTION PROTOTYPES*/
 void init_menu(ITEM ***some_items, char **some_choices, size_t n_choices);
+int get_regid(char *login);
 int pass_verify(char *, char *);
 void appointement(void);
 void timetable(void);

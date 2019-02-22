@@ -2,7 +2,17 @@
 #ifdef SQL_ADAPTER_H
 extern sqlite3 *db;
 #define PASS_REQUEST "SELECT * FROM pat_pass where regid = ? AND password = ?"
+#define MEDCARD_REQUEST "SELECT * FROM medicalcard where card GLOB '*0' || ?"
 #include <string.h>
 #endif
 
 int authenticate(int, char *);
+
+struct medcard {
+	char *cardid;
+	char *crdate;
+	char *type;
+	int record_count;
+};
+
+typedef struct medcard * MEDCARD;

@@ -10,20 +10,20 @@ int main(void)
 		exit(EXIT_FAILURE);
 	}
 	setlocale(LC_ALL, "");
-	char *credentials[2];
+	int regid;
 	initscr();
 	cbreak();
 	noecho();
 	start_color();
-	user_t usertype = login();
+	user_t usertype = login(&regid);
 		
 	switch(usertype) {
 		case PATIENT:
-			patient_interface();
+			patient_interface(regid);
 		case DOCTOR:
-			doctor_interface();
+			doctor_interface(regid);
 		case REGISTRY:
-			registry_interface();
+			registry_interface(regid);
 	}
 EXIT:
 	nocbreak();

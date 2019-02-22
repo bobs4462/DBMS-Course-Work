@@ -1,7 +1,7 @@
 CREATE VIEW medicalcard AS 
 SELECT 
-	"AN00000" || an.anid, 
-	"D000000" || an.tabid,
+	"AN00000" || an.anid as type,
+	"D000000" || an.tabid AS doctor_num,
 	emp.fio,
 	emp.position,
 	"C000000" || an.cardid as card,
@@ -11,8 +11,8 @@ SELECT
 	FROM analysis an INNER JOIN employee emp ON emp.tabid = an.tabid 
 UNION ALL 
 SELECT 
-	"TR00000" || tr.treatid, 
-	"D000000" || tr.tabid,
+	"TR00000" || tr.treatid AS type, 
+	"D000000" || tr.tabid AS doctor_num,
 	emp.fio,
 	emp.position,
 	"C000000" || tr.cardid AS card,
@@ -22,8 +22,8 @@ SELECT
 	FROM treatment tr INNER JOIN employee emp ON emp.tabid = tr.tabid
 UNION ALL
 SELECT 
-	"VS00000" || vis.visid,
-	"D000000" || vis.tabid,
+	"VS00000" || vis.visid AS type,
+	"D000000" || vis.tabid AS doctor_num,
 	emp.fio,
 	emp.position,
 	"C000000" || vis.cardid AS card,

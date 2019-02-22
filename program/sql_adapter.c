@@ -19,4 +19,6 @@ int authenticate(int regid, char *pass)
 	return rv;
 }
 
-
+MEDCARD get_medcards(int regid)
+{
+	

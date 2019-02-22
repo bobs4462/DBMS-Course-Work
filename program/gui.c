@@ -2,7 +2,7 @@
 #include <gui.h>
 #include <sqlite_adapter.h>
 
-user_t login(void)
+user_t login(int regid)
 {
 	user_t ret_val; //return value, defines type of user being authenticated
 	WINDOW *login; 
@@ -112,6 +112,7 @@ user_t login(void)
 				break;
 		}
 EXIT:
+	*regid = get_regid(field_buffer(fields[0], 0));	
 	i = 0;
 	while(*(fields + i)) //cleaning up
 		free_field(fields[i++]);
@@ -123,7 +124,7 @@ EXIT:
 	return ret_val;
 }
 
-void patient_interface(void)
+void patient_interface(int regid)
 {
 	const char *sql = "SELECT * from name;";
 	char **result, *err, temp[1000];
@@ -206,8 +207,13 @@ void patient_interface(void)
 	while(*(menu_items + i)) { //cleaning up
 		free_item(*(menu_items + i++));
 	}
+	i = 0;
+	while(*(info_fields + i)) { //cleaning up
+		free_field(*(info_fields + i++));
+	}
 	free(menu_items);
 	free_menu(main_menu);
+	free_form(info_form);
 }
 
 void doctor_interface(void)
@@ -244,14 +250,10 @@ void timetable(void)
 
 void medical_cards()
 {
-//	int rows, cols;
-//	char *sql, **result, *err;
-//	sqlite3_mprintf(sql, "select count(*) from medcard where regid" , )
-//	sqlite3_get_table(db, sql, &result, &rows, &cols, &err);	
-//	int cardnum = atoi(result[1]);
-//	PANEL *medcard[cardnum];
-//	mvprintw(LINES - 1, 2, "SUCCESS");
-//	refresh();
+	int rows, cols;
+	
+	PANEL *medcards[]
+	refresh();
 return;
 }
 
@@ -263,41 +265,9 @@ int pass_verify(char *login, char *pass)
 	return authenticate(regid, pass);
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+int get_regid(char *login)
+{
+	int i = 0;
+	while(login[i++] = '0');
+	return atoi(login + (--i));
+}
