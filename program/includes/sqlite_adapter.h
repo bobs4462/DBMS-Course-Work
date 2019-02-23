@@ -9,11 +9,3 @@ extern sqlite3 *db;
 
 int authenticate(int, char *);
 
-struct medcard {
-	char *cardid;
-	char *crdate;
-	char *type;
-	int record_count;
-};
-
-typedef struct medcard * MEDCARD;

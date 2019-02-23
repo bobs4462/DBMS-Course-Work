@@ -33,5 +33,13 @@ SELECT
 	FROM visit vis INNER JOIN employee emp ON emp.tabid = vis.tabid
 ORDER BY occurence;
 
-
-	
+CREATE VIEW patient_medcard AS 
+SELECT 
+	pat.regid AS regid,
+	"MC000" || mc.cardid,
+	pat.fio,
+	mc.crdate,
+	mc.type,
+	(SELECT count(*) FROM medicalcard WHERE card LIKE "%" || mc.cardid) AS rec_count	
+	FROM medcard mc INNER JOIN patient pat ON pat.regid = mc.regid
+ORDER BY mc.crdate;

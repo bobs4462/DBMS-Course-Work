@@ -43,8 +43,8 @@ user_t login(int regid)
 	box(login, 0, 0); //visual stuff
 
 	mvwaddch(login, 2, 0, ACS_LTEE);
-	mvwhline(login, 2, 1, ACS_HLINE, cols + 11);
-	mvwaddch(login, 2, cols + 10, ACS_RTEE);
+	mvwhline(login, 2, 1, ACS_HLINE, cols + 10);
+	mvwaddch(login, 2, cols + 11, ACS_RTEE);
 	wattron(login, COLOR_PAIR(BLUE));
 	mvwprintw(login,  1, (cols + 11) / 2 - 2, "ВХОД");
 	mvwprintw(login,  5, 2, "ЛОГИН: ");

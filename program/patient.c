@@ -2,6 +2,15 @@
 #include <gui.h>
 #include <sqlite_adapter.h>
 
+struct medcard {
+	char *cardid;
+	char *crdate;
+	char *type;
+	int record_count;
+};
+
+typedef struct medcard * MEDCARD;
+
 void patient_interface(int regid)
 {
 	const char *sql = "SELECT * from name;";
@@ -120,10 +129,27 @@ void medical_cards(int regid)
 	int rows, cols, i = 0;
 	int cards = get_card_amount(regid);
 
+	PANEL *top;
 	PANEL *pmedcards[cards];
 	WINDOW *wmedcards[cards];
+
 	bind_windows(pmedcards, wmedcards, cards);
+	last_left = pmedcards[cards - 1];
+	top = pmedcards[0];
+	
 	card_populate(wmedcards, regid);
+
+	while ((i = getch()) == 27) {
+		switch (i) {
+			case KEY_LEFT:
+				top_panel(last_left);
+				break;
+			case KEY_RIGHT:
+				top = 
+					//TODO finish key handling on panels
+
+
+				
 	refresh();
 
 	i = 0;
@@ -139,25 +165,49 @@ void medical_cards(int regid)
 void bind_windows(PANEL **pmedcards, WINDOW **wmedcards, int cards) 
 {
 	int height = 30, width = 40, ypos = LINES - 30, xpos = WIDTH / 2 - 15;
+
 	int i = 0;
-	while (i < cards) 
+	while (i < cards) {
 		wmedcards[i] = newwin(height, width, ypos, xpos);
+		box(wmedcards[i++], 0, 0);
+	}
 
 	i = 0;
 	while (i < cards) 
-		pmedcards[i] = new_panel(wmedcards[i]);
+		pmedcards[i] = new_panel(wmedcards[i++]);
+
+	i = 0;
+	while (i < cards)
+		set_panel_userptr(pmedcards[i], pmedcards[++i]);
+	set_panel_userptr(pmedcards[--i], pmedcards[0]);
+
+	update_panels();
+	doupdate();
 }
 
 void card_populate(WINDOW **wmedcards, int regid)
 {
 	int i = 0;
-	const char *sql = "SELECT * FROM medicalcard where card GLOB '*0' || ?";
-	sqlite3_stmt *stmt;
+	const char *sql = "SELECT * FROM patient_medcard where regid = ?";
 	const char *tail;
+
+	sqlite3_stmt *stmt;
+
 	sqlite3_prepare_v2(db, CARD_AMOUNT_REQUEST, strlen(CARD_AMOUNT_REQUEST), &stmt, &tail);
 	sqlite3_bind_int(stmt, 1, regid);
+
 	while(sqlite3_step(stmt) != SQLITE_DONE) {
-		//TODO fill up cards with data
+		mvwprintw(wmedcards[i], 1, 2, "Карта № %s", sqlite_column_text(stmt, 1));
+		mvwaddch(wmedcards[i], 2, 0, ACS_LTEE);
+		mvwhline(wmedcards[i], 2, 1, ACS_HLINE, 38);
+		mvwaddch(wmedcards[i], 2, 39, ACS_RTEE);
+		mvwprintw(wmedcards[i], 4, 2, "ФИО: %s", sqlite_column_text(stmt, 2)); 
+		mvwprintw(wmedcards[i], 5, 2, "Дата заведения: %s", sqlite_column_text(stmt, 3)); 
+		mvwprintw(wmedcards[i], 6, 2, "Тип медкарты: %s", sqlite_column_text(stmt, 4)); 
+		mvwprintw(wmedcards[i], 6, 2, "Количество записей: %s", sqlite_column_text(stmt, 5)); 
+		++i;
+	}
+	sqlite3_finalize(stmt);
 }
 
 
