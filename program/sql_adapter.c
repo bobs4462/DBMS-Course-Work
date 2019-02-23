@@ -1,5 +1,5 @@
 #define SQL_ADAPTER_H
-#include <stdio.h>
+#include <string.h>
 #include <sqlite_adapter.h>
 
 int authenticate(int regid, char *pass)
@@ -19,6 +19,15 @@ int authenticate(int regid, char *pass)
 	return rv;
 }
 
-MEDCARD get_medcards(int regid)
+int get_card_amount(int regid)
 {
-	
+	int amount = 0;	
+	sqlite3_stmt *stmt;
+	const char *tail;
+	sqlite3_prepare_v2(db, CARD_AMOUNT_REQUEST, strlen(CARD_AMOUNT_REQUEST), &stmt, &tail);
+	sqlite3_bind_int(stmt, 1, regid);
+	sqlite3_step(stmt);
+	amount = sqlite3_column_int(stmt, 0);
+	sqlite3_finalize(stmt);
+	return amount;
+}	
