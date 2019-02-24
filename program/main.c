@@ -1,5 +1,4 @@
 #define MAIN_H
-#include <sqlite3.h>
 #include <gui.h>
 sqlite3 *db;
 
@@ -15,6 +14,7 @@ int main(void)
 	cbreak();
 	noecho();
 	start_color();
+	keypad(stdscr, TRUE);
 	user_t usertype = login(&regid);
 		
 	switch(usertype) {

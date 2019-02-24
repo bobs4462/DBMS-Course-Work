@@ -1,7 +1,6 @@
-#define GUI_H
-#include <gui.h>
+#include <login.h>
 
-user_t login(int regid)
+user_t login(int *regid)
 {
 	user_t ret_val; //return value, defines type of user being authenticated
 	WINDOW *login; 
@@ -43,8 +42,8 @@ user_t login(int regid)
 	box(login, 0, 0); //visual stuff
 
 	mvwaddch(login, 2, 0, ACS_LTEE);
-	mvwhline(login, 2, 1, ACS_HLINE, cols + 10);
-	mvwaddch(login, 2, cols + 11, ACS_RTEE);
+	mvwhline(login, 2, 1, ACS_HLINE, cols + 9);
+	mvwaddch(login, 2, cols + 10, ACS_RTEE);
 	wattron(login, COLOR_PAIR(BLUE));
 	mvwprintw(login,  1, (cols + 11) / 2 - 2, "ВХОД");
 	mvwprintw(login,  5, 2, "ЛОГИН: ");
@@ -96,9 +95,6 @@ user_t login(int regid)
 					case 'R':
 						ret_val = REGISTRY;
 						break;
-					default:
-						ret_val = UNKNOWN;
-						break;
 				}
 				goto EXIT; // I know this is bad, but more ellegant than other methods
 			default:
@@ -125,10 +121,11 @@ EXIT:
 
 int get_regid(char *login)
 {
-	int i = 0;
-	while(login[i++] = '0');
+	int i = 1;
+	while(login[i++] == '0');
 	return atoi(login + (--i));
 }
+
 
 int pass_verify(char *login, char *pass)
 {
@@ -138,3 +135,19 @@ int pass_verify(char *login, char *pass)
 	return authenticate(regid, pass);
 }
 
+int authenticate(int regid, char *pass)
+{
+	int rv;
+	sqlite3_stmt *stmt;
+	const char *tail;
+	sqlite3_prepare_v2(db, PASS_REQUEST, strlen(PASS_REQUEST), &stmt, &tail);
+	sqlite3_bind_int(stmt, 1, regid);
+	sqlite3_bind_text(stmt, 2, pass, strlen(pass), SQLITE_TRANSIENT);
+	if (sqlite3_step(stmt) == SQLITE_ROW)
+		rv = 0;
+	else {
+		rv = 1;
+	}
+	sqlite3_finalize(stmt);
+	return rv;
+}

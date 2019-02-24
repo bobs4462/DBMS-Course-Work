@@ -36,7 +36,7 @@ ORDER BY occurence;
 CREATE VIEW patient_medcard AS 
 SELECT 
 	pat.regid AS regid,
-	"MC000" || mc.cardid,
+	mc.cardid,
 	pat.fio,
 	mc.crdate,
 	mc.type,

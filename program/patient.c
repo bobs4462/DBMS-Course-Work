@@ -1,17 +1,6 @@
-#define GUI_H
-#include <gui.h>
-#include <sqlite_adapter.h>
+#include <patient.h>
 
-struct medcard {
-	char *cardid;
-	char *crdate;
-	char *type;
-	int record_count;
-};
-
-typedef struct medcard * MEDCARD;
-
-void patient_interface(int regid)
+void patient_interface(int regid) // the boss function to manage the view of interface
 {
 	const char *sql = "SELECT * from name;";
 	char **result, *err, temp[1000];
@@ -45,11 +34,11 @@ void patient_interface(int regid)
 	main_menu = new_menu((ITEM **)menu_items);
 	scale_menu(main_menu, &rows, &cols);
 
-	win_main_menu = newwin(rows + 4, cols + 4, 4, 55); 
+	win_main_menu = newwin(rows + 4, cols + 4, 4, 75); 
 	set_menu_win(main_menu, win_main_menu); 
 	set_menu_sub(main_menu, derwin(win_main_menu, rows, cols, 2, 2)); 
 	menu = new_panel(win_main_menu);
-	patient_info = newwin(30, 50, 4, 4);
+	patient_info = newwin(30, 70, 4, 4);
 	scale_form(info_form, &rows, &cols);
 	set_form_win(info_form, patient_info);
 	set_form_sub(info_form, derwin(patient_info, rows, cols, 3, 2));
@@ -69,8 +58,8 @@ void patient_interface(int regid)
 	keypad(win_main_menu, TRUE); 
 	box(win_main_menu, 0, 0);
 
-	update_panels();
 	post_menu(main_menu);
+	update_panels();
 
 	doupdate();
 	while((i = wgetch(win_main_menu)) != KEY_F(1))
@@ -83,13 +72,17 @@ void patient_interface(int regid)
 				break;
 			case 10:
 				if (current_item(main_menu) == menu_items[0])
-					appointement();
+					appointement(regid);
 				else if (current_item(main_menu) == menu_items[1])
-					timetable();
+					timetable(regid);
 				else if (current_item(main_menu) == menu_items[2])
-					medical_cards();
+					medical_cards(regid);
+				else
+					goto EXIT;
 		}
 	}	
+
+EXIT:
 	i = 0;
 	while(*(menu_items + i)) { //cleaning up
 		free_item(*(menu_items + i++));
@@ -103,7 +96,7 @@ void patient_interface(int regid)
 	free_form(info_form);
 }
 
-void init_menu(ITEM ***some_items, char **choices, size_t n_choices)
+void init_menu(ITEM ***some_items, char **choices, size_t n_choices) // general function for menu initializing
 {
 	int i = -1;
 	*some_items = (ITEM**)calloc(n_choices + 1, sizeof(ITEM *));
@@ -112,102 +105,129 @@ void init_menu(ITEM ***some_items, char **choices, size_t n_choices)
 	(*some_items)[n_choices] = NULL;
 }
 
-void appointement(void)
+void appointement(int regid) //function for appointment creation
 {
 	mvprintw(LINES - 1, 2, "SUCCESS");
 	refresh();
 }
 
-void timetable(void)
+void timetable(int regid) //doctor's timetable view
 {
 	mvprintw(LINES - 1, 2, "SUCCESS");
 	refresh();
 }
 
-void medical_cards(int regid)
+void medical_cards(int regid) //work with patient's medical cards
 {
-	int rows, cols, i = 0;
+	int rows, cols, i = 0, j = 0;
 	int cards = get_card_amount(regid);
+	j = cards - 1;	
 
-	PANEL *top;
-	PANEL *pmedcards[cards];
-	WINDOW *wmedcards[cards];
+	PANEL **pmedcards = malloc(sizeof(PANEL *) * cards);
+	WINDOW **wmedcards = malloc(sizeof(WINDOW *) * cards);
 
 	bind_windows(pmedcards, wmedcards, cards);
-	last_left = pmedcards[cards - 1];
-	top = pmedcards[0];
-	
-	card_populate(wmedcards, regid);
 
-	while ((i = getch()) == 27) {
+	card_populate(pmedcards, wmedcards, regid);
+
+	update_panels();
+	doupdate();
+
+	while ((i = getch()) != KEY_F(1)) {
 		switch (i) {
 			case KEY_LEFT:
-				top_panel(last_left);
+			case 'h':
+				if (j > 0)
+					top_panel(pmedcards[--j]);
 				break;
+			case 'l':
 			case KEY_RIGHT:
-				top = 
-					//TODO finish key handling on panels
-
-
-				
-	refresh();
-
+				if (j < cards - 1)
+					top_panel(pmedcards[++j]);
+				break;
+			case 10:
+				show_card(*((int *)panel_userptr(pmedcards[j])));
+		}
+	}
+  			
 	i = 0;
-	while (i < cards)
-		delwin(wmedcards[i]);
+	while (i < cards) {
+		free((int *)panel_userptr(pmedcards[j]));
+		del_panel(pmedcards[i]);
+		wclear(wmedcards[i]);
+		wrefresh(wmedcards[i]);
+		delwin(wmedcards[i++]);
+	}
 
-	i = 0;
-	while (i < cards)
-		del_panel(wmedcards[i]);
+
 	return;
 }
 
+/* utility functions */
+
 void bind_windows(PANEL **pmedcards, WINDOW **wmedcards, int cards) 
 {
-	int height = 30, width = 40, ypos = LINES - 30, xpos = WIDTH / 2 - 15;
-
+	int height = 15, width = 40, ypos = LINES - 20, xpos = COLS - 45;
 	int i = 0;
+
 	while (i < cards) {
-		wmedcards[i] = newwin(height, width, ypos, xpos);
+		wmedcards[i] = newwin(height, width, ypos, xpos + i);
 		box(wmedcards[i++], 0, 0);
 	}
 
 	i = 0;
-	while (i < cards) 
-		pmedcards[i] = new_panel(wmedcards[i++]);
-
-	i = 0;
-	while (i < cards)
-		set_panel_userptr(pmedcards[i], pmedcards[++i]);
-	set_panel_userptr(pmedcards[--i], pmedcards[0]);
-
-	update_panels();
-	doupdate();
+	while (i < cards) {
+		pmedcards[i] = new_panel(wmedcards[i]);
+		i++;
+	}
 }
 
-void card_populate(WINDOW **wmedcards, int regid)
+void card_populate(PANEL **pmedcards, WINDOW **wmedcards, int regid)
 {
-	int i = 0;
+	int i = 0, *userptr;
 	const char *sql = "SELECT * FROM patient_medcard where regid = ?";
 	const char *tail;
 
 	sqlite3_stmt *stmt;
 
-	sqlite3_prepare_v2(db, CARD_AMOUNT_REQUEST, strlen(CARD_AMOUNT_REQUEST), &stmt, &tail);
+	sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, &tail);
 	sqlite3_bind_int(stmt, 1, regid);
 
 	while(sqlite3_step(stmt) != SQLITE_DONE) {
-		mvwprintw(wmedcards[i], 1, 2, "Карта № %s", sqlite_column_text(stmt, 1));
+		mvwprintw(wmedcards[i], 1, 2, "Карта № MC3070%d", sqlite3_column_int(stmt, 1));
 		mvwaddch(wmedcards[i], 2, 0, ACS_LTEE);
 		mvwhline(wmedcards[i], 2, 1, ACS_HLINE, 38);
 		mvwaddch(wmedcards[i], 2, 39, ACS_RTEE);
-		mvwprintw(wmedcards[i], 4, 2, "ФИО: %s", sqlite_column_text(stmt, 2)); 
-		mvwprintw(wmedcards[i], 5, 2, "Дата заведения: %s", sqlite_column_text(stmt, 3)); 
-		mvwprintw(wmedcards[i], 6, 2, "Тип медкарты: %s", sqlite_column_text(stmt, 4)); 
-		mvwprintw(wmedcards[i], 6, 2, "Количество записей: %s", sqlite_column_text(stmt, 5)); 
+		mvwprintw(wmedcards[i], 4, 2, "ФИО: %s", sqlite3_column_text(stmt, 2)); 
+		mvwprintw(wmedcards[i], 5, 2, "Дата заведения: %s", sqlite3_column_text(stmt, 3)); 
+		mvwprintw(wmedcards[i], 6, 2, "Тип медкарты: %s", sqlite3_column_text(stmt, 4)); 
+		mvwprintw(wmedcards[i], 7, 2, "Количество записей: %s", sqlite3_column_text(stmt, 5)); 
+
+		userptr = malloc(sizeof(int));
+		*userptr = sqlite3_column_int(stmt, 1);
+
+		set_panel_userptr(pmedcards[i], userptr);
 		++i;
 	}
 	sqlite3_finalize(stmt);
 }
 
 
+int get_card_amount(int regid)
+{
+	int amount = 7;	
+	sqlite3_stmt *stmt;
+	const char *tail;
+	sqlite3_prepare_v2(db, CARD_AMOUNT_REQUEST, strlen(CARD_AMOUNT_REQUEST), &stmt, &tail);
+	sqlite3_bind_int(stmt, 1, regid);
+	sqlite3_step(stmt);
+	amount = sqlite3_column_int(stmt, 0);
+	sqlite3_finalize(stmt);
+	return amount;
+}	
+
+void show_card(int cardid)
+{
+	mvprintw(LINES - 1, 2, "SUCCESS CARD NUMBER #%d", cardid);
+	return;
+}
