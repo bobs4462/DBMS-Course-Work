@@ -15,20 +15,17 @@ clinic: $(OBJ) $(LIBS)
 	
 %.o: %.h gui.h
 
-#main.o: gui.h
-
-#patient.o: gui.h patient.h
-
-#doctor.o: doctor.h gui.h
-
-#registry.o: registry.h gui.h
 
 clean: 
 	rm -f clinic $(OBJ) 
 
-git: 
+git: clean
 	git add ../.
 	git commit
 	git push
 
-.PHONY: clean git
+db: 
+	database/redeploy.sh
+#	sqlite3 database/clinic.db
+
+.PHONY: clean git db

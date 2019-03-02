@@ -2,6 +2,7 @@
 
 #define MEDCARD_REQUEST "SELECT * FROM medicalcard where card GLOB '*0' || ?"
 #define CARD_AMOUNT_REQUEST "SELECT count(*) FROM medcard where regid = ?"
+#define REQORD_AMOUNT_REQUESt "SELECT count(*) FROM medicalcard where card GLOb '*0' || ?"
 
 void appointement(int regid);
 void timetable(int regid);

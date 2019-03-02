@@ -1,5 +1,5 @@
 BEGIN;
-INSERT INTO employee(fio, position, experien, birthdate, gender, address, pnumber, password)
+INSERT INTO employee(fio, position, experien, birthdate, address, pnumber, password)
 VALUES
 ('Алешин Алексей Сергеевич','педиатор',16,'1983-07-27','109145, г. Москва, Жулебинский бульвар, д. 9','+79745317084','10422645BD' ),
 ('Антошечкин Владислав Михайлович','ортопед',12,'1979-12-11','109202, г. Москва, Рязанский проспект, д. 33','+79390969363','08DB174048' ),

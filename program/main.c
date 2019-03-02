@@ -4,7 +4,7 @@ sqlite3 *db;
 
 int main(void)
 {
-	if(sqlite3_open_v2("clinic.db", &db, SQLITE_OPEN_READWRITE, NULL)) {
+	if(sqlite3_open_v2("database/clinic.db", &db, SQLITE_OPEN_READWRITE, NULL)) {
 		fprintf(stderr, "Ошибка открытия базы данных: %s\n", sqlite3_errmsg(db));
 		exit(EXIT_FAILURE);
 	}
@@ -15,6 +15,7 @@ int main(void)
 	noecho();
 	start_color();
 	keypad(stdscr, TRUE);
+	curs_set(0);
 	user_t usertype = login(&regid);
 		
 	switch(usertype) {

@@ -3,6 +3,7 @@
 user_t login(int *regid)
 {
 	user_t ret_val; //return value, defines type of user being authenticated
+	curs_set(2);
 	WINDOW *login; 
 	FIELD *fields[3]; //form fields
 	FORM *login_form;
@@ -116,6 +117,7 @@ EXIT:
 	delwin(login);
 	erase();
 	refresh();
+	curs_set(0);
 	return ret_val;
 }
 

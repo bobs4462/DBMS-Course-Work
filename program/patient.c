@@ -163,6 +163,85 @@ void medical_cards(int regid) //work with patient's medical cards
 	return;
 }
 
+void show_card(int cardid)
+{
+	int t = 0, i = 0, j = 0;
+	int rc; //record count
+    const char *temp;
+	WINDOW *wmedc;
+	PANEL *pmedc;
+	sqlite3_stmt *stmt;
+
+	wmedc = newwin(20, 63, LINES / 2, (COLS - 40) / 2);
+	keypad(wmedc, TRUE);
+	pmedc = new_panel(wmedc);
+	update_panels();
+	doupdate();
+
+	sqlite3_prepare_v2(db, REQORD_AMOUNT_REQUESt, strlen(REQORD_AMOUNT_REQUESt), &stmt, NULL);
+	sqlite3_bind_int(stmt, 1, cardid);
+	sqlite3_step(stmt);
+	rc = sqlite3_column_int(stmt, 0);
+	sqlite3_finalize(stmt);
+
+	sqlite3_prepare_v2(db, MEDCARD_REQUEST, strlen(MEDCARD_REQUEST), &stmt, NULL);
+	sqlite3_bind_int(stmt, 1, cardid);
+	sqlite3_step(stmt);
+
+	do {
+DRAW:			werase(wmedc);	
+				box(wmedc, 0, 0);
+				temp = sqlite3_column_text(stmt, 0);
+				t = temp[0];
+				mvwprintw(wmedc, 2, 3, "Тип записи: %s", 
+						t == 'V' ? "Визит": (t == 'T' ? "Лечение": "Анализы"));
+				mvwprintw(wmedc, 3, 3, "Таб. номер врача: %s", sqlite3_column_text(stmt, 1));
+				mvwprintw(wmedc, 4, 3, "ФИО отвественного врача: %s", sqlite3_column_text(stmt, 2));
+				mvwprintw(wmedc, 5, 3, "Должность врача: %s", sqlite3_column_text(stmt, 3));
+				mvwprintw(wmedc, 6, 3, "Дата внесения записи: %s", sqlite3_column_text(stmt, 5));
+				mvwprintw(wmedc, 7, 3, "%s: %s", 
+						t == 'V' ? "Цель визита": (t == 'T' ? "Заболевание": "Вид анализов"), 
+						sqlite3_column_text(stmt, 6));
+				mvwprintw(wmedc, 8, 3, "%s %s", 
+						t == 'V' ? "": (t == 'T' ? "Назначенное лечение:": "Результаты анализов:"), 
+						sqlite3_column_text(stmt, 7));
+				mvwprintw(wmedc, 18, 30, "%d/%d", i + 1, rc);
+				while ((t = wgetch(wmedc)) != KEY_F(1)) 
+					switch (t) {
+						case 'l':
+						case KEY_RIGHT:
+							if (sqlite3_step(stmt) == SQLITE_DONE) {
+								sqlite3_reset(stmt);
+								for (int k = 0; k <= i; ++k)
+									sqlite3_step(stmt);
+							}
+							else {
+								++i;
+								goto DRAW;
+
+							}
+							break;
+						case 'h':
+						case KEY_LEFT:
+							if (0 == i)
+								break;
+							sqlite3_reset(stmt);
+							for (j = 0; j < i; ++j) {
+								sqlite3_step(stmt);
+							}
+							i = j - 1;
+							goto DRAW; 
+					}
+				break;
+	} while(TRUE); 
+	sqlite3_finalize(stmt);
+	delwin(wmedc);
+	del_panel(pmedc);
+	update_panels();
+	doupdate();
+	return;
+}
+
 /* utility functions */
 
 void bind_windows(PANEL **pmedcards, WINDOW **wmedcards, int cards) 
@@ -181,6 +260,18 @@ void bind_windows(PANEL **pmedcards, WINDOW **wmedcards, int cards)
 		i++;
 	}
 }
+
+int get_card_amount(int regid)
+{
+	int amount = 7;	
+	sqlite3_stmt *stmt;
+	sqlite3_prepare_v2(db, CARD_AMOUNT_REQUEST, strlen(CARD_AMOUNT_REQUEST), &stmt, NULL);
+	sqlite3_bind_int(stmt, 1, regid);
+	sqlite3_step(stmt);
+	amount = sqlite3_column_int(stmt, 0);
+	sqlite3_finalize(stmt);
+	return amount;
+}	
 
 void card_populate(PANEL **pmedcards, WINDOW **wmedcards, int regid)
 {
@@ -209,84 +300,4 @@ void card_populate(PANEL **pmedcards, WINDOW **wmedcards, int regid)
 		++i;
 	}
 	sqlite3_finalize(stmt);
-}
-
-
-int get_card_amount(int regid)
-{
-	int amount = 7;	
-	sqlite3_stmt *stmt;
-	sqlite3_prepare_v2(db, CARD_AMOUNT_REQUEST, strlen(CARD_AMOUNT_REQUEST), &stmt, NULL);
-	sqlite3_bind_int(stmt, 1, regid);
-	sqlite3_step(stmt);
-	amount = sqlite3_column_int(stmt, 0);
-	sqlite3_finalize(stmt);
-	return amount;
-}	
-
-void show_card(int cardid)
-{
-	int t = 0, i = 1, j = 0;
-    const char *temp;
-	WINDOW *wmedc;
-	PANEL *pmedc;
-	sqlite3_stmt *stmt;
-
-	wmedc = newwin(20, 40, LINES / 2, (COLS - 40) / 2);
-	keypad(wmedc, TRUE);
-	pmedc = new_panel(wmedc);
-	update_panels();
-	doupdate();
-
-	sqlite3_prepare_v2(db, MEDCARD_REQUEST, strlen(MEDCARD_REQUEST), &stmt, NULL);
-	sqlite3_bind_int(stmt, 1, cardid);
-	sqlite3_step(stmt);
-
-	do {
-DRAW:			werase(wmedc);	
-				box(wmedc, 0, 0);
-				temp = sqlite3_column_text(stmt, 0);
-				t = temp[0];
-				mvwprintw(wmedc, 2, 3, "Тип записи: %s", 
-						t == 'V' ? "Визит": (t == 'T' ? "Лечение": "Анализы"));
-				mvwprintw(wmedc, 3, 3, "Таб. номер врача: %s", sqlite3_column_text(stmt, 1));
-				mvwprintw(wmedc, 4, 3, "ФИО отвественного врача: %s", sqlite3_column_text(stmt, 2));
-				mvwprintw(wmedc, 5, 3, "Должность врача :%s", sqlite3_column_text(stmt, 3));
-				mvwprintw(wmedc, 6, 3, "Дата внесения записи: %s", sqlite3_column_text(stmt, 5));
-				mvwprintw(wmedc, 7, 3, "%s: %s", 
-						t == 'V' ? "Цель визита": (t == 'T' ? "Заболевание": "Вид анализов"), 
-						sqlite3_column_text(stmt, 6));
-				mvwprintw(wmedc, 8, 3, "%s: %s", 
-						t == 'V' ? "\021": (t == 'T' ? "Назначенное лечение": "Результаты анализов"), 
-						sqlite3_column_text(stmt, 7));
-				while ((t = wgetch(wmedc)) != KEY_F(1)) 
-					switch (t) {
-						case 'l':
-						case KEY_RIGHT:
-							if (sqlite3_step(stmt) == SQLITE_DONE) {
-								sqlite3_reset(stmt);
-								for (int k = 0; k <= i; ++k)
-									sqlite3_step(stmt);
-							}
-							else
-								++i;
-							break;
-						case 'h':
-						case KEY_LEFT:
-							if (0 == i)
-								break;
-							sqlite3_reset(stmt);
-							for (j = 0; j < i; ++j) {
-								sqlite3_step(stmt);
-							}
-							i = j;
-							goto DRAW; //244
-					}
-	} while(TRUE); //TODO FIX the bug, while is not reached
-	sqlite3_finalize(stmt);
-	delwin(wmedc);
-	del_panel(pmedc);
-	update_panels();
-	doupdate();
-	return;
 }
