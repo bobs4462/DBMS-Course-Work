@@ -1,8 +1,8 @@
 CC := gcc 
-CPPFLAGS := -I includes -g
+.INCLUDE_DIRS := ./includes
+CPPFLAGS := -I $(.INCLUDE_DIRS) -g
 BUILD_DEBUG := yes
 
-vpath %.h includes
 LIBS := -lpanel -lmenu -lform -lncurses -lsqlite3
 
 STLDFLAGS := $(LIBS)
@@ -13,7 +13,13 @@ clinic: $(OBJ) $(LIBS)
 	$(CC) -o $@ $(OBJ) $(STLDFLAGS) -g
 	#./$@
 	
-%.o: %.h gui.h
+
+%.o: %.c $(.INCLUDE_DIRS)/%.h $(INCLUDE_DIRS)gui.h
+	$(CC) $< $(STLDFLAGS) $(CPPFLAGS) -o $@ 
+
+
+
+	
 
 
 clean: 

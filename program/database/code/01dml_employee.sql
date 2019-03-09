@@ -1,4 +1,3 @@
-BEGIN;
 INSERT INTO employee(fio, position, experien, birthdate, address, pnumber, password)
 VALUES
 ('Алешин Алексей Сергеевич','педиатор',16,'1983-07-27','109145, г. Москва, Жулебинский бульвар, д. 9','+79745317084','10422645BD' ),

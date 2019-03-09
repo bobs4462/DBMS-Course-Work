@@ -150,6 +150,7 @@ int authenticate(int regid, char *pass)
 	else {
 		rv = 1;
 	}
+	printw("%s", sqlite3_errmsg(db));
 	sqlite3_finalize(stmt);
 	return rv;
 }

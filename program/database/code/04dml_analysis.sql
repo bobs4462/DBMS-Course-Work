@@ -1,5 +1,5 @@
 INSERT INTO analysis
-(tabid, cardid, type, passdate, result)
+(tabid, cardid, passdate, type, result)
 VALUES
 (15,76,'2013-09-04','Риноскопия','Реакция PH слабая'),
 (11,150,'2013-07-19','Фарингоскопия','отрицательный'),

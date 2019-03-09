@@ -6,7 +6,7 @@ SELECT
 	emp.position,
 	"C000000" || an.cardid as card,
 	an.passdate AS occurence,
-	an.type,
+	an.type AS antype,
 	an.result
 	FROM analysis an INNER JOIN employee emp ON emp.tabid = an.tabid 
 UNION ALL 
@@ -38,8 +38,22 @@ SELECT
 	pat.regid AS regid,
 	mc.cardid,
 	pat.fio,
-	mc.crdate,
+	mc.crdate AS occurence,
 	mc.type,
-	(SELECT count(*) FROM medicalcard WHERE card LIKE "%" || mc.cardid) AS rec_count	
+	(SELECT count(*) FROM medicalcard WHERE card LIKE "%00" || mc.cardid) AS rec_count	
 	FROM medcard mc INNER JOIN patient pat ON pat.regid = mc.regid
-ORDER BY mc.crdate;
+ORDER BY occurence;
+
+CREATE VIEW patient_info AS 
+SELECT 
+	fio AS ФИО,
+	insurcomp AS 'Страховая компания',
+	icontract AS 'Номер полиса страхования',
+	birthdate AS 'Дата рождения',
+	CASE gender
+	WHEN 'М' THEN 'мужчина'
+	WHEN 'Ж' THEN 'женщина'
+	END AS 'Пол',
+	address AS 'Адрес проживания',
+	pnumber AS 'Контактный телефон'
+FROM patient;
