@@ -8,12 +8,6 @@ user_t login(int *regid)
 	FIELD *fields[3]; //form fields
 	FORM *login_form;
 
-	init_pair(1, COLOR_GREEN, COLOR_BLACK);
-	init_pair(2, COLOR_RED, COLOR_BLACK);
-	init_pair(3, COLOR_CYAN, COLOR_BLACK);
-	init_pair(4, COLOR_MAGENTA, COLOR_BLACK);
-	init_pair(5, COLOR_BLUE, COLOR_BLACK);
-
 	int i = 0, y = (LINES - 8) / 2, x = (COLS - 41) / 2; //where to print user prompts
 	int rows, cols, tn = 0;
 	char tbuf[100];
@@ -49,7 +43,7 @@ user_t login(int *regid)
 	mvwprintw(login,  1, (cols + 11) / 2 - 2, "ВХОД");
 	mvwprintw(login,  5, 2, "ЛОГИН: ");
 	mvwprintw(login, 7, 1, "ПАРОЛЬ: ");
-	wattroff(login, COLOR_PAIR(GREEN));
+	wattroff(login, COLOR_PAIR(BLUE));
 
 	post_form(login_form);
 	wrefresh(login);
@@ -82,7 +76,6 @@ user_t login(int *regid)
 				tbuf[tn] = '\0';
 				if (pass_verify(field_buffer(fields[0], 0), tbuf)) {
 					mvprintw(LINES - 5, (COLS - strlen(LOG_INCORRECT) / 2) / 2, LOG_INCORRECT);
-					form_driver(login_form, REQ_END_LINE);
 					refresh();
 					continue;
 				}
@@ -96,6 +89,8 @@ user_t login(int *regid)
 					case 'R':
 						ret_val = REGISTRY;
 						break;
+					default:
+						ret_val = UNKNOWN;
 				}
 				goto EXIT; // I know this is bad, but more ellegant than other methods
 			default:
@@ -150,7 +145,7 @@ int authenticate(int regid, char *pass)
 	else {
 		rv = 1;
 	}
-	printw("%s", sqlite3_errmsg(db));
+	mvprintw(LINES - 5, 5, "%s", sqlite3_errmsg(db));
 	sqlite3_finalize(stmt);
 	return rv;
 }

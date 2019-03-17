@@ -7,7 +7,7 @@
 #include <menu.h>
 #include <panel.h>
 
-enum user_types {PATIENT, DOCTOR, REGISTRY}; 
+enum user_types {PATIENT = 63, DOCTOR, REGISTRY, UNKNOWN}; 
 typedef enum user_types user_t;
 
 #define LOG_INCORRECT "Ошибка! Ввeдён неправильный логин или пароль!"

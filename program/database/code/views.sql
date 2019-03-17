@@ -55,5 +55,6 @@ SELECT
 	WHEN 'Ж' THEN 'женщина'
 	END AS 'Пол',
 	address AS 'Адрес проживания',
-	pnumber AS 'Контактный телефон'
+	pnumber AS 'Контактный телефон',
+	regid
 FROM patient;

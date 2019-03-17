@@ -4,7 +4,7 @@
 #define CARD_AMOUNT_REQUEST "SELECT count(*) FROM medcard where regid = ?"
 #define REQORD_AMOUNT_REQUEST "SELECT count(*) FROM medicalcard where card GLOb '*00' || ?"
 #define DOCTOR_LIST_REQUEST "SELECT fio, position, tabid from employee where position <> 'регистратура'"
-#define PATIENT_INFO_REQUEST "SELECT * from patient_info"
+#define PATIENT_INFO_REQUEST "SELECT * from patient_info where regid = ?"
 #define PATIENT_PASS_UPDATE "UPDATE patient set password = ? where regid = ?"
 
 typedef struct menu_struct {
@@ -25,3 +25,4 @@ MENU *doctor_list(DMS *clup);
 void free_ms(DMS clup);
 void password_change(int regid); 
 void print_timetable(int regid);
+void update_pass(int regid, char *new_pass);

@@ -33,11 +33,11 @@ void patient_interface(int regid) // the boss function to manage the view of int
 	patient = new_panel(patient_info);
 
 	sqlite3_prepare_v2(db, PATIENT_INFO_REQUEST, strlen(PATIENT_INFO_REQUEST), &stmt, NULL);
-	sqlite3_bind_int(stmt, 0, regid);
+	sqlite3_bind_int(stmt, 1, regid);
 	sqlite3_step(stmt);
 
 	i = 0;
-	for (int j = sqlite3_column_count(stmt); i < j; ++i)
+	for (int j = sqlite3_column_count(stmt) - 1; i < j; ++i)
 		mvwprintw(patient_info, 2 + i, 3, "%s: %s",
 				sqlite3_column_name(stmt, i), sqlite3_column_text(stmt, i));
 	sqlite3_finalize(stmt);	
@@ -145,11 +145,18 @@ void timetable(void) //doctor's timetable view
 
 void print_timetable(int tabid)
 {
-
+//TODO finish function	
+	WINDOW *wtimet;
+	PANEL *ptimet;
+	FIELD *ftt[28];
+	for (int i = 0; i < 7; ++i) 
+		for (int j = 0; j < 4; ++j) 
+			ftt[i * 4 + j] = new_field(1, 7, 2 + i * 4, 2 + j * 9);
+	ftt[27] = NULL;
 	return;
 }
 
-MENU *doctor_list(DMS (*clup)) //arguments are doctors list and positions list
+MENU *doctor_list(DMS (*clup)) //argument is a cleanup structure
 {
 	(*clup) = malloc(sizeof(struct menu_struct));
 	(*clup)->dlist = (*clup)->plist = NULL;
@@ -234,45 +241,131 @@ void medical_cards(int regid) //work with patient's medical cards
 }
 void password_change(int regid) //function for appointment creation
 {
-	WINDOW *wpass_change, new_pass, confirm_pass; 			
+	int i = 0;
+	bool SUCCESS = FALSE;
+	WINDOW *wpass_change; 			
 	PANEL *ppass_change;		
 	FORM *fpass_change;
 	FIELD **fpc = malloc(3 * sizeof(FIELD *));
-	fpc[0] = new_field(1, 30, 2, strlen("Новый пароль: "), 0, 0);
-	fpc[1] = new_field(1, 30, 4, strlen("Подтверждение: "), 0, 0);
+	fpc[0] = new_field(1, 27, 3, 18, 0, 0);
+	fpc[1] = new_field(1, 27, 7, 18, 0, 0);
 	fpc[2] = NULL;
 	fpass_change = new_form(fpc);
 	set_field_opts(fpc[0], ~(O_AUTOSKIP | O_BLANK | O_STATIC));
 	set_field_opts(fpc[1], ~(O_AUTOSKIP | O_BLANK | O_STATIC));
-	
+	form_opts_off(fpass_change, O_BS_OVERLOAD); //neccessary in order to prevent strange behaviour of backspace key
 
-	wpass_change = newwin(9, 50, 10, 50);
+	wpass_change = newwin(13, 50, 10, 50);
+
+	set_form_win(fpass_change, wpass_change);
+	set_form_sub(fpass_change, derwin(wpass_change, 10, 50, 3, 0));
+
+	post_form(fpass_change);	
 	box(wpass_change, 0, 0);
+
 	ppass_change = new_panel(wpass_change);
 	update_panels();
 	mvwaddch(wpass_change, 2, 0, ACS_LTEE);
 	mvwhline(wpass_change, 2, 1, ACS_HLINE, 49);
-	mvwaddch(wpass_change, 2, 50, ACS_RTEE);
+	mvwaddch(wpass_change, 2, 49, ACS_RTEE);
+
+	wattron(wpass_change, COLOR_PAIR(RED));
+	mvwprintw(wpass_change, 1, 13, "Введите новый пароль ниже");
+	wattroff(wpass_change, COLOR_PAIR(RED));
 
 	mvwaddch(wpass_change, 5, 17, ACS_ULCORNER);
 	mvwaddch(wpass_change, 7, 17, ACS_LLCORNER);
-	mvwhline(wpass_change, 5, 18, ACS_HLINE, 30);
-	mvwhline(wpass_change, 7, 18, ACS_HLINE, 30);
-	mvwaddch(wpass_change, 5, 48, ACS_URCORNER);
-	mvwaddch(wpass_change, 7, 48, ACS_LRCORNER);
+	mvwhline(wpass_change, 5, 18, ACS_HLINE, 29);
+	mvwhline(wpass_change, 7, 18, ACS_HLINE, 29);
+	mvwaddch(wpass_change, 5, 46, ACS_URCORNER);
+	mvwaddch(wpass_change, 7, 46, ACS_LRCORNER);
 	mvwvline(wpass_change, 6, 17, ACS_VLINE, 1);
-	mvwvline(wpass_change, 6, 48, ACS_VLINE, 1);
+	mvwvline(wpass_change, 6, 46, ACS_VLINE, 1);
+
+	mvwaddch(wpass_change, 9, 17, ACS_ULCORNER);
+	mvwaddch(wpass_change, 11, 17, ACS_LLCORNER);
+	mvwhline(wpass_change, 9, 18, ACS_HLINE, 29);
+	mvwhline(wpass_change, 11, 18, ACS_HLINE, 29);
+	mvwaddch(wpass_change, 9, 46, ACS_URCORNER);
+	mvwaddch(wpass_change, 11, 46, ACS_LRCORNER);
+	mvwvline(wpass_change, 10, 17, ACS_VLINE, 1);
+	mvwvline(wpass_change, 10, 46, ACS_VLINE, 1);
 	wrefresh(wpass_change);
 	doupdate();
 
-	//new_pass = derwin(wpass_change, 3, 30, 3, 15);
-	//confirm_pass = derwin(wpass_change, 3, 30, 7, 15);
-	//box(new_pass, 0, 0);
-	//box(confirm_pass, 0, 0);
+	wattron(wpass_change, COLOR_PAIR(GREEN));
+	mvwprintw(wpass_change, 6, 3, "Новый пароль");
+	mvwprintw(wpass_change, 10, 2, "Подтверждение");
+	wattroff(wpass_change, COLOR_PAIR(GREEN));
+	
+    keypad(wpass_change, TRUE); //let every keystroke through
 
+	while (!SUCCESS && (i = wgetch(wpass_change))) //control loop to manage form 
+		switch(i) {
+			case KEY_UP:
+				form_driver(fpass_change, REQ_PREV_FIELD);
+				form_driver(fpass_change, REQ_END_LINE);
+				break;
+			case '\t':
+			case KEY_DOWN:
+				form_driver(fpass_change, REQ_NEXT_FIELD);
+				form_driver(fpass_change, REQ_END_LINE);
+				break;
+			case KEY_LEFT:
+				form_driver(fpass_change, REQ_LEFT_CHAR);
+				break;
+			case KEY_RIGHT:
+				form_driver(fpass_change, REQ_RIGHT_CHAR);
+				break;
+			case KEY_DC:
+			case KEY_BACKSPACE:
+				form_driver(fpass_change, REQ_DEL_PREV);
+				break;
+			case 10:
+				if (!strcmp(field_buffer(fpc[0], 0), field_buffer(fpc[1], 0))) {
+					update_pass(regid, field_buffer(fpc[0], 0));
+					move(LINES - 2, 3); clrtoeol();	
+					SUCCESS = TRUE;
 
-
+					del_panel(ppass_change);
+					unpost_form(fpass_change);
+					free_form(fpass_change);
+					free_field(fpc[0]); free_field(fpc[1]);
+					free(fpc);
+					werase(wpass_change);
+					wrefresh(wpass_change);
+					delwin(wpass_change);
+					update_panels();
+					doupdate();
+					mvprintw(LINES - 2, 4, "Пароль успешно обновлен");
+					}
+				else {
+					mvprintw(LINES - 2, 4, "Пароли не совпадают");
+				}
+				refresh();
+				break;
+			default:
+				form_driver(fpass_change, i); 
+				form_driver(fpass_change, REQ_END_LINE);
+				break;
+		}
+	getch();
+	move(LINES - 2, 3); clrtoeol();	
 	return;	
+}
+
+void update_pass(int regid, char *new_pass)
+{
+	char temporary[100], i;
+	for (i = -1; *(new_pass + ++i) != ' ' && i < 100; temporary[i] = new_pass[i]);
+	temporary[i] = '\0';
+	char *sql = PATIENT_PASS_UPDATE;
+	sqlite3_stmt *stmt;
+	sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, NULL);
+	sqlite3_bind_int(stmt, 2, regid);
+	sqlite3_bind_text(stmt, 1, temporary, strlen(temporary), SQLITE_STATIC);
+	sqlite3_step(stmt);
+	sqlite3_finalize(stmt);
 }
 
 void show_card(int cardid)
