@@ -25,4 +25,5 @@ MENU *doctor_list(DMS *clup);
 void free_ms(DMS clup);
 void password_change(int regid); 
 void print_timetable(int regid);
+int show_menu(char **items, int sz, char *msg);
 void update_pass(int regid, char *new_pass);

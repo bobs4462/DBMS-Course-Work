@@ -1,4 +1,6 @@
 #include <patient.h>
+#include <time.h>
+
 
 void patient_interface(int regid) // the boss function to manage the view of interface
 {
@@ -98,6 +100,16 @@ void init_menu(ITEM ***some_items, char **choices, size_t n_choices) // general 
 
 void appointement(int regid) //function for appointment creation
 {
+	time_t now = time(NULL);	
+	char *days[8];
+	const int sec_in_day = 86400;
+	for (int i = 0; i < 7; ++i) {
+		days[i] = calloc(200, 1);	
+		now += sec_in_day;
+		strftime(days[i], 199, "%d.%m.%Y %A", localtime(&now));
+	}
+	days[7] = NULL;
+	show_menu(days, 8, "Выберите дату записи");
 	mvprintw(LINES - 1, 2, "SUCCESS");
 	refresh();
 }
@@ -143,17 +155,94 @@ void timetable(void) //doctor's timetable view
 	return;
 }
 
+
 void print_timetable(int tabid)
 {
-//TODO finish function	
-	WINDOW *wtimet;
-	PANEL *ptimet;
-	FIELD *ftt[28];
-	for (int i = 0; i < 7; ++i) 
-		for (int j = 0; j < 4; ++j) 
-			ftt[i * 4 + j] = new_field(1, 7, 2 + i * 4, 2 + j * 9);
-	ftt[27] = NULL;
+	char *sql = "SELECT weekday, get_time(shiftst), get_time(shiftend), get_time(break) FROM timetable where tabid = ? ORDER BY daynum";
+	char *days[8];
+	sqlite3_stmt *stmt;
+	sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, NULL);
+	sqlite3_bind_int(stmt, 1, tabid);
+
+	for (int i = 0; sqlite3_step(stmt) != SQLITE_DONE; ++i) {
+		days[i] = calloc(200, 1);
+		sprintf(days[i], "%s %8s%8s%8s",
+				sqlite3_column_text(stmt, 0),
+				sqlite3_column_text(stmt, 1),
+				sqlite3_column_text(stmt, 2),
+				sqlite3_column_text(stmt, 3));
+	}
+	days[7] = NULL;
+	char *message = "\tДень\t Начало\t Конец \tПерерыв";
+	show_menu(days, 8, message);
+	for (int i = 0; i < 7; ++i)
+		free(days[i]);
+	sqlite3_finalize(stmt);
 	return;
+}
+
+int show_menu(char **items, int sz, char *msg)
+{
+	int x, y;
+	MENU *menu;
+	WINDOW *wmenu, *sub;
+	PANEL *pmenu;
+	ITEM *itptr[sz];
+	for (int i = 0, *uptr; items[i]; i++) {
+		itptr[i] = new_item(items[i], NULL);
+		uptr = malloc(sizeof(int));	
+		*uptr = i;
+		set_item_userptr(itptr[i], uptr);
+	}
+	itptr[sz - 1] = NULL;
+	menu = new_menu(itptr);
+	scale_menu(menu, &y, &x);
+	wmenu = newwin(y + 5, x + 12, (LINES - y - 8) / 2, (COLS - x - 16) / 2);
+	keypad(wmenu, TRUE);
+	set_menu_win(menu, wmenu);	
+	set_menu_sub(menu, sub = derwin(wmenu, y, x , 4, 6));
+	post_menu(menu);
+	box(wmenu, 0, 0);
+	mvwaddch(wmenu, 2, 0, ACS_LTEE);
+	mvwhline(wmenu, 2, 1, ACS_HLINE, x + 10);
+	mvwaddch(wmenu, 2, x + 11, ACS_RTEE);
+	mvwprintw(wmenu, 1, 7, msg);
+	wrefresh(wmenu);
+	pmenu = new_panel(wmenu);
+	update_panels();
+	doupdate();
+
+	while((y = wgetch(wmenu)) != KEY_F(1))
+	{
+		switch(y)
+		{
+			case KEY_DOWN:
+				menu_driver(menu, REQ_DOWN_ITEM);
+				break;
+			case KEY_UP:
+				menu_driver(menu, REQ_UP_ITEM);
+				break;
+			case 10:
+				x = *(int*)item_userptr(current_item(menu));
+				goto CLEANUP;
+		}
+	}
+
+CLEANUP:
+	for (int i = 0; i < sz; i++) {
+		free(item_userptr(itptr[i]));
+		free_item(itptr[i]);
+	}
+	unpost_menu(menu);
+	free_menu(menu);
+	werase(wmenu);
+	wrefresh(wmenu);
+	del_panel(pmenu);
+	delwin(sub);
+	delwin(wmenu);
+	update_panels();
+	doupdate();
+	return x;
 }
 
 MENU *doctor_list(DMS (*clup)) //argument is a cleanup structure
@@ -518,4 +607,5 @@ void free_ms(DMS clup)
 		free(*(clup->plist +i));
 	}
 }
+
 

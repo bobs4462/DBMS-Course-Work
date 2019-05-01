@@ -2,13 +2,17 @@
 #include <gui.h>
 sqlite3 *db;
 
+void get_time(sqlite3_context* ctx, int nargs, sqlite3_value** values);
+
 int main(void)
 {
 	if(sqlite3_open_v2("database/clinic.db", &db, SQLITE_OPEN_READWRITE, NULL)) {
 		fprintf(stderr, "Ошибка открытия базы данных: %s\n", sqlite3_errmsg(db));
 		exit(EXIT_FAILURE);
 	}
-	setlocale(LC_ALL, "");
+	sqlite3_create_function( db, "get_time", 1, SQLITE_UTF8, NULL, get_time, NULL, NULL);
+
+	setlocale(LC_ALL, "ru_RU.utf8");
 	int regid;
 	initscr();
 	cbreak();
@@ -47,4 +51,16 @@ EXIT:
 	endwin();
 	return 0;
 
+}
+
+void get_time(sqlite3_context* ctx, int nargs, sqlite3_value** values)
+{
+	const char *msg;
+	int minutes = sqlite3_value_int(values[0]);
+	msg = sqlite3_mprintf("%s%d:%s%d",
+			minutes / 60 > 9 ? "" : "0",
+			minutes / 60,
+			minutes % 60 > 9 ? "" : "0",
+			minutes % 60);
+	sqlite3_result_text(ctx, msg, strlen(msg), sqlite3_free);
 }
