@@ -1,12 +1,5 @@
 /*INCLUDES*/
-#include <ncurses.h>
-#include <string.h>
-#include <stdlib.h>
-#include <sqlite3.h>
-#include <form.h>
-#include <menu.h>
-#include <panel.h>
-
+#include <common.c>
 enum user_types {PATIENT = 63, DOCTOR, REGISTRY, UNKNOWN}; 
 typedef enum user_types user_t;
 
@@ -30,7 +23,5 @@ void registry_interface(int regid);
 #define LOG_HIGHT 3
 
 
-enum colors {GREEN = 1, RED, CYAN, MAGENTA, BLUE};
 
-extern sqlite3 *db;
 

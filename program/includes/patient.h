@@ -13,8 +13,8 @@ typedef struct menu_struct {
 	ITEM **doctors; //menu items for subsequent cleanup
 } * DMS; //doctor menu structure;
 
-void appointement(int regid);
-void timetable(void);
+void appointment(int regid);
+int timetable(int mode);
 void medical_cards(int regid);
 void init_menu(ITEM ***some_items, char **some_choices, size_t n_choices);
 int get_card_amount(int regid);

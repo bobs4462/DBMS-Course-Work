@@ -63,9 +63,9 @@ void patient_interface(int regid) // the boss function to manage the view of int
 				break;
 			case 10:
 				if (current_item(main_menu) == menu_items[0]) //EXAMPLE OF TERRIBLE CODING
-					appointement(regid);
+					appointment(regid);
 				else if (current_item(main_menu) == menu_items[1])
-					timetable();
+					timetable(0);
 				else if (current_item(main_menu) == menu_items[2])
 					medical_cards(regid);
 				else if (current_item(main_menu) == menu_items[3])
@@ -98,8 +98,10 @@ void init_menu(ITEM ***some_items, char **choices, size_t n_choices) // general 
 	(*some_items)[n_choices] = NULL;
 }
 
-void appointement(int regid) //function for appointment creation
+void appointment(int regid) //function for appointment creation
 {
+	int tabid = timetable(1);
+	int i = 0;
 	time_t now = time(NULL);	
 	char *days[8];
 	const int sec_in_day = 86400;
@@ -109,12 +111,43 @@ void appointement(int regid) //function for appointment creation
 		strftime(days[i], 199, "%d.%m.%Y %A", localtime(&now));
 	}
 	days[7] = NULL;
-	show_menu(days, 8, "Выберите дату записи");
+	int choice = show_menu(days, 8, "Выберите дату записи");
+	char *sql = "SELECT vacant_time(?, ?)";
+	sqlite3_stmt *stmt;
+	sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, NULL);
+	sqlite3_bind_int(stmt, 1, tabid);
+	char temp[100] = {0};
+	now = time(NULL);	
+	now += sec_in_day * (choice + 1);
+	strftime(temp, 99, "%Y-%m-%d", localtime(&now));
+	sqlite3_bind_text(stmt, 2, temp, -1, SQLITE_STATIC);
+	sqlite3_step(stmt);
+	char **vacant_times = NULL;
+	for (i = 0; ((char**)sqlite3_column_blob(stmt, 0))[i]; ++i) {
+		vacant_times = realloc(vacant_times, sizeof(char *) * (i + 2));
+		vacant_times[i] = malloc(50);
+		vacant_times[i + 1] = NULL;
+		sprintf(vacant_times[i], "%s", ((char**)sqlite3_column_blob(stmt, 0))[i]);
+	}
+	sqlite3_finalize(stmt);
+	choice = show_menu(vacant_times, i + 1, "ВРЕМЯ ЗАПИСИ");
+	sql = "INSERT INTO appointment values(?, ?, ?)";
+	sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, NULL);
+	sqlite3_bind_int(stmt, 1, tabid);
+	sqlite3_bind_int(stmt, 2, regid);
+	sqlite3_bind_text(stmt, 3, strcat(temp, vacant_times[choice]), -1, SQLITE_STATIC);
+	printw("%d", sqlite3_step(stmt));
+	if ((i = sqlite3_finalize(stmt)) > 0 && i < 100) 
+		message_box(sqlite3_errmsg(db), "Произошла ошибка");
 	mvprintw(LINES - 1, 2, "SUCCESS");
+	for (int i = 0; vacant_times[i]; ++i) 
+		free(vacant_times[i]);
+	free(vacant_times);
+
 	refresh();
 }
 
-void timetable(void) //doctor's timetable view
+int timetable(int mode) //doctor's timetable view
 {
 	int i = 0;
 	WINDOW *dwindow;
@@ -141,7 +174,10 @@ void timetable(void) //doctor's timetable view
 				menu_driver(dmenu, REQ_UP_ITEM);
 				break;
 			case 10:
-				print_timetable(*(int *)(item_userptr(current_item(dmenu))));
+				if (mode == 0)
+					print_timetable(*(int *)(item_userptr(current_item(dmenu))));
+				else if (mode == 1)
+					return *(int *)(item_userptr(current_item(dmenu)));
 				break;
 		}
 	}	
@@ -152,7 +188,7 @@ void timetable(void) //doctor's timetable view
 	delwin(dwindow);
 	update_panels();
 	doupdate();
-	return;
+	return 0;
 }
 
 
