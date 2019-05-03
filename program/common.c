@@ -1,6 +1,8 @@
 #include <common.h>
 
 void strip(char *text);
+int trim (char *array);
+char *space_wrap(const char *text, int maxlen);
 int message_box(const char *text, char *header, int y, int x, int h, int w) 
 {
 	WINDOW *message_win, *message_sub;
@@ -184,6 +186,7 @@ char *search(char *header)
 				break;
 			case KEY_DC:
 			case KEY_BACKSPACE:
+			case 127:
 				if (current_field(search_form) == search_field[0])
 					form_driver(search_form, REQ_DEL_PREV);
 				break;
@@ -258,8 +261,8 @@ int medical_cards(int regid, int EXTRACT) //work with patient's medical cards
 		doupdate();
 	}
   			
-	i = 0;
 EXIT:
+	i = 0;
 	while (i < cards) {
 		free((int *)panel_userptr(pmedcards[i]));
 		del_panel(pmedcards[i]);
@@ -305,7 +308,7 @@ void card_populate(PANEL **pmedcards, WINDOW **wmedcards, WINDOW **subs, int reg
 
 void show_card(int cardid)
 {
-	int t = 0, i = 0, j = 0;
+	int t = 0, i = 0, j = 0, c;
 	int rc; //record count
     const char *temp;
 	WINDOW *wmedc, *sub;
@@ -329,7 +332,7 @@ void show_card(int cardid)
 	sqlite3_prepare_v2(db, MEDCARD_REQUEST, strlen(MEDCARD_REQUEST), &stmt, NULL);
 	sqlite3_bind_int(stmt, 1, cardid);
 	sqlite3_step(stmt);
-	int row = 0;
+	int row = 0, y, x;
 
 	do {
 DRAW:			werase(sub);	
@@ -345,7 +348,8 @@ DRAW:			werase(sub);
 				mvwprintw(sub, row++, 0, "%s: %s", 
 						t == 'V' ? "Цель визита": (t == 'T' ? "Заболевание": "Вид анализов"), 
 						sqlite3_column_text(stmt, 6));
-				mvwprintw(sub, ++row, 0, "%s %s", 
+				getyx(sub, y, x);
+				mvwprintw(sub, y + 1, 0, "%s %s", 
 						t == 'V' ? "": (t == 'T' ? "Назначенное лечение:": "Результаты анализов:"), 
 						sqlite3_column_text(stmt, 7));
 				wmove(wmedc, 18, 36); wclrtoeol(wmedc);
@@ -456,12 +460,12 @@ struct win_pan *patient_info(int regid)
 
 char **get_input(char *msg, char **desc, int count, int height, int width) //intro message, field descriptions, field count, field height, field width
 {
-	curs_set(0);
 	int x, y, d = 0, c = 0;
 	char buffer[count][10000], **retval;
 	WINDOW *text_win, *sub;
 	FORM *text_form;
 	FIELD *fields[count + 2];
+	PANEL *text_pan;
 
 	if (desc != NULL)
 		while (c < count) {
@@ -487,8 +491,11 @@ char **get_input(char *msg, char **desc, int count, int height, int width) //int
 	text_win = newwin(y += 6, (x += 5) + d , (LINES - y - 6) / 2, (COLS - x - d - 5) / 2);
 	set_form_win(text_form, text_win);
 	set_form_sub(text_form, sub = derwin(text_win, y - 6, x - 5, 3, 1 + d));
+	text_pan = new_panel(text_win);
 	post_form(text_form);
 	refresh();
+	update_panels();
+	doupdate();
 
 	if (desc != NULL) {
 		for (int i = 0; i < count; ++i) {
@@ -509,13 +516,16 @@ char **get_input(char *msg, char **desc, int count, int height, int width) //int
 
 	mvwaddch(text_win, 2, 0, ACS_LTEE);
 	mvwhline(text_win, 2, 1, ACS_HLINE, x + d - 2);
-	mvwaddch(text_win, 2, x - 1, ACS_RTEE);
+	mvwaddch(text_win, 2, x + d - 1, ACS_RTEE);
 
 	keypad(text_win, TRUE);
 	wrefresh(text_win);
 	x = 0; y = 0;
 
+	curs_set(1);
 	while ((c = wgetch(text_win)) != KEY_F(2)) {
+		mvprintw(1,1,"%d", c);
+		refresh();
 		switch(c) {
 			case 9:
 				form_driver(text_form, REQ_NEXT_FIELD);
@@ -544,14 +554,16 @@ char **get_input(char *msg, char **desc, int count, int height, int width) //int
 				}
 				break;
 			case KEY_DC:
-			case KEY_BACKSPACE:
+			case 127:
 				form_driver(text_form, REQ_DEL_PREV);
 				break;
 			case 10:
 				if (current_field(text_form) == fields[count])
 					goto CLEANUP;
-				else 
-					form_driver(text_form, '\n');
+				else {
+					form_driver(text_form, REQ_NEXT_LINE);
+					form_driver(text_form, REQ_BEG_LINE);
+				}
 			default:
 				form_driver(text_form, c);
 		}
@@ -559,9 +571,10 @@ char **get_input(char *msg, char **desc, int count, int height, int width) //int
 CLEANUP:
 	retval = malloc(count * sizeof(char *));	
 	for (int i = 0; i < count; ++i) {
-		retval[i] = malloc(strlen(field_buffer(fields[i], 0)));
+		retval[i] = calloc(strlen(field_buffer(fields[i], 0)) + 1, 1);
 		strcpy(retval[i], field_buffer(fields[i], 0));
 		strip(retval[i]);
+		trim(retval[i]);
 		free_field(fields[i]);
 	}
 
@@ -569,6 +582,7 @@ CLEANUP:
 	free_form(text_form);
 	werase(text_win);
 	wrefresh(text_win);
+	del_panel(text_pan);
 	delwin(sub);
 	delwin(text_win);
 	update_panels();
@@ -578,14 +592,17 @@ CLEANUP:
 
 int trim (char *array)
 {
-	int i = 0, j = 0, space = 0;
+	int i = 0, j = 0, space = 0, s = 0;
 	char *temp = calloc(strlen(array), 1);
 	while (array[i]) {
-		if (array[i] != ' ') {
+		if (array[i] == ' ') {
 			space = i;
-			while (array[++space] == ' ');
-			temp[j] = array[i];
-			temp[++j] = array[space++];
+			temp[j++] = ' ';
+			while (array[++space] == ' ') ++s;
+			if (s)
+				temp[j++] = '\n';
+			s = 0;
+			temp[j++] = array[space++];
 			i = space;
 		}
 		else {
@@ -594,6 +611,7 @@ int trim (char *array)
 		}
 	}
 	strcpy(array, temp);
+	curs_set(0);
 	return 0;
 }
 

@@ -66,7 +66,7 @@ user_t login(int *regid)
 				form_driver(login_form, REQ_RIGHT_CHAR);
 				break;
 			case KEY_DC:
-			case KEY_BACKSPACE:
+			case 127:
 				form_driver(login_form, REQ_DEL_PREV);
 				if (current_field(login_form) == *(fields + 1))
 					if (tn > 0)

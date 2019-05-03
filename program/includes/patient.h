@@ -13,7 +13,6 @@ void appointment(int regid);
 int timetable(int mode);
 void init_menu(ITEM ***some_items, char **some_choices, size_t n_choices);
 int get_card_amount(int regid);
-void bind_windows(PANEL **pmedcards, WINDOW **wmedcards, int cards);
 MENU *doctor_list(DMS *clup);
 void free_ms(DMS clup);
 void password_change(int regid); 

@@ -344,6 +344,7 @@ void password_change(int regid) //function for appointment creation
 				break;
 			case KEY_DC:
 			case KEY_BACKSPACE:
+			case 127:
 				form_driver(fpass_change, REQ_DEL_PREV);
 				break;
 			case 10:
