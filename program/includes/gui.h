@@ -1,5 +1,5 @@
 /*INCLUDES*/
-#include <common.c>
+#include <common.h>
 enum user_types {PATIENT = 63, DOCTOR, REGISTRY, UNKNOWN}; 
 typedef enum user_types user_t;
 
@@ -11,7 +11,7 @@ typedef enum user_types user_t;
 #include <locale.h>
 user_t login(int *regid);
 void patient_interface(int regid);
-void doctor_interface(int regid);
+void doctor_interface(int tabid);
 void registry_interface(int regid);
 
 

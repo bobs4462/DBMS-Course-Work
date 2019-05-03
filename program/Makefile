@@ -7,7 +7,7 @@ LIBS := -lpanel -lmenu -lform -lncurses -lsqlite3
 
 STLDFLAGS := $(LIBS)
 
-OBJ := main.o patient.o doctor.o registry.o login.o
+OBJ := main.o patient.o doctor.o registry.o login.o common.o
 
 clinic: $(OBJ) $(LIBS)
 	$(CC) -o $@ $(OBJ) $(STLDFLAGS) -g

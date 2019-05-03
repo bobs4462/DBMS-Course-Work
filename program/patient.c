@@ -1,5 +1,4 @@
 #include <patient.h>
-#include <time.h>
 
 
 void patient_interface(int regid) // the boss function to manage the view of interface
@@ -9,9 +8,9 @@ void patient_interface(int regid) // the boss function to manage the view of int
 
 	int i = 0, rows, cols;
 
-	WINDOW *win_main_menu, *patient_info;
+	WINDOW *win_main_menu;
 
-	PANEL *menu, *patient;
+	PANEL *menu;
 	MENU *main_menu;
 	char *choices[] = {
 						"Запись к врачу",
@@ -31,20 +30,8 @@ void patient_interface(int regid) // the boss function to manage the view of int
 	set_menu_win(main_menu, win_main_menu); 
 	set_menu_sub(main_menu, derwin(win_main_menu, rows, cols, 2, 2)); 
 	menu = new_panel(win_main_menu);
-	patient_info = newwin(25, 70, 4, 4);
-	patient = new_panel(patient_info);
+	struct win_pan *pat = patient_info(regid);
 
-	sqlite3_prepare_v2(db, PATIENT_INFO_REQUEST, strlen(PATIENT_INFO_REQUEST), &stmt, NULL);
-	sqlite3_bind_int(stmt, 1, regid);
-	sqlite3_step(stmt);
-
-	i = 0;
-	for (int j = sqlite3_column_count(stmt) - 1; i < j; ++i)
-		mvwprintw(patient_info, 2 + i, 3, "%s: %s",
-				sqlite3_column_name(stmt, i), sqlite3_column_text(stmt, i));
-	sqlite3_finalize(stmt);	
-				
-	box(patient_info, 0,0);
 
 	keypad(win_main_menu, TRUE); 
 	box(win_main_menu, 0, 0);
@@ -53,7 +40,7 @@ void patient_interface(int regid) // the boss function to manage the view of int
 	update_panels();
 
 	doupdate();
-	while((i = wgetch(win_main_menu)) != KEY_F(1))
+	while((i = wgetch(win_main_menu)) != KEY_F(2))
 	{   switch(i)
 	    {	case KEY_DOWN:
 		        menu_driver(main_menu, REQ_DOWN_ITEM);
@@ -67,7 +54,7 @@ void patient_interface(int regid) // the boss function to manage the view of int
 				else if (current_item(main_menu) == menu_items[1])
 					timetable(0);
 				else if (current_item(main_menu) == menu_items[2])
-					medical_cards(regid);
+					medical_cards(regid, 0);
 				else if (current_item(main_menu) == menu_items[3])
 					password_change(regid);
 				else
@@ -82,9 +69,10 @@ EXIT:
 	}
 	i = 0;
 	del_panel(menu);
-	del_panel(patient);
+	del_panel(pat->pan);
 	delwin(win_main_menu);
-	delwin(patient_info);
+	delwin(pat->sub);
+	delwin(pat->win);
 	free(menu_items);
 	free_menu(main_menu);
 }
@@ -116,7 +104,7 @@ void appointment(int regid) //function for appointment creation
 	sqlite3_stmt *stmt;
 	sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, NULL);
 	sqlite3_bind_int(stmt, 1, tabid);
-	char temp[100] = {0};
+	char temp[5000] = {0};
 	now = time(NULL);	
 	now += sec_in_day * (choice + 1);
 	strftime(temp, 99, "%Y-%m-%d", localtime(&now));
@@ -127,7 +115,7 @@ void appointment(int regid) //function for appointment creation
 		vacant_times = realloc(vacant_times, sizeof(char *) * (i + 2));
 		vacant_times[i] = malloc(50);
 		vacant_times[i + 1] = NULL;
-		sprintf(vacant_times[i], "%s", ((char**)sqlite3_column_blob(stmt, 0))[i]);
+		sprintf(vacant_times[i], " %s", ((char**)sqlite3_column_blob(stmt, 0))[i]);
 	}
 	sqlite3_finalize(stmt);
 	choice = show_menu(vacant_times, i + 1, "ВРЕМЯ ЗАПИСИ");
@@ -136,15 +124,36 @@ void appointment(int regid) //function for appointment creation
 	sqlite3_bind_int(stmt, 1, tabid);
 	sqlite3_bind_int(stmt, 2, regid);
 	sqlite3_bind_text(stmt, 3, strcat(temp, vacant_times[choice]), -1, SQLITE_STATIC);
-	printw("%d", sqlite3_step(stmt));
-	if ((i = sqlite3_finalize(stmt)) > 0 && i < 100) 
-		message_box(sqlite3_errmsg(db), "Произошла ошибка");
-	mvprintw(LINES - 1, 2, "SUCCESS");
+	if (sqlite3_step(stmt) == SQLITE_CONSTRAINT) {
+		sqlite3_finalize(stmt);
+		sql = "SELECT e.fio, a.recdatetime FROM appointment a \
+			   INNER JOIN employee e ON a.tabid = e.tabid where a.regid = ? and a.tabid = ?";
+		sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, NULL);
+		sqlite3_bind_int(stmt, 1, regid);
+		sqlite3_bind_int(stmt, 2, tabid);
+		sqlite3_step(stmt); 
+		sprintf(temp, "\tУ вас уже есть запись к врачу\n\t%s\n\tна %s",
+				sqlite3_column_text(stmt, 0),
+				sqlite3_column_text(stmt, 1));
+		message_box(temp, "Произошла ошибка", -1, -1, 4, 30);
+	}
+	else {
+		sqlite3_finalize(stmt);
+		sql = "SELECT e.fio, a.recdatetime FROM appointment a \
+			   INNER JOIN employee e ON a.tabid = e.tabid where a.regid = ? and a.tabid = ?";
+		sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, NULL);
+		sqlite3_bind_int(stmt, 1, regid);
+		sqlite3_bind_int(stmt, 2, tabid);
+		sqlite3_step(stmt); 
+		sprintf(temp, "\tЗапись к врачу\n\t%s\n\tна %s создана.",
+				sqlite3_column_text(stmt, 0),
+				sqlite3_column_text(stmt, 1));
+		message_box(temp, "Запись создана", -1, -1, 4, 30);
+	}
+	sqlite3_finalize(stmt);
 	for (int i = 0; vacant_times[i]; ++i) 
 		free(vacant_times[i]);
 	free(vacant_times);
-
-	refresh();
 }
 
 int timetable(int mode) //doctor's timetable view
@@ -165,7 +174,7 @@ int timetable(int mode) //doctor's timetable view
 	update_panels();
 	doupdate();
 	
-	while((i = wgetch(dwindow)) != KEY_F(1))
+	while((i = wgetch(dwindow)) != KEY_F(2))
 	{   switch(i)
 	    {	case KEY_DOWN:
 		        menu_driver(dmenu, REQ_DOWN_ITEM);
@@ -217,69 +226,6 @@ void print_timetable(int tabid)
 	return;
 }
 
-int show_menu(char **items, int sz, char *msg)
-{
-	int x, y;
-	MENU *menu;
-	WINDOW *wmenu, *sub;
-	PANEL *pmenu;
-	ITEM *itptr[sz];
-	for (int i = 0, *uptr; items[i]; i++) {
-		itptr[i] = new_item(items[i], NULL);
-		uptr = malloc(sizeof(int));	
-		*uptr = i;
-		set_item_userptr(itptr[i], uptr);
-	}
-	itptr[sz - 1] = NULL;
-	menu = new_menu(itptr);
-	scale_menu(menu, &y, &x);
-	wmenu = newwin(y + 5, x + 12, (LINES - y - 8) / 2, (COLS - x - 16) / 2);
-	keypad(wmenu, TRUE);
-	set_menu_win(menu, wmenu);	
-	set_menu_sub(menu, sub = derwin(wmenu, y, x , 4, 6));
-	post_menu(menu);
-	box(wmenu, 0, 0);
-	mvwaddch(wmenu, 2, 0, ACS_LTEE);
-	mvwhline(wmenu, 2, 1, ACS_HLINE, x + 10);
-	mvwaddch(wmenu, 2, x + 11, ACS_RTEE);
-	mvwprintw(wmenu, 1, 7, msg);
-	wrefresh(wmenu);
-	pmenu = new_panel(wmenu);
-	update_panels();
-	doupdate();
-
-	while((y = wgetch(wmenu)) != KEY_F(1))
-	{
-		switch(y)
-		{
-			case KEY_DOWN:
-				menu_driver(menu, REQ_DOWN_ITEM);
-				break;
-			case KEY_UP:
-				menu_driver(menu, REQ_UP_ITEM);
-				break;
-			case 10:
-				x = *(int*)item_userptr(current_item(menu));
-				goto CLEANUP;
-		}
-	}
-
-CLEANUP:
-	for (int i = 0; i < sz; i++) {
-		free(item_userptr(itptr[i]));
-		free_item(itptr[i]);
-	}
-	unpost_menu(menu);
-	free_menu(menu);
-	werase(wmenu);
-	wrefresh(wmenu);
-	del_panel(pmenu);
-	delwin(sub);
-	delwin(wmenu);
-	update_panels();
-	doupdate();
-	return x;
-}
 
 MENU *doctor_list(DMS (*clup)) //argument is a cleanup structure
 {
@@ -318,52 +264,6 @@ MENU *doctor_list(DMS (*clup)) //argument is a cleanup structure
 		return dmenu;
 }
 
-void medical_cards(int regid) //work with patient's medical cards
-{
-	int i = 0, j = 0;
-	int cards = get_card_amount(regid);
-	j = cards - 1;	
-
-	PANEL **pmedcards = malloc(sizeof(PANEL *) * cards);
-	WINDOW **wmedcards = malloc(sizeof(WINDOW *) * cards);
-
-	bind_windows(pmedcards, wmedcards, cards);
-
-	card_populate(pmedcards, wmedcards, regid);
-
-	update_panels();
-	doupdate();
-
-	while ((i = getch()) != KEY_F(1)) {
-		switch (i) {
-			case KEY_LEFT:
-			case 'h':
-				if (j > 0) 
-					top_panel(pmedcards[--j]);
-				break;
-			case 'l':
-			case KEY_RIGHT:
-				if (j < cards - 1)
-					top_panel(pmedcards[++j]);
-				break;
-			case 10:
-				show_card(*((int *)panel_userptr(pmedcards[j])));
-		}
-		update_panels();
-		doupdate();
-	}
-  			
-	i = 0;
-	while (i < cards) {
-		free((int *)panel_userptr(pmedcards[i]));
-		del_panel(pmedcards[i]);
-		wclear(wmedcards[i]);
-		wrefresh(wmedcards[i]);
-		delwin(wmedcards[i++]);
-	}
-
-	return;
-}
 void password_change(int regid) //function for appointment creation
 {
 	int i = 0;
@@ -493,144 +393,7 @@ void update_pass(int regid, char *new_pass)
 	sqlite3_finalize(stmt);
 }
 
-void show_card(int cardid)
-{
-	int t = 0, i = 0, j = 0;
-	int rc; //record count
-    const char *temp;
-	WINDOW *wmedc;
-	PANEL *pmedc;
-	sqlite3_stmt *stmt;
 
-	wmedc = newwin(20, 63, LINES / 2, (COLS - 40) / 2);
-	keypad(wmedc, TRUE);
-	pmedc = new_panel(wmedc);
-	update_panels();
-	doupdate();
-
-	sqlite3_prepare_v2(db, REQORD_AMOUNT_REQUEST, strlen(REQORD_AMOUNT_REQUEST), &stmt, NULL);
-	sqlite3_bind_int(stmt, 1, cardid);
-	sqlite3_step(stmt);
-	rc = sqlite3_column_int(stmt, 0);
-	sqlite3_finalize(stmt);
-
-	sqlite3_prepare_v2(db, MEDCARD_REQUEST, strlen(MEDCARD_REQUEST), &stmt, NULL);
-	sqlite3_bind_int(stmt, 1, cardid);
-	sqlite3_step(stmt);
-
-	do {
-DRAW:			werase(wmedc);	
-				box(wmedc, 0, 0);
-				temp = sqlite3_column_text(stmt, 0);
-				t = temp[0];
-				mvwprintw(wmedc, 2, 3, "Тип записи: %s", 
-						t == 'V' ? "Визит": (t == 'T' ? "Лечение": "Анализы"));
-				mvwprintw(wmedc, 3, 3, "Таб. номер врача: %s", sqlite3_column_text(stmt, 1));
-				mvwprintw(wmedc, 4, 3, "ФИО отвественного врача: %s", sqlite3_column_text(stmt, 2));
-				mvwprintw(wmedc, 5, 3, "Должность врача: %s", sqlite3_column_text(stmt, 3));
-				mvwprintw(wmedc, 6, 3, "Дата внесения записи: %s", sqlite3_column_text(stmt, 5));
-				mvwprintw(wmedc, 7, 3, "%s: %s", 
-						t == 'V' ? "Цель визита": (t == 'T' ? "Заболевание": "Вид анализов"), 
-						sqlite3_column_text(stmt, 6));
-				mvwprintw(wmedc, 8, 3, "%s %s", 
-						t == 'V' ? "": (t == 'T' ? "Назначенное лечение:": "Результаты анализов:"), 
-						sqlite3_column_text(stmt, 7));
-				mvwprintw(wmedc, 18, 30, "%d/%d", i + 1, rc);
-				while ((t = wgetch(wmedc)) != KEY_F(1)) 
-					switch (t) {
-						case 'l':
-						case KEY_RIGHT:
-							if (sqlite3_step(stmt) == SQLITE_DONE) {
-								sqlite3_reset(stmt);
-								for (int k = 0; k <= i; ++k)
-									sqlite3_step(stmt);
-							}
-							else {
-								++i;
-								goto DRAW;
-
-							}
-							break;
-						case 'h':
-						case KEY_LEFT:
-							if (0 == i)
-								break;
-							sqlite3_reset(stmt);
-							for (j = 0; j < i; ++j) {
-								sqlite3_step(stmt);
-							}
-							i = j - 1;
-							goto DRAW; 
-					}
-				break;
-	} while(TRUE); 
-	sqlite3_finalize(stmt);
-	delwin(wmedc);
-	del_panel(pmedc);
-	update_panels();
-	doupdate();
-	return;
-}
-
-/* utility functions */
-
-void bind_windows(PANEL **pmedcards, WINDOW **wmedcards, int cards) 
-{
-	int height = 15, width = 40, ypos = LINES - 20, xpos = COLS - 45;
-	int i = 0;
-
-	while (i < cards) {
-		wmedcards[i] = newwin(height, width, ypos + 2 * i, xpos + 2 * i);
-		box(wmedcards[i++], 0, 0);
-	}
-
-	i = 0;
-	while (i < cards) {
-		pmedcards[i] = new_panel(wmedcards[i]);
-		i++;
-	}
-}
-
-int get_card_amount(int regid)
-{
-	int amount = 7;	
-	sqlite3_stmt *stmt;
-	sqlite3_prepare_v2(db, CARD_AMOUNT_REQUEST, strlen(CARD_AMOUNT_REQUEST), &stmt, NULL);
-	sqlite3_bind_int(stmt, 1, regid);
-	sqlite3_step(stmt);
-	amount = sqlite3_column_int(stmt, 0);
-	sqlite3_finalize(stmt);
-	return amount;
-}	
-
-void card_populate(PANEL **pmedcards, WINDOW **wmedcards, int regid)
-{
-	int i = 0, *userptr;
-	const char *sql = "SELECT * FROM patient_medcard where regid = ?";
-
-	sqlite3_stmt *stmt;
-
-	sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, NULL);
-	sqlite3_bind_int(stmt, 1, regid);
-
-	while(sqlite3_step(stmt) != SQLITE_DONE) {
-		mvwprintw(wmedcards[i], 1, 2, "Карта № MC3070%d", sqlite3_column_int(stmt, 1));
-		mvwaddch(wmedcards[i], 2, 0, ACS_LTEE);
-		mvwhline(wmedcards[i], 2, 1, ACS_HLINE, 38);
-		mvwaddch(wmedcards[i], 2, 39, ACS_RTEE);
-		mvwprintw(wmedcards[i], 4, 2, "ФИО: %s", sqlite3_column_text(stmt, 2)); 
-		mvwprintw(wmedcards[i], 5, 2, "Дата заведения: %s", sqlite3_column_text(stmt, 3)); 
-		mvwprintw(wmedcards[i], 6, 2, "Тип медкарты: %s", sqlite3_column_text(stmt, 4)); 
-		mvwprintw(wmedcards[i], 7, 2, "Количество записей: %s", sqlite3_column_text(stmt, 5)); 
-
-		userptr = malloc(sizeof(int));
-		*userptr = sqlite3_column_int(stmt, 1);
-
-		set_panel_userptr(pmedcards[i], userptr);
-		++i;
-	}
-	sqlite3_finalize(stmt);
-}
 
 void free_ms(DMS clup)
 {

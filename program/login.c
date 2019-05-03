@@ -74,19 +74,29 @@ user_t login(int *regid)
 				break;
 			case 10:
 				tbuf[tn] = '\0';
-				if (pass_verify(field_buffer(fields[0], 0), tbuf)) {
-					mvprintw(LINES - 5, (COLS - strlen(LOG_INCORRECT) / 2) / 2, LOG_INCORRECT);
-					refresh();
-					continue;
-				}
 				switch(field_buffer(fields[0], 0)[0]) {
 					case 'P':
+						if (pass_verify(field_buffer(fields[0], 0), tbuf, PASS_REQUEST)) {
+							mvprintw(LINES - 5, (COLS - strlen(LOG_INCORRECT) / 2) / 2, LOG_INCORRECT);
+							refresh();
+							continue;
+						}
 						ret_val = PATIENT;
 						break;
 					case 'D':
+						if (pass_verify(field_buffer(fields[0], 0), tbuf, PASS_REQUEST_D)) {
+							mvprintw(LINES - 5, (COLS - strlen(LOG_INCORRECT) / 2) / 2, LOG_INCORRECT);
+							refresh();
+							continue;
+						}
 						ret_val = DOCTOR;
 						break;
 					case 'R':
+						if (pass_verify(field_buffer(fields[0], 0), tbuf, PASS_REQUEST_D)) {
+							mvprintw(LINES - 5, (COLS - strlen(LOG_INCORRECT) / 2) / 2, LOG_INCORRECT);
+							refresh();
+							continue;
+						}
 						ret_val = REGISTRY;
 						break;
 					default:
@@ -124,20 +134,20 @@ int get_regid(char *login)
 }
 
 
-int pass_verify(char *login, char *pass)
+int pass_verify(char *login, char *pass, char *sql)
 {
 	int regid, i = 1;
 	while (login[i++] == '0');
 	regid = atoi(login + (--i));
-	return authenticate(regid, pass);
+	return authenticate(regid, pass, sql);
 }
 
-int authenticate(int regid, char *pass)
+int authenticate(int regid, char *pass, char *sql)
 {
 	int rv;
 	sqlite3_stmt *stmt;
 	const char *tail;
-	sqlite3_prepare_v2(db, PASS_REQUEST, strlen(PASS_REQUEST), &stmt, &tail);
+	sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, &tail);
 	sqlite3_bind_int(stmt, 1, regid);
 	sqlite3_bind_text(stmt, 2, pass, strlen(pass), SQLITE_TRANSIENT);
 	if (sqlite3_step(stmt) == SQLITE_ROW)
