@@ -1,5 +1,6 @@
 #include <patient.h>
 
+int inside (char (*array)[50], char *value, int size);
 
 void patient_interface(int regid) // the boss function to manage the view of interface
 {
@@ -89,22 +90,44 @@ void init_menu(ITEM ***some_items, char **choices, size_t n_choices) // general 
 void appointment(int regid) //function for appointment creation
 {
 	int tabid = timetable(1);
-	int i = 0;
+	int i = 0, dos = 0;
 	time_t now = time(NULL);	
-	char *days[8];
+	char *days[8], tarray[100];
 	const int sec_in_day = 86400;
-	for (int i = 0; i < 7; ++i) {
-		days[i] = calloc(200, 1);	
-		now += sec_in_day;
-		strftime(days[i], 199, "%d.%m.%Y %A", localtime(&now));
-	}
-	days[7] = NULL;
-	int choice = show_menu(days, 8, "Выберите дату записи");
-	char *sql = "SELECT vacant_time(?, ?)";
+	char *sql = "SELECT weekday FROM timetable WHERE tabid = ? AND shiftst IS NULL";
 	sqlite3_stmt *stmt;
 	sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, NULL);
 	sqlite3_bind_int(stmt, 1, tabid);
-	char temp[5000] = {0};
+	char dayoffs[7][50];
+	for (dos = 0; sqlite3_step(stmt) != SQLITE_DONE; ++dos) {
+		strcpy(dayoffs[dos], sqlite3_column_text(stmt, 0));
+		strip(dayoffs[dos]);
+	}
+
+	now += sec_in_day;
+	for (int i = 0; i < 7; ++i) {
+		days[i] = calloc(200, 1);	
+		strftime(tarray, 98, "%A", localtime(&now));
+		if (dos && inside(dayoffs, tarray, dos)) 
+			strcpy(days[i], "Выходной день");
+		else 
+			strftime(days[i], 199, "%d.%m.%Y %A", localtime(&now));
+		now += sec_in_day;
+	}
+	sqlite3_finalize(stmt);
+	days[7] = NULL;
+	int choice;
+	while (TRUE) { 
+		choice = show_menu(days, 8, "Выберите дату записи", 10, COLS - 80);
+		if (strcmp(days[choice], "Выходной день"))
+			break;
+	}
+
+	sql = "SELECT vacant_time(?, ?)";
+	sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, NULL);
+	sqlite3_bind_int(stmt, 1, tabid);
+	char temp[500] = {0};
+	char backup[500] = {0};
 	now = time(NULL);	
 	now += sec_in_day * (choice + 1);
 	strftime(temp, 99, "%Y-%m-%d", localtime(&now));
@@ -117,8 +140,9 @@ void appointment(int regid) //function for appointment creation
 		vacant_times[i + 1] = NULL;
 		sprintf(vacant_times[i], " %s", ((char**)sqlite3_column_blob(stmt, 0))[i]);
 	}
+	strcpy(backup, temp);
 	sqlite3_finalize(stmt);
-	choice = show_menu(vacant_times, i + 1, "ВРЕМЯ ЗАПИСИ");
+	choice = show_menu(vacant_times, i + 1, "ВРЕМЯ ЗАПИСИ", -1, -1);
 	sql = "INSERT INTO appointment values(?, ?, ?)";
 	sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, NULL);
 	sqlite3_bind_int(stmt, 1, tabid);
@@ -132,10 +156,19 @@ void appointment(int regid) //function for appointment creation
 		sqlite3_bind_int(stmt, 1, regid);
 		sqlite3_bind_int(stmt, 2, tabid);
 		sqlite3_step(stmt); 
-		sprintf(temp, "\tУ вас уже есть запись к врачу\n\t%s\n\tна %s",
+		sprintf(temp, "\tУ вас уже есть запись к врачу\n\t%s\n\tна %s\n\tЗаменить запись?",
 				sqlite3_column_text(stmt, 0),
 				sqlite3_column_text(stmt, 1));
-		message_box(temp, "Произошла ошибка", -1, -1, 4, 30);
+		if (message_box(temp, "Произошла ошибка", -1, -1, 8, 40, 1)) {
+			sqlite3_finalize(stmt);
+			sql = "UPDATE appointment SET recdatetime = ? where regid = ? and tabid = ?";
+			sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, NULL);
+			sqlite3_bind_int(stmt, 3, tabid);
+			sqlite3_bind_int(stmt, 2, regid);
+			sqlite3_bind_text(stmt, 1, strcat(backup, vacant_times[choice]), -1, SQLITE_STATIC);
+			sqlite3_step(stmt); 
+			message_box("Запись успешно обновлена", "Обновление записи", -1, -1, 3, 40, 0);
+		}
 	}
 	else {
 		sqlite3_finalize(stmt);
@@ -148,7 +181,7 @@ void appointment(int regid) //function for appointment creation
 		sprintf(temp, "\tЗапись к врачу\n\t%s\n\tна %s создана.",
 				sqlite3_column_text(stmt, 0),
 				sqlite3_column_text(stmt, 1));
-		message_box(temp, "Запись создана", -1, -1, 4, 30);
+		message_box(temp, "Запись создана", -1, -1, 4, 40, 0);
 	}
 	sqlite3_finalize(stmt);
 	for (int i = 0; vacant_times[i]; ++i) 
@@ -163,16 +196,25 @@ int timetable(int mode) //doctor's timetable view
 	PANEL *dpanel;
 	DMS cleanup = NULL;
 	MENU *dmenu = doctor_list(&cleanup);
-	dwindow = newwin(25, 49, 10, 60);
+	dwindow = newwin(23, 49, 10, 60);
 	dpanel = new_panel(dwindow);
 	box(dwindow, 0, 0);
 	
+	mvwaddch(dwindow, 2, 0, ACS_LTEE);
+	mvwhline(dwindow, 2, 1, ACS_HLINE, 47);
+	mvwaddch(dwindow, 2, 48, ACS_RTEE);
+
+	wattron(dwindow, COLOR_PAIR(GREEN));
+	mvwprintw(dwindow, 1, 18, "СПИСОК ВРАЧЕЙ");
+	wattroff(dwindow, COLOR_PAIR(GREEN));
+
 	set_menu_win(dmenu, dwindow); 
-	set_menu_sub(dmenu, derwin(dwindow, 22, 45, 3, 1)); 
+	set_menu_sub(dmenu, derwin(dwindow, 17, 45, 4, 2)); 
 	post_menu(dmenu);
 	keypad(dwindow, TRUE); 
 	update_panels();
 	doupdate();
+	int retval = 0;
 	
 	while((i = wgetch(dwindow)) != KEY_F(2))
 	{   switch(i)
@@ -185,11 +227,14 @@ int timetable(int mode) //doctor's timetable view
 			case 10:
 				if (mode == 0)
 					print_timetable(*(int *)(item_userptr(current_item(dmenu))));
-				else if (mode == 1)
-					return *(int *)(item_userptr(current_item(dmenu)));
+				else if (mode == 1) {
+					retval = *(int *)(item_userptr(current_item(dmenu)));
+					goto EXIT;
+				}
 				break;
 		}
 	}	
+EXIT:
 	free_ms(cleanup);
 	free_menu(dmenu);
 	del_panel(dpanel);
@@ -197,19 +242,20 @@ int timetable(int mode) //doctor's timetable view
 	delwin(dwindow);
 	update_panels();
 	doupdate();
-	return 0;
+	return retval;
 }
 
 
 void print_timetable(int tabid)
 {
-	char *sql = "SELECT weekday, get_time(shiftst), get_time(shiftend), get_time(break) FROM timetable where tabid = ? ORDER BY daynum";
-	char *days[8];
+	char *sql = "SELECT weekday, get_time(shiftst), get_time(shiftend), get_time(break) FROM timetable where tabid = ? and shiftst IS NOT NULL ORDER BY daynum";
+	char *days[8] = {NULL};
 	sqlite3_stmt *stmt;
 	sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, NULL);
 	sqlite3_bind_int(stmt, 1, tabid);
 
-	for (int i = 0; sqlite3_step(stmt) != SQLITE_DONE; ++i) {
+	int i = 0;
+	for (i = 0; sqlite3_step(stmt) != SQLITE_DONE; ++i) {
 		days[i] = calloc(200, 1);
 		sprintf(days[i], "%s %8s%8s%8s",
 				sqlite3_column_text(stmt, 0),
@@ -217,9 +263,8 @@ void print_timetable(int tabid)
 				sqlite3_column_text(stmt, 2),
 				sqlite3_column_text(stmt, 3));
 	}
-	days[7] = NULL;
-	char *message = "\tДень\t Начало\t Конец \tПерерыв";
-	show_menu(days, 8, message);
+	char *message = "\tДень\t\tНачало\t Конец \tПерерыв";
+	show_menu(days, i + 1, message, -1, -1);
 	for (int i = 0; i < 7; ++i)
 		free(days[i]);
 	sqlite3_finalize(stmt);
@@ -408,4 +453,10 @@ void free_ms(DMS clup)
 	}
 }
 
-
+int inside (char (*array)[50], char *value, int size)
+{
+	for (int i = 0; i < size; ++i)
+		if (!strcmp(array[i], value))
+			return 1;
+	return 0;
+}

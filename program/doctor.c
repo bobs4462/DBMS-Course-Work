@@ -15,7 +15,7 @@ SEARCH:
 	sqlite3_bind_text(stmt, 1, mask, -1, SQLITE_STATIC);
 	char **patients = NULL;
 
-	int i = 0;
+	int i = 0, repeat = 0;
 	for (i = 0; sqlite3_step(stmt) != SQLITE_DONE; ++i) {
 		patients = realloc(patients, sizeof(char *) * (i + 2));
 		patients[i] = malloc(500);
@@ -29,7 +29,7 @@ SEARCH:
 	}
 
 	patients[i] = NULL;
-	int r = show_menu(patients, i + 1, "Выберите пациента!");
+	int r = show_menu(patients, i + 1, "Выберите пациента!", -1, -1);
 	sqlite3_reset(stmt);
 	for (int j = 0; (sqlite3_step(stmt) != SQLITE_DONE) && (j < r); ++j);
 	int regid = sqlite3_column_int(stmt, 0);
@@ -41,11 +41,12 @@ SEARCH:
 		"Назначение лечения",
 		"Выписка рецепта",
 		"Выдача листка нетрудоспособности",
+		"Повторить поиск",
 		"Выход",
 		NULL
 	};
-	while(TRUE)
-		switch (show_menu(options, 8, "Выберите действие")) {
+	while(TRUE) {
+		switch (show_menu(options, 9, "Выберите действие", 4, COLS - 70)) {
 			case 0:
 				medical_cards(regid, 0);
 				break;
@@ -64,15 +65,27 @@ SEARCH:
 			case 5:
 				sick_leave_issue(regid);
 				break;
+			case 6:
+				repeat = 1;
+				goto EXIT;
+				break;
 			default:
-				exit(0);
+				repeat = 0;
+				goto EXIT;
 		}
+	}
 
+EXIT:
+	del_panel(pat->pan);
 	delwin(pat->sub);
 	delwin(pat->win);
-	del_panel(pat->pan);
-	refresh();
-	getch();
+	update_panels();
+	doupdate();
+	if (repeat) {
+		repeat = 0;
+		goto SEARCH;
+	}
+	return;
 }
 
 int annalysis_create(int tabid, int regid)
@@ -101,7 +114,7 @@ int annalysis_create(int tabid, int regid)
 		sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, NULL);
 		sqlite3_step(stmt);
 		sprintf(msg, "Анализ № %d успешно назначен", sqlite3_column_int(stmt, 0));
-		message_box(msg, "Номер анализа", -1, -1, 4, 30);
+		message_box(msg, "Номер анализа", -1, -1, 4, 35);
 	}
 
 	sqlite3_finalize(stmt);
@@ -128,7 +141,7 @@ int annalysis_update(void)
 	sqlite3_bind_text(stmt, 1, fields[1], -1, SQLITE_STATIC);
 	if (sqlite3_step(stmt) == SQLITE_DONE) {
 		sprintf(msg, "Анализ № %d успешно обновлен", anid);
-		message_box(msg, "Обновление анализа", -1, -1, 4, 30);
+		message_box(msg, "Обновление анализа", -1, -1, 4, 35);
 	}
 	sqlite3_finalize(stmt);
 	free(fields[0]);
@@ -163,7 +176,7 @@ int cure_create(int regid, int tabid)
 		sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, NULL);
 		sqlite3_step(stmt);
 		sprintf(msg, "Лечение № %d успешно добавлено", sqlite3_column_int(stmt, 0));
-		message_box(msg, "Создание Лечения", -1, -1, 4, 30);
+		message_box(msg, "Создание Лечения", -1, -1, 4, 40);
 	}
 	sqlite3_finalize(stmt);
 	free(fields[0]);
@@ -193,7 +206,7 @@ int receipt_issue(int tabid)
 		sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, NULL);
 		sqlite3_step(stmt);
 		sprintf(msg, "Рецепт № %d успешно добавлен", sqlite3_column_int(stmt, 0));
-		message_box(msg, "Создание рецепта", -1, -1, 4, 30);
+		message_box(msg, "Создание рецепта", -1, -1, 4, 40);
 	}
 	sqlite3_finalize(stmt);
 	free(fields[0]);

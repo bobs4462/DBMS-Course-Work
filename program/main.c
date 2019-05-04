@@ -58,14 +58,14 @@ EXIT:
 
 void get_time(sqlite3_context* ctx, int nargs, sqlite3_value** values)
 {
-	const char *msg;
+	char *msg = calloc(100, 1);
 	int minutes = sqlite3_value_int(values[0]);
-	msg = sqlite3_mprintf("%s%d:%s%d",
+	sprintf(msg, "%s%d:%s%d",
 			minutes / 60 > 9 ? "" : "0",
 			minutes / 60,
-			minutes % 60 > 9 ? "" : "0",
+			minutes % 60 ? "" : "0",
 			minutes % 60);
-	sqlite3_result_text(ctx, msg, strlen(msg), sqlite3_free);
+	sqlite3_result_text(ctx, msg, strlen(msg), SQLITE_STATIC);
 }
 
 void vacant_time(sqlite3_context* ctx, int nargs, sqlite3_value** values)
@@ -75,7 +75,7 @@ void vacant_time(sqlite3_context* ctx, int nargs, sqlite3_value** values)
 	int i = 0, j = 0, flag = 0;
 	sqlite3_stmt *stmt;
 	char *sql = "SELECT strftime('%H:%M', recdatetime) FROM appointment WHERE tabid = ? \
-		   AND strftime('%d-%m-%Y', recdatetime) = strftime('%d-%m-%Y', ?)";
+		   AND strftime('%Y-%m-%d', recdatetime) = ?";
 	sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, NULL);
 	sqlite3_bind_int(stmt, 1, sqlite3_value_int(values[0]));
 	sqlite3_bind_text(stmt, 2, sqlite3_value_text(values[1]), -1, SQLITE_STATIC);
@@ -86,10 +86,14 @@ void vacant_time(sqlite3_context* ctx, int nargs, sqlite3_value** values)
 	}
 	sqlite3_finalize(stmt);
 	sql = "SELECT get_time(shiftst), get_time(shiftend), get_time(break) FROM \
-		   timetable where tabid = ? AND (daynum - 1) = CAST(strftime('%w', ?) AS INTEGER)";
+		   timetable where tabid = ? AND daynum  = case \
+		   when CAST(strftime('%w', ?) as INTEGER) \
+		   then CAST(strftime('%w', ?) as INTEGER) \
+		   else 7 end;";
 	sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, NULL);
 	sqlite3_bind_int(stmt, 1, sqlite3_value_int(values[0]));
 	sqlite3_bind_text(stmt, 2, sqlite3_value_text(values[1]), -1, SQLITE_STATIC);
+	sqlite3_bind_text(stmt, 3, sqlite3_value_text(values[1]), -1, SQLITE_STATIC);
 	sqlite3_step(stmt);
 	char start[50], end[50];
 	strcpy(start, sqlite3_column_text(stmt, 0));
@@ -127,7 +131,7 @@ void vacant_time(sqlite3_context* ctx, int nargs, sqlite3_value** values)
 		flag = 0;
 		sqlite3_reset(stmt);
 		sqlite3_bind_text(stmt, 1, start, -1, SQLITE_STATIC);
-		sprintf(mod, "+%d minutes", ++w * 20);
+		sprintf(mod, "+%d minutes", ++w * 30);
 		sqlite3_bind_text(stmt, 2, mod, -1, SQLITE_STATIC);
 		sqlite3_step(stmt);
 	}

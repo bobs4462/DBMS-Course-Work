@@ -1,9 +1,7 @@
 #include <common.h>
 
-void strip(char *text);
 int trim (char *array);
-char *space_wrap(const char *text, int maxlen);
-int message_box(const char *text, char *header, int y, int x, int h, int w) 
+int message_box(const char *text, char *header, int y, int x, int h, int w, int buttons) 
 {
 	WINDOW *message_win, *message_sub;
 	y = y > 0 ? y : (LINES / 2 - (h + 4) / 2);
@@ -21,19 +19,61 @@ int message_box(const char *text, char *header, int y, int x, int h, int w)
 		offset = 3;
 	}
 	message_sub = derwin(message_win, h, w, offset, 2);
-	mvwprintw(message_sub, h / 2, 1, text);
+	mvwprintw(message_sub, h / 2 - 1, 1, text);
 	box(message_win, 0, 0);
+	ITEM **ok = malloc(sizeof(ITEM *) * 3);
+	MENU *response;
+	if (buttons) {
+		char *opts[3] = {
+			"ДА",
+			"НЕТ",
+			NULL
+		};
+		ok[0] = new_item(opts[0], NULL);
+		ok[1] = new_item(opts[1], NULL);
+		ok[2] = NULL;
+		response = new_menu(ok);
+		set_menu_format(response, 1, 2);
+		set_menu_win(response, message_win);
+		set_menu_sub(response, derwin(message_win, 1, 10, h + 2, (w - 6) / 2));
+		post_menu(response);
+	}
+
+	int retval = 0;
 	update_panels();
 	doupdate();
-	wgetch(message_win);
+	keypad(message_win, TRUE);
+	if (buttons) 
+	while((y = wgetch(message_win)) != KEY_F(2))
+	{
+		switch(y)
+		{
+			case KEY_RIGHT:
+				menu_driver(response, REQ_RIGHT_ITEM);
+				break;
+			case KEY_LEFT:
+				menu_driver(response, REQ_LEFT_ITEM);
+				break;
+			case 10:
+				if (current_item(response) == ok[0])
+					retval = 1;
+				unpost_menu(response);
+				free_menu(response);
+				goto CLEANUP;
+		}
+	}
+	else
+		wgetch(message_win);
+CLEANUP:
 	del_panel(message_pan);
 	delwin(message_sub);
 	delwin(message_win);
 	update_panels();
 	doupdate();
+	return retval;
 }
 
-int show_menu(char **items, int sz, char *msg)
+int show_menu(char **items, int sz, char *msg, int yc, int xc)
 {
 	int x, y;
 	MENU *menu;
@@ -49,7 +89,9 @@ int show_menu(char **items, int sz, char *msg)
 	itptr[sz - 1] = NULL;
 	menu = new_menu(itptr);
 	scale_menu(menu, &y, &x);
-	wmenu = newwin(y + 5, x + 12, (LINES - y - 8) / 2, (COLS - x - 16) / 2);
+	yc = yc > 0 ? yc : (LINES - y - 8) / 2;
+	xc = xc > 0 ? xc : (COLS - x - 16) / 2;
+	wmenu = newwin(y + 5, x + 12, yc, xc);
 	keypad(wmenu, TRUE);
 	set_menu_win(menu, wmenu);	
 	set_menu_sub(menu, sub = derwin(wmenu, y, x , 4, 6));
@@ -58,7 +100,7 @@ int show_menu(char **items, int sz, char *msg)
 	mvwaddch(wmenu, 2, 0, ACS_LTEE);
 	mvwhline(wmenu, 2, 1, ACS_HLINE, x + 10);
 	mvwaddch(wmenu, 2, x + 11, ACS_RTEE);
-	mvwprintw(wmenu, 1, 7, msg);
+	mvwprintw(wmenu, 1, (x - strlen(msg) / 2) / 2, msg);
 	wrefresh(wmenu);
 	pmenu = new_panel(wmenu);
 	update_panels();
@@ -627,3 +669,4 @@ int frame_field(WINDOW *win, int ulcy, int ulcx, int lrcy, int lrcx)
 	mvwvline(win, ulcy + 1, lrcx, ACS_VLINE, lrcy - ulcy - 1);
 	return 0;
 }
+
