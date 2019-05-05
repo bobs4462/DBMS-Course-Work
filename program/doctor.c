@@ -2,37 +2,9 @@
 
 void doctor_interface(int tabid)
 {
-	char mask[1000];
-	char *s;
-	sqlite3_stmt *stmt;
-
-	char *sql = "SELECT regid, fio FROM patient WHERE fio LIKE ?";
+	int regid, repeat = 0;
 SEARCH:
-	sprintf(mask, "%%%s%%", s = search("Поиск пациента"));
-	free(s);
-	refresh();
-	sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, NULL);
-	sqlite3_bind_text(stmt, 1, mask, -1, SQLITE_STATIC);
-	char **patients = NULL;
-
-	int i = 0, repeat = 0;
-	for (i = 0; sqlite3_step(stmt) != SQLITE_DONE; ++i) {
-		patients = realloc(patients, sizeof(char *) * (i + 2));
-		patients[i] = malloc(500);
-		sprintf(patients[i], "%4d %-s", 
-				sqlite3_column_int(stmt, 0),
-				sqlite3_column_text(stmt, 1));
-	}
-	if (!i) {
-		message_box("Пациентов не найдено", "УПС!!!", -1, -1, 3, 25);
-		goto SEARCH;
-	}
-
-	patients[i] = NULL;
-	int r = show_menu(patients, i + 1, "Выберите пациента!", -1, -1);
-	sqlite3_reset(stmt);
-	for (int j = 0; (sqlite3_step(stmt) != SQLITE_DONE) && (j < r); ++j);
-	int regid = sqlite3_column_int(stmt, 0);
+	regid = patient_search();
 	struct win_pan *pat = patient_info(regid);
 	char *options[] = {
 		"Просмотр карт пациента",
@@ -91,7 +63,7 @@ EXIT:
 int annalysis_create(int tabid, int regid)
 {
 	sqlite3_stmt *stmt;
-	message_box("Выберите карту пациента", NULL, 5, COLS - 50, 2, 25);	
+	message_box("Выберите карту пациента", NULL, 5, COLS - 50, 2, 25, 0);	
 	int cardid = medical_cards(regid, 1);
 	char *descriptions[] = {
 		"Вид анализов",
@@ -102,7 +74,7 @@ int annalysis_create(int tabid, int regid)
 	//char today[21];
 	//time_t now = time(NULL);
 	//strftime(today, 20, "%Y-%m-%d", localtime(&now));
-	char **fields = get_input("Назначение анализов", descriptions, 1, 5, 35);
+	char **fields = get_input("Назначение анализов", descriptions, 1, 5, 35, NULL);
 	char *sql = "INSERT INTO analysis(tabid, cardid, type) values(?, ?, ?)";
 	sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, NULL);
 	sqlite3_bind_int(stmt, 1, tabid);
@@ -111,10 +83,10 @@ int annalysis_create(int tabid, int regid)
 	if (sqlite3_step(stmt) == SQLITE_DONE) {
 		sqlite3_finalize(stmt);
 		sql = "SELECT last_insert_rowid()"; 
-		sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, NULL);
+		sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, NULL); 
 		sqlite3_step(stmt);
 		sprintf(msg, "Анализ № %d успешно назначен", sqlite3_column_int(stmt, 0));
-		message_box(msg, "Номер анализа", -1, -1, 4, 35);
+		message_box(msg, "Номер анализа", -1, -1, 4, 35, 0);
 	}
 
 	sqlite3_finalize(stmt);
@@ -132,7 +104,7 @@ int annalysis_update(void)
 		"Результат анализов",
 	};
 
-	char **fields = get_input("Заполните поля", descriptions, 2, 4, 40);
+	char **fields = get_input("Заполните поля", descriptions, 2, 4, 40, NULL);
 	char *sql = "UPDATE analysis SET result = ? where anid = ?";
 	char msg[100];
 	int anid = atoi(fields[0]);
@@ -141,7 +113,7 @@ int annalysis_update(void)
 	sqlite3_bind_text(stmt, 1, fields[1], -1, SQLITE_STATIC);
 	if (sqlite3_step(stmt) == SQLITE_DONE) {
 		sprintf(msg, "Анализ № %d успешно обновлен", anid);
-		message_box(msg, "Обновление анализа", -1, -1, 4, 35);
+		message_box(msg, "Обновление анализа", -1, -1, 4, 35, 0);
 	}
 	sqlite3_finalize(stmt);
 	free(fields[0]);
@@ -153,7 +125,7 @@ int annalysis_update(void)
 int cure_create(int regid, int tabid)
 {
 	sqlite3_stmt *stmt;
-	message_box("Выберите карту пациента", NULL, 5, COLS - 50, 2, 25);	
+	message_box("Выберите карту пациента", NULL, 5, COLS - 50, 2, 25, 0);	
 	int cardid = medical_cards(regid, 1);
 
 	char *descriptions[] = {
@@ -161,7 +133,7 @@ int cure_create(int regid, int tabid)
 		"Лечение",
 	};
 
-	char **fields = get_input("Заполните поля", descriptions, 2, 5, 50);
+	char **fields = get_input("Заполните поля", descriptions, 2, 5, 50, NULL);
 	char *sql = "INSERT INTO treatment(tabid, cardid, illness, treatment)\
 				 values(?, ?, ?, ?)";
 	char msg[100];
@@ -176,7 +148,7 @@ int cure_create(int regid, int tabid)
 		sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, NULL);
 		sqlite3_step(stmt);
 		sprintf(msg, "Лечение № %d успешно добавлено", sqlite3_column_int(stmt, 0));
-		message_box(msg, "Создание Лечения", -1, -1, 4, 40);
+		message_box(msg, "Создание Лечения", -1, -1, 4, 40, 0);
 	}
 	sqlite3_finalize(stmt);
 	free(fields[0]);
@@ -193,7 +165,7 @@ int receipt_issue(int tabid)
 		"Лекарства",
 	};
 
-	char **fields = get_input("Заполните поля", descriptions, 1, 5, 50);
+	char **fields = get_input("Заполните поля", descriptions, 1, 5, 50, NULL);
 	char *sql = "INSERT INTO receipt(tabid, medicine)\
 				 values(?, ?)";
 	char msg[100];
@@ -206,7 +178,7 @@ int receipt_issue(int tabid)
 		sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, NULL);
 		sqlite3_step(stmt);
 		sprintf(msg, "Рецепт № %d успешно добавлен", sqlite3_column_int(stmt, 0));
-		message_box(msg, "Создание рецепта", -1, -1, 4, 40);
+		message_box(msg, "Создание рецепта", -1, -1, 4, 40, 0);
 	}
 	sqlite3_finalize(stmt);
 	free(fields[0]);
@@ -223,7 +195,7 @@ int sick_leave_issue(int regid)
 		"Место назначения"
 	};
 
-	char **fields = get_input("Создание больничного", descriptions, 3, 1, 30);
+	char **fields = get_input("Создание больничного", descriptions, 3, 1, 30, NULL);
 	char *sql = "INSERT INTO sickleave(regid, stdate, endate, destn)\
 				 values(?, ?, ?, ?)";
 	char msg[100];
@@ -238,7 +210,7 @@ int sick_leave_issue(int regid)
 		sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, NULL);
 		sqlite3_step(stmt);
 		sprintf(msg, "Больничный № %d успешно создан", sqlite3_column_int(stmt, 0));
-		message_box(msg, "Выписка листа нетрудоспособности", -1, -1, 4, 30);
+		message_box(msg, "Выписка листа нетрудоспособности", -1, -1, 4, 30, 0);
 	}
 	sqlite3_finalize(stmt);
 	free(fields[0]);
@@ -246,4 +218,41 @@ int sick_leave_issue(int regid)
 	free(fields[2]);
 	free(fields);
 	return 0;
+}
+
+int patient_search(void)
+{
+	char mask[1000];
+	char *s;
+	sqlite3_stmt *stmt;
+
+	char *sql = "SELECT regid, fio FROM patient WHERE fio LIKE ?";
+SEARCH:
+	sprintf(mask, "%%%s%%", s = search("Поиск пациента"));
+	free(s);
+	refresh();
+	sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, NULL);
+	sqlite3_bind_text(stmt, 1, mask, -1, SQLITE_STATIC);
+	char **patients = NULL;
+
+	int i = 0;
+	for (i = 0; sqlite3_step(stmt) != SQLITE_DONE; ++i) {
+		patients = realloc(patients, sizeof(char *) * (i + 2));
+		patients[i] = malloc(500);
+		sprintf(patients[i], "%4d %-s", 
+				sqlite3_column_int(stmt, 0),
+				sqlite3_column_text(stmt, 1));
+	}
+	if (!i) {
+		message_box("Пациентов не найдено", "УПС!!!", -1, -1, 3, 25, 0);
+		goto SEARCH;
+	}
+
+	patients[i] = NULL;
+	int r = show_menu(patients, i + 1, "Выберите пациента!", -1, -1);
+	sqlite3_reset(stmt);
+	for (int j = 0; (sqlite3_step(stmt) != SQLITE_DONE) && (j < r); ++j);
+	int regid = sqlite3_column_int(stmt, 0);
+	sqlite3_finalize(stmt);
+	return regid;
 }

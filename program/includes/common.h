@@ -25,7 +25,11 @@ void strip(char *text);
 int get_card_amount(int regid);
 void card_populate(PANEL **pmedcards, WINDOW **wmedcards, WINDOW **subs, int regid);
 struct win_pan *patient_info(int regid);
-char **get_input(char *msg, char **desc, int count, int height, int width); //intro message, field descriptions, field count, field height, field width
+char **get_input(char *msg, char **desc, int count, int height, int width, char **regexes); //intro message, field descriptions, field count, field height, field width
+int inside (char (*array)[50], char *value, int size);
+void appointment(int regid);//function for appointment creation
+int timetable(int mode); //doctor's timetable view
+int patient_search(void);
 
 #define MEDCARD_REQUEST "SELECT * FROM medicalcard where card GLOB '*00' || ?"
 #define CARD_AMOUNT_REQUEST "SELECT count(*) FROM medcard where regid = ?"

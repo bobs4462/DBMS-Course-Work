@@ -1,7 +1,5 @@
 #include <patient.h>
 
-int inside (char (*array)[50], char *value, int size);
-
 void patient_interface(int regid) // the boss function to manage the view of interface
 {
 	sqlite3_stmt *stmt;
@@ -118,7 +116,7 @@ void appointment(int regid) //function for appointment creation
 	days[7] = NULL;
 	int choice;
 	while (TRUE) { 
-		choice = show_menu(days, 8, "Выберите дату записи", 10, COLS - 80);
+		choice = show_menu(days, 8, "Выберите дату записи", -1, -1);
 		if (strcmp(days[choice], "Выходной день"))
 			break;
 	}
@@ -196,7 +194,7 @@ int timetable(int mode) //doctor's timetable view
 	PANEL *dpanel;
 	DMS cleanup = NULL;
 	MENU *dmenu = doctor_list(&cleanup);
-	dwindow = newwin(23, 49, 10, 60);
+	dwindow = newwin(23, 49, 10, (COLS - 50) / 2);
 	dpanel = new_panel(dwindow);
 	box(dwindow, 0, 0);
 	
@@ -263,7 +261,7 @@ void print_timetable(int tabid)
 				sqlite3_column_text(stmt, 2),
 				sqlite3_column_text(stmt, 3));
 	}
-	char *message = "\tДень\t\tНачало\t Конец \tПерерыв";
+	char *message = "День   Начало\t Конец \tПерерыв";
 	show_menu(days, i + 1, message, -1, -1);
 	for (int i = 0; i < 7; ++i)
 		free(days[i]);

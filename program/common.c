@@ -19,7 +19,7 @@ int message_box(const char *text, char *header, int y, int x, int h, int w, int 
 		offset = 3;
 	}
 	message_sub = derwin(message_win, h, w, offset, 2);
-	mvwprintw(message_sub, h / 2 - 1, 1, text);
+	mvwprintw(message_sub, h / 2 - 2, 0, text);
 	box(message_win, 0, 0);
 	ITEM **ok = malloc(sizeof(ITEM *) * 3);
 	MENU *response;
@@ -100,7 +100,7 @@ int show_menu(char **items, int sz, char *msg, int yc, int xc)
 	mvwaddch(wmenu, 2, 0, ACS_LTEE);
 	mvwhline(wmenu, 2, 1, ACS_HLINE, x + 10);
 	mvwaddch(wmenu, 2, x + 11, ACS_RTEE);
-	mvwprintw(wmenu, 1, (x - strlen(msg) / 2) / 2, msg);
+	mvwprintw(wmenu, 1, (x + 12 - strlen(msg) / 2) / 2, msg);
 	wrefresh(wmenu);
 	pmenu = new_panel(wmenu);
 	update_panels();
@@ -357,8 +357,8 @@ void show_card(int cardid)
 	PANEL *pmedc;
 	sqlite3_stmt *stmt;
 
-	wmedc = newwin(20, 80, LINES / 2, (COLS - 70) / 2);
-	sub = derwin(wmedc, 17, 72, 1, 3);
+	wmedc = newwin(15, 80, LINES / 2 - 1, (COLS - 70) / 2);
+	sub = derwin(wmedc, 13, 72, 1, 3);
 	box(wmedc, 0, 0);
 	keypad(wmedc, TRUE);
 	pmedc = new_panel(wmedc);
@@ -394,8 +394,8 @@ DRAW:			werase(sub);
 				mvwprintw(sub, y + 1, 0, "%s %s", 
 						t == 'V' ? "": (t == 'T' ? "Назначенное лечение:": "Результаты анализов:"), 
 						sqlite3_column_text(stmt, 7));
-				wmove(wmedc, 18, 36); wclrtoeol(wmedc);
-				mvwprintw(wmedc, 18, 36, "%d/%d", i + 1, rc);
+				wmove(sub, 11, 33); wclrtoeol(sub);
+				mvwprintw(sub, 12, 33, "%d/%d", i + 1, rc);
 				wrefresh(sub);
 				while ((t = wgetch(wmedc)) != 'q') 
 					switch (t) {
@@ -500,7 +500,7 @@ struct win_pan *patient_info(int regid)
 	return resp;
 }
 
-char **get_input(char *msg, char **desc, int count, int height, int width) //intro message, field descriptions, field count, field height, field width
+char **get_input(char *msg, char **desc, int count, int height, int width, char **regexes) //intro message, field descriptions, field count, field height, field width
 {
 	int x, y, d = 0, c = 0;
 	char buffer[count][10000], **retval;
@@ -525,6 +525,10 @@ char **get_input(char *msg, char **desc, int count, int height, int width) //int
 	set_field_buffer(fields[count], 0, "Ввод");
 	set_field_fore(fields[count], COLOR_PAIR(BLUE));
 	set_field_opts(fields[count], ~(O_AUTOSKIP | O_BLANK | O_EDIT));
+	if (regexes)
+		for (int i = 0; i < count; ++i) {
+			set_field_type(fields[i], TYPE_REGEXP, regexes[i]);
+		}
 	fields[count + 1] = NULL;
 	text_form = new_form(fields);
 	form_opts_off(text_form, O_BS_OVERLOAD);
