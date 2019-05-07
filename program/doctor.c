@@ -74,7 +74,7 @@ int annalysis_create(int tabid, int regid)
 	//char today[21];
 	//time_t now = time(NULL);
 	//strftime(today, 20, "%Y-%m-%d", localtime(&now));
-	char **fields = get_input("Назначение анализов", descriptions, 1, 5, 35, NULL);
+	char **fields = get_input("Назначение анализов", descriptions, 1, 5, 35, NULL, NULL, NULL);
 	char *sql = "INSERT INTO analysis(tabid, cardid, type) values(?, ?, ?)";
 	sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, NULL);
 	sqlite3_bind_int(stmt, 1, tabid);
@@ -104,7 +104,7 @@ int annalysis_update(void)
 		"Результат анализов",
 	};
 
-	char **fields = get_input("Заполните поля", descriptions, 2, 4, 40, NULL);
+	char **fields = get_input("Заполните поля", descriptions, 2, 4, 40, NULL, NULL, NULL);
 	char *sql = "UPDATE analysis SET result = ? where anid = ?";
 	char msg[100];
 	int anid = atoi(fields[0]);
@@ -133,7 +133,7 @@ int cure_create(int regid, int tabid)
 		"Лечение",
 	};
 
-	char **fields = get_input("Заполните поля", descriptions, 2, 5, 50, NULL);
+	char **fields = get_input("Заполните поля", descriptions, 2, 5, 50, NULL, NULL, NULL);
 	char *sql = "INSERT INTO treatment(tabid, cardid, illness, treatment)\
 				 values(?, ?, ?, ?)";
 	char msg[100];
@@ -165,7 +165,7 @@ int receipt_issue(int tabid)
 		"Лекарства",
 	};
 
-	char **fields = get_input("Заполните поля", descriptions, 1, 5, 50, NULL);
+	char **fields = get_input("Заполните поля", descriptions, 1, 5, 50, NULL, NULL, NULL);
 	char *sql = "INSERT INTO receipt(tabid, medicine)\
 				 values(?, ?)";
 	char msg[100];
@@ -195,7 +195,7 @@ int sick_leave_issue(int regid)
 		"Место назначения"
 	};
 
-	char **fields = get_input("Создание больничного", descriptions, 3, 1, 30, NULL);
+	char **fields = get_input("Создание больничного", descriptions, 3, 1, 30, NULL, NULL, NULL);
 	char *sql = "INSERT INTO sickleave(regid, stdate, endate, destn)\
 				 values(?, ?, ?, ?)";
 	char msg[100];

@@ -149,10 +149,12 @@ void appointment(int regid) //function for appointment creation
 	if (sqlite3_step(stmt) == SQLITE_CONSTRAINT) {
 		sqlite3_finalize(stmt);
 		sql = "SELECT e.fio, a.recdatetime FROM appointment a \
-			   INNER JOIN employee e ON a.tabid = e.tabid where a.regid = ? and a.tabid = ?";
+			   INNER JOIN employee e ON a.tabid = e.tabid WHERE (a.regid = ? AND a.tabid = ?) OR (a.regid = ? AND a.recdatetime = ?)";
 		sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, NULL);
 		sqlite3_bind_int(stmt, 1, regid);
 		sqlite3_bind_int(stmt, 2, tabid);
+		sqlite3_bind_int(stmt, 3, regid);
+		sqlite3_bind_text(stmt, 4, temp, -1, SQLITE_STATIC);
 		sqlite3_step(stmt); 
 		sprintf(temp, "\tУ вас уже есть запись к врачу\n\t%s\n\tна %s\n\tЗаменить запись?",
 				sqlite3_column_text(stmt, 0),

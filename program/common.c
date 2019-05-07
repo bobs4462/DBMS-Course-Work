@@ -19,7 +19,7 @@ int message_box(const char *text, char *header, int y, int x, int h, int w, int 
 		offset = 3;
 	}
 	message_sub = derwin(message_win, h, w, offset, 2);
-	mvwprintw(message_sub, h / 2 - 2, 0, text);
+	mvwprintw(message_sub, 1, 2, text);
 	box(message_win, 0, 0);
 	ITEM **ok = malloc(sizeof(ITEM *) * 3);
 	MENU *response;
@@ -353,9 +353,18 @@ void show_card(int cardid)
 	int t = 0, i = 0, j = 0, c;
 	int rc; //record count
     const char *temp;
+	sqlite3_stmt *stmt;
+
+	sqlite3_prepare_v2(db, REQORD_AMOUNT_REQUEST, strlen(REQORD_AMOUNT_REQUEST), &stmt, NULL);
+	sqlite3_bind_int(stmt, 1, cardid);
+	sqlite3_step(stmt);
+	rc = sqlite3_column_int(stmt, 0);
+	sqlite3_finalize(stmt);
+	if (!rc)
+		return;
+
 	WINDOW *wmedc, *sub;
 	PANEL *pmedc;
-	sqlite3_stmt *stmt;
 
 	wmedc = newwin(15, 80, LINES / 2 - 1, (COLS - 70) / 2);
 	sub = derwin(wmedc, 13, 72, 1, 3);
@@ -364,12 +373,6 @@ void show_card(int cardid)
 	pmedc = new_panel(wmedc);
 	update_panels();
 	doupdate();
-
-	sqlite3_prepare_v2(db, REQORD_AMOUNT_REQUEST, strlen(REQORD_AMOUNT_REQUEST), &stmt, NULL);
-	sqlite3_bind_int(stmt, 1, cardid);
-	sqlite3_step(stmt);
-	rc = sqlite3_column_int(stmt, 0);
-	sqlite3_finalize(stmt);
 
 	sqlite3_prepare_v2(db, MEDCARD_REQUEST, strlen(MEDCARD_REQUEST), &stmt, NULL);
 	sqlite3_bind_int(stmt, 1, cardid);
@@ -438,7 +441,7 @@ DRAW:			werase(sub);
 
 void bind_windows(PANEL **pmedcards, WINDOW **wmedcards, WINDOW **subs, int cards) 
 {
-	int height = 15, width = 50, ypos = LINES - 20, xpos = COLS - 65;
+	int height = 15, width = 50, ypos = LINES - 25, xpos = COLS - 75;
 	int i = 0;
 
 	while (i < cards) {
@@ -500,7 +503,7 @@ struct win_pan *patient_info(int regid)
 	return resp;
 }
 
-char **get_input(char *msg, char **desc, int count, int height, int width, char **regexes) //intro message, field descriptions, field count, field height, field width
+char **get_input(char *msg, char **desc, int count, int height, int width, char **regexes, char **defaults, MENU *menu) //intro message, field descriptions, field count, field height, field width
 {
 	int x, y, d = 0, c = 0;
 	char buffer[count][10000], **retval;
@@ -532,6 +535,10 @@ char **get_input(char *msg, char **desc, int count, int height, int width, char 
 	fields[count + 1] = NULL;
 	text_form = new_form(fields);
 	form_opts_off(text_form, O_BS_OVERLOAD);
+	if (defaults)
+		for (int i = 0; i < count; ++i) {
+			set_field_buffer(fields[i], 0, defaults[i]);
+		}
 
 	scale_form(text_form, &y, &x);	
 	text_win = newwin(y += 6, (x += 5) + d , (LINES - y - 6) / 2, (COLS - x - d - 5) / 2);
@@ -598,6 +605,12 @@ char **get_input(char *msg, char **desc, int count, int height, int width, char 
 				else {
 					form_driver(text_form, REQ_PREV_LINE);
 				}
+				break;
+			case KEY_LEFT:
+				form_driver(text_form, REQ_PREV_CHAR);
+				break;
+			case KEY_RIGHT:
+				form_driver(text_form, REQ_NEXT_CHAR);
 				break;
 			case KEY_DC:
 			case 127:

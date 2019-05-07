@@ -25,7 +25,7 @@ void strip(char *text);
 int get_card_amount(int regid);
 void card_populate(PANEL **pmedcards, WINDOW **wmedcards, WINDOW **subs, int regid);
 struct win_pan *patient_info(int regid);
-char **get_input(char *msg, char **desc, int count, int height, int width, char **regexes); //intro message, field descriptions, field count, field height, field width
+char **get_input(char *msg, char **desc, int count, int height, int width, char **regexes, char **defaults, MENU *menu); //intro message, field descriptions, field count, field height, field width
 int inside (char (*array)[50], char *value, int size);
 void appointment(int regid);//function for appointment creation
 int timetable(int mode); //doctor's timetable view
