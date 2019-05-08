@@ -26,7 +26,7 @@ SEARCH:
 				annalysis_create(tabid, regid);
 				break;
 			case 2:
-				annalysis_update();
+				annalysis_update(regid);
 				break;
 			case 3:
 				cure_create(regid, tabid);
@@ -70,12 +70,10 @@ int annalysis_create(int tabid, int regid)
 	};
 
 	char msg[100];
+	char *sql; 
 
-	//char today[21];
-	//time_t now = time(NULL);
-	//strftime(today, 20, "%Y-%m-%d", localtime(&now));
 	char **fields = get_input("Назначение анализов", descriptions, 1, 5, 35, NULL, NULL, NULL);
-	char *sql = "INSERT INTO analysis(tabid, cardid, type) values(?, ?, ?)";
+	sql = "INSERT INTO analysis(tabid, cardid, type) values(?, ?, ?)";
 	sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, NULL);
 	sqlite3_bind_int(stmt, 1, tabid);
 	sqlite3_bind_int(stmt, 2, cardid);
@@ -96,18 +94,38 @@ int annalysis_create(int tabid, int regid)
 	return 0;
 }
 
-int annalysis_update(void)
+int annalysis_update(int regid)
 {
 	sqlite3_stmt *stmt;
 	char *descriptions[] = {
 		"Номер анализов",
-		"Результат анализов",
+		"Результат",
 	};
+	char *sql = "SELECT id, type FROM analysis WHERE regid = ? AND result IS NULL";
+	char **ansis_set = NULL;
+	sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, NULL);
+	sqlite3_bind_int(stmt, 1, regid);
+	int z = 0;
+	while(sqlite3_step(stmt) != SQLITE_DONE) {
+		ansis_set = realloc(ansis_set, sizeof(char *) * (z + 2));
+		ansis_set[z] = malloc(strlen(sqlite3_column_text(stmt, 1)) + 11);
+		sprintf(ansis_set[z], "%4d %-s", 
+				sqlite3_column_int(stmt, 0),
+				sqlite3_column_text(stmt, 1));
+		++z;
+	}
+	ansis_set[z] = NULL;
+	z = show_menu(ansis_set, z + 1, "Выберите анализы", -1, -1);
+	sqlite3_reset(stmt);	
+	for (int i = 0; i <= z; ++i) 
+		sqlite3_step(stmt);
+	int anid = sqlite3_column_int(stmt, 0);
+	sqlite3_finalize(stmt);
 
-	char **fields = get_input("Заполните поля", descriptions, 2, 4, 40, NULL, NULL, NULL);
-	char *sql = "UPDATE analysis SET result = ? where anid = ?";
+	//TODO FINISH FUNCTIONS, modify get_input, to accept diff sizes, add default value to get_input as anid
+	char **fields = get_input("Заполните поля", descriptions, 1, 4, 40, NULL, NULL, NULL);
+	sql = "UPDATE analysis SET result = ? where anid = ?";
 	char msg[100];
-	int anid = atoi(fields[0]);
 	sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, NULL);
 	sqlite3_bind_int(stmt, 2, anid);
 	sqlite3_bind_text(stmt, 1, fields[1], -1, SQLITE_STATIC);
