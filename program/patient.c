@@ -12,11 +12,12 @@ void patient_interface(int regid) // the boss function to manage the view of int
 	PANEL *menu;
 	MENU *main_menu;
 	char *choices[] = {
-						"Запись к врачу",
-						"Расписание врачей",
-						"Медицинские книжки",
-						"Смена пароля",
-						"Выход"
+						"Запись к врачу                ",
+						"Просмотр своих записей        ",
+						"Расписание врачей             ",
+						"Медицинские книжки            ",
+						"Смена пароля                  ",
+						"Выход                         ",
 					  };
 
 	ITEM **menu_items; 
@@ -51,10 +52,12 @@ void patient_interface(int regid) // the boss function to manage the view of int
 				if (current_item(main_menu) == menu_items[0]) //EXAMPLE OF TERRIBLE CODING
 					appointment(regid);
 				else if (current_item(main_menu) == menu_items[1])
-					timetable(0);
+					show_appointments(regid);
 				else if (current_item(main_menu) == menu_items[2])
-					medical_cards(regid, 0);
+					timetable(0);
 				else if (current_item(main_menu) == menu_items[3])
+					medical_cards(regid, 0);
+				else if (current_item(main_menu) == menu_items[4])
 					password_change(regid);
 				else
 					goto EXIT;
@@ -459,4 +462,33 @@ int inside (char (*array)[50], char *value, int size)
 		if (!strcmp(array[i], value))
 			return 1;
 	return 0;
+}
+
+int show_appointments(int regid)
+{
+	char *sql = "SELECT a.recdatetime, e.fio, e.position FROM appointment a JOIN employee e on a.tabid = e.tabid WHERE regid = ?";
+	char **appointments = NULL;
+	char temp[400];
+	int patient_count = 0;
+	sqlite3_stmt *stmt;
+	sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, NULL);
+	sqlite3_bind_int(stmt, 1, regid);
+
+	while (sqlite3_step(stmt) != SQLITE_DONE) {
+		sprintf(temp, "%s - %s - %s",
+				sqlite3_column_text(stmt, 1),
+				sqlite3_column_text(stmt, 2),
+				sqlite3_column_text(stmt, 0));
+		appointments = realloc(appointments, (patient_count + 1) * sizeof(char *));
+		appointments[patient_count] = malloc(strlen(temp) + 1);
+		strcpy(appointments[patient_count], temp);
+		patient_count += 1;
+	}
+	sqlite3_finalize(stmt);
+	appointments = realloc(appointments, (patient_count + 1) * sizeof(char *));
+	appointments[patient_count] = NULL;
+	show_menu(appointments, patient_count + 1, "Список ваших записей", -1, -1);
+	for (int i = 0; i < patient_count; ++i)
+		free(appointments[i]);
+	free(appointments);
 }

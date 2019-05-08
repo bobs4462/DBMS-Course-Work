@@ -21,6 +21,7 @@ void show_card(int cardid);
 void bind_windows(PANEL **pmedcards, WINDOW **wmedcards, WINDOW **subs, int cards); 
 int frame_field(WINDOW *win, int ulcy, int ulcx, int lrcy, int lrcx);
 void strip(char *text);
+int show_appointments(int regid);
 
 int get_card_amount(int regid);
 void card_populate(PANEL **pmedcards, WINDOW **wmedcards, WINDOW **subs, int regid);
