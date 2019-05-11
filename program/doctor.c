@@ -32,10 +32,10 @@ SEARCH:
 				cure_create(regid, tabid);
 				break;
 			case 4:
-				receipt_issue(tabid);
+				receipt_issue(tabid, regid);
 				break;
 			case 5:
-				sick_leave_issue(regid);
+				sick_leave_issue(regid, tabid);
 				break;
 			case 6:
 				repeat = 1;
@@ -175,7 +175,7 @@ int cure_create(int regid, int tabid)
 
 	return 0;
 }
-int receipt_issue(int tabid)
+int receipt_issue(int tabid, int regid)
 {
 	sqlite3_stmt *stmt;
 
@@ -184,12 +184,13 @@ int receipt_issue(int tabid)
 	};
 
 	char **fields = get_input("Заполните поля", descriptions, 1, 5, 50, NULL, NULL, NULL);
-	char *sql = "INSERT INTO receipt(tabid, medicine)\
-				 values(?, ?)";
+	char *sql = "INSERT INTO receipt(tabid, regid, medicine)\
+				 values(?, ?, ?)";
 	char msg[100];
 	sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, NULL);
 	sqlite3_bind_int(stmt, 1, tabid);
-	sqlite3_bind_text(stmt, 2, fields[0], -1, SQLITE_STATIC);
+	sqlite3_bind_int(stmt, 2, regid);
+	sqlite3_bind_text(stmt, 3, fields[0], -1, SQLITE_STATIC);
 	if (sqlite3_step(stmt) == SQLITE_DONE) {
 		sqlite3_finalize(stmt);
 		sql = "SELECT last_insert_rowid()"; 
@@ -203,7 +204,7 @@ int receipt_issue(int tabid)
 	free(fields);
 	return 0;
 }
-int sick_leave_issue(int regid)
+int sick_leave_issue(int regid, int tabid)
 {
 	sqlite3_stmt *stmt;
 
@@ -214,14 +215,15 @@ int sick_leave_issue(int regid)
 	};
 
 	char **fields = get_input("Создание больничного", descriptions, 3, 1, 30, NULL, NULL, NULL);
-	char *sql = "INSERT INTO sickleave(regid, stdate, endate, destn)\
-				 values(?, ?, ?, ?)";
+	char *sql = "INSERT INTO sickleave(regid, tabid, stdate, endate, destn)\
+				 values(?, ?, ?, ?, ?)";
 	char msg[100];
 	sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, NULL);
 	sqlite3_bind_int(stmt, 1, regid);
-	sqlite3_bind_text(stmt, 2, fields[0], -1, SQLITE_STATIC);
-	sqlite3_bind_text(stmt, 3, fields[1], -1, SQLITE_STATIC);
-	sqlite3_bind_text(stmt, 4, fields[2], -1, SQLITE_STATIC);
+	sqlite3_bind_int(stmt, 2, tabid);
+	sqlite3_bind_text(stmt, 3, fields[0], -1, SQLITE_STATIC);
+	sqlite3_bind_text(stmt, 4, fields[1], -1, SQLITE_STATIC);
+	sqlite3_bind_text(stmt, 5, fields[2], -1, SQLITE_STATIC);
 	if (sqlite3_step(stmt) == SQLITE_DONE) {
 		sqlite3_finalize(stmt);
 		sql = "SELECT last_insert_rowid()"; 
@@ -273,4 +275,8 @@ SEARCH:
 	int regid = sqlite3_column_int(stmt, 0);
 	sqlite3_finalize(stmt);
 	return regid;
+}
+
+int sickleave_blank(int tabid) {
+return 0;
 }

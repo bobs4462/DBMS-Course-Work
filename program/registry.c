@@ -121,9 +121,10 @@ int card_create(int regid)
 
 int create_patient(void)
 {
+	time_t now;
 	sqlite3_stmt *stmt;
 	char *sql = "INSERT INTO patient(fio, insurcomp, icontract, birthdate, gender, address, pnumber) VALUES(?, ?, ?, ?, ?, ?, ?)";
-	char msg[500];
+	char msg[500], today[30], **data = NULL;
 	char *desc[] = {
 		"ФИО",
 		"Страх. комп.",
@@ -137,12 +138,19 @@ int create_patient(void)
 		"^\\w",
 		"^\\w",
 		"^\\w",
-		"^[0-9]{4}-[0-9]{2}-[0-9]{2}\\s+$",
+		"^[1-2]{1}[0-9]{3}-[0-1]{1}[0-9]{1}-[0-3]{1}[0-9]{1}\\s+$",
 		"^(М|Ж){1}\\s+$",
 		"^\\w",
 		"^[+][7][0-9]{10}\\s+$"
 	};
-	char **data = get_input("Заполните данные пациента", desc, 7, 1, 50, regexes, NULL, NULL);
+INPUT:
+	data = get_input("Заполните данные пациента", desc, 7, 1, 50, regexes, NULL, NULL);
+	now = time(NULL);
+	strftime(today, 29, "%Y-%m-%d", localtime(&now));
+	if (strcmp(today, data[3]) < 0 || strcmp(data[3], "1900-01-01") < 0) {
+		message_box("Введена не корректная дата", "Ошибка!", -1, -1, 3, 30, 0);
+		goto INPUT;
+	}
 	sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, NULL); 
 	sqlite3_bind_text(stmt, 1, data[0], -1, SQLITE_STATIC);
 	sqlite3_bind_text(stmt, 2, data[1], -1, SQLITE_STATIC);

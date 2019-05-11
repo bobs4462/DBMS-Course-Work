@@ -14,6 +14,7 @@ void patient_interface(int regid) // the boss function to manage the view of int
 	char *choices[] = {
 						"Запись к врачу                ",
 						"Просмотр своих записей        ",
+						"Просмотр выписанных рецептов   ",
 						"Расписание врачей             ",
 						"Медицинские книжки            ",
 						"Смена пароля                  ",
@@ -54,10 +55,12 @@ void patient_interface(int regid) // the boss function to manage the view of int
 				else if (current_item(main_menu) == menu_items[1])
 					show_appointments(regid);
 				else if (current_item(main_menu) == menu_items[2])
-					timetable(0);
+					show_receipts(regid);
 				else if (current_item(main_menu) == menu_items[3])
-					medical_cards(regid, 0);
+					timetable(0);
 				else if (current_item(main_menu) == menu_items[4])
+					medical_cards(regid, 0);
+				else if (current_item(main_menu) == menu_items[5])
 					password_change(regid);
 				else
 					goto EXIT;
@@ -469,7 +472,7 @@ int show_appointments(int regid)
 	char *sql = "SELECT a.recdatetime, e.fio, e.position FROM appointment a JOIN employee e on a.tabid = e.tabid WHERE regid = ?";
 	char **appointments = NULL;
 	char temp[400];
-	int patient_count = 0;
+	int app_count = 0;
 	sqlite3_stmt *stmt;
 	sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, NULL);
 	sqlite3_bind_int(stmt, 1, regid);
@@ -479,16 +482,128 @@ int show_appointments(int regid)
 				sqlite3_column_text(stmt, 1),
 				sqlite3_column_text(stmt, 2),
 				sqlite3_column_text(stmt, 0));
-		appointments = realloc(appointments, (patient_count + 1) * sizeof(char *));
-		appointments[patient_count] = malloc(strlen(temp) + 1);
-		strcpy(appointments[patient_count], temp);
-		patient_count += 1;
+		appointments = realloc(appointments, (app_count + 1) * sizeof(char *));
+		appointments[app_count] = malloc(strlen(temp) + 1);
+		strcpy(appointments[app_count], temp);
+		app_count += 1;
 	}
 	sqlite3_finalize(stmt);
-	appointments = realloc(appointments, (patient_count + 1) * sizeof(char *));
-	appointments[patient_count] = NULL;
-	show_menu(appointments, patient_count + 1, "Список ваших записей", -1, -1);
-	for (int i = 0; i < patient_count; ++i)
+	appointments = realloc(appointments, (app_count + 1) * sizeof(char *));
+	appointments[app_count] = NULL;
+	show_menu(appointments, app_count + 1, "Список ваших записей", -1, -1);
+	for (int i = 0; i < app_count; ++i)
 		free(appointments[i]);
 	free(appointments);
+}
+
+int show_receipts(int regid)
+{
+	char *sql = "SELECT r.receiptid, r.medicine, r.issuedate, e.fio, p.fio, \
+				 CAST ((julianday('now') - julianday(p.birthdate)) / 365.25 as INTEGER), \
+				 p.address\
+				 FROM \
+				 receipt r JOIN employee e ON e.tabid = r.tabid JOIN \
+				 patient p ON p.regid = r.regid where r.regid = ?";
+	char **receipts = NULL;
+	char temp[1000];
+	int receipt_count = 0, choice = 0;
+	sqlite3_stmt *stmt;
+	sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, NULL);
+	sqlite3_bind_int(stmt, 1, regid);
+
+	while (sqlite3_step(stmt) != SQLITE_DONE) {
+		sprintf(temp, "RN0%3d - %s - %s",
+				sqlite3_column_int(stmt, 0),
+				sqlite3_column_text(stmt, 2),
+				sqlite3_column_text(stmt, 3));
+		receipts = realloc(receipts, (receipt_count + 1) * sizeof(char *));
+		receipts[receipt_count] = malloc(strlen(temp) + 1);
+		strcpy(receipts[receipt_count], temp);
+		receipt_count += 1;
+	}
+	sqlite3_finalize(stmt);
+	receipts = realloc(receipts, (receipt_count + 1) * sizeof(char *));
+	receipts[receipt_count] = NULL;
+MENU:
+	choice = show_menu(receipts, receipt_count + 1, "Список выписанных вам рецептов", -1, -1);
+	sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, NULL);
+	sqlite3_bind_int(stmt, 1, regid);
+	for (int i = 0; i <= choice; ++i)
+		sqlite3_step(stmt);
+	choice = show_receipt_form(stmt);
+	if (choice == 'q')
+		goto MENU;
+
+	for (int i = 0; i < receipt_count; ++i)
+		free(receipts[i]);
+	free(receipts);
+}
+
+int show_receipt_form(sqlite3_stmt *stmt)
+{
+	int w = 71, h = 31;
+	WINDOW *rwin, *rsub;
+	PANEL *rpan;
+	rwin = newwin(h + 2, w + 10, 3, 40);
+	rsub = derwin(rwin, h, w, 1, 5);
+	rpan = new_panel(rwin);
+	mvwprintw(rsub, 1, 0, "Министерство здравохранения");
+	mvwprintw(rsub, 2, 0, "Российской Федерации");
+	mvwprintw(rsub, 3, 0, "Городская поликлиника №72");
+	mvwprintw(rsub, 1, 43, "Код формы по ОКУД 3293011");
+	mvwprintw(rsub, 2, 43, "Медицинская документация");
+	mvwprintw(rsub, 3, 43, "Форма №148-1/у-88");
+	mvwprintw(rsub, 4, 43, "Утверждена приказом");
+	mvwprintw(rsub, 5, 43, "Министерства здравохранения");
+	mvwprintw(rsub, 6, 43, "Российской Федерации");
+	mvwprintw(rsub, 7, 43, "От 20 декабря 2012 г. №1175");
+	//===================================================
+	mvwhline(rsub, 8, 0, ACS_HLINE, w - 1);
+	//===================================================
+	mvwprintw(rsub, 9, 43, "Серия AB90");
+	mvwprintw(rsub, 9, 54, "№00%d", sqlite3_column_int(stmt, 0));
+	mvwprintw(rsub, 10, 43, "Дата выписки %s", sqlite3_column_text(stmt, 2));
+	mvwprintw(rsub, 11, 32, "РЕЦЕПТ");
+	if (sqlite3_column_int(stmt, 5) > 18) 
+		mvwprintw(rsub, 12, 31, "Взрослый");
+	else
+		mvwprintw(rsub, 12, 29, "Детский");
+	//===================================================
+	mvwhline(rsub, 13, 0, ACS_HLINE, w - 1);
+	//===================================================
+	mvwprintw(rsub, 14, 0, "Ф.И.О. пациента (полностью): ");
+	mvwprintw(rsub, 14, 32, "%s", sqlite3_column_text(stmt, 4));
+	mvwchgat(rsub, 14, 31, 40, A_UNDERLINE, 0, NULL);
+	mvwprintw(rsub, 15, 0, "Возвраст:     %d лет", sqlite3_column_int(stmt, 5));
+	mvwchgat(rsub, 15, 12, 59, A_UNDERLINE, 0, NULL);
+	mvwprintw(rsub, 17, 0, "Адрес пациента :");
+	wattron(rsub, A_UNDERLINE);
+	mvwprintw(rsub, 17, 20, "%s", sqlite3_column_text(stmt, 6));
+	wattroff(rsub, A_UNDERLINE);
+	mvwchgat(rsub, 18, 0, -1, A_UNDERLINE, 0, NULL);
+	mvwprintw(rsub, 19, 0, "Ф.И.О. врача (полностью): ");
+	mvwprintw(rsub, 19, 32, "%s", sqlite3_column_text(stmt, 3));
+	mvwchgat(rsub, 19, 31, 40, A_UNDERLINE, 0, NULL);
+	//===================================================
+	mvwhline(rsub, 21, 0, ACS_HLINE, w - 1);
+	//===================================================
+	mvwprintw(rsub, 22, 0, "Руб. | Коп. | Rp. ");
+	mvwprintw(rsub, 23, 0, "%s", sqlite3_column_text(stmt, 1));
+	//===================================================
+	mvwhline(rsub, 28, 0, ACS_HLINE, w - 1);
+	//===================================================
+	mvwprintw(rsub, 29, 0, "Подпись и личная печать");
+	mvwprintw(rsub, 30, 0, "лечащего врача");
+
+	sqlite3_finalize(stmt);
+
+	box(rwin, 0,0);
+	int retval = wgetch(rwin);
+
+	del_panel(rpan);
+	delwin(rsub);
+	delwin(rwin);
+	update_panels();
+	doupdate();
+	return retval;	
 }

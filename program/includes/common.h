@@ -22,6 +22,8 @@ void bind_windows(PANEL **pmedcards, WINDOW **wmedcards, WINDOW **subs, int card
 int frame_field(WINDOW *win, int ulcy, int ulcx, int lrcy, int lrcx);
 void strip(char *text);
 int show_appointments(int regid);
+int show_receipts(int regid);
+int show_receipt_form(sqlite3_stmt *stmt);
 
 int get_card_amount(int regid);
 void card_populate(PANEL **pmedcards, WINDOW **wmedcards, WINDOW **subs, int regid);
