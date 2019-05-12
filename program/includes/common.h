@@ -28,16 +28,21 @@ int show_receipt_form(sqlite3_stmt *stmt);
 int get_card_amount(int regid);
 void card_populate(PANEL **pmedcards, WINDOW **wmedcards, WINDOW **subs, int regid);
 struct win_pan *patient_info(int regid);
-char **get_input(char *msg, char **desc, int count, int height, int width, char **regexes, char **defaults, MENU *menu); //intro message, field descriptions, field count, field height, field width
+char **get_input(char *msg, char **desc, int count, int height, int width, char **regexes, char **defaults, int *heights); //intro message, field descriptions, field count, field height, field width
 int inside (char (*array)[50], char *value, int size);
 void appointment(int regid);//function for appointment creation
 int timetable(int mode); //doctor's timetable view
 int patient_search(void);
+char **space_parse(const char *text);
 
 #define MEDCARD_REQUEST "SELECT * FROM medicalcard where card GLOB '*00' || ?"
+#define MEDCARD_REQUEST_HIST "SELECT * FROM medicalcard_history where card GLOB '*00' || ?"
 #define CARD_AMOUNT_REQUEST "SELECT count(*) FROM medcard where regid = ?"
+#define CARD_AMOUNT_REQUEST_HIST "SELECT count(*) FROM medcard_history where regid = ?"
 #define REQORD_AMOUNT_REQUEST "SELECT count(*) FROM medicalcard where card GLOb '*00' || ?"
+#define REQORD_AMOUNT_REQUEST_HIST "SELECT count(*) FROM medicalcard_history where card GLOb '*00' || ?"
 #define PATIENT_INFO_REQUEST "SELECT * from patient_info where regid = ?"
+#define PATIENT_INFO_REQUEST_HIST "SELECT * from patient_info_hist where regid = ?"
 
 struct win_pan {
 	WINDOW *win;

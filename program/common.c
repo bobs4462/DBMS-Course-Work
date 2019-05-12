@@ -503,7 +503,7 @@ struct win_pan *patient_info(int regid)
 	return resp;
 }
 
-char **get_input(char *msg, char **desc, int count, int height, int width, char **regexes, char **defaults, MENU *menu) //intro message, field descriptions, field count, field height, field width
+char **get_input(char *msg, char **desc, int count, int height, int width, char **regexes, char **defaults, int *heights) //intro message, field descriptions, field count, field height, field width
 {
 	int x, y, d = 0, c = 0;
 	char buffer[count][10000], **retval;
@@ -518,13 +518,23 @@ char **get_input(char *msg, char **desc, int count, int height, int width, char 
 			++c;
 		}
 	d = d / 2 + 4;
+	int last_y = 2;
+	if (heights)
+		for (int i = 0; i < count; ++i) {
+			fields[i] = new_field(heights[i], width, last_y, 1, 0, 0);	
+			set_field_opts(fields[i], ~(O_AUTOSKIP | O_BLANK | O_STATIC));
+			last_y += heights[i] + 2;
+		}
+	else
+		for (int i = 0; i < count; ++i) {
+			fields[i] = new_field(height, width, 2 + i * (height + 2), 1, 0, 0);	
+			set_field_opts(fields[i], ~(O_AUTOSKIP | O_BLANK | O_STATIC));
+		}
 
-	for (int i = 0; i < count; ++i) {
-		fields[i] = new_field(height, width, 2 + i * (height + 2), 1, 0, 0);	
-		set_field_opts(fields[i], ~(O_AUTOSKIP | O_BLANK | O_STATIC));
-	}
-
-	fields[count] = new_field(1, 5, 2 + count * (height + 2), (width + d) / 2 - d, 0, 0);
+	if (heights)
+		fields[count] = new_field(1, 5, last_y, (width + d) / 2 - d, 0, 0);
+	else
+		fields[count] = new_field(1, 5, 2 + count * (height + 2), (width + d) / 2 - d, 0, 0);
 	set_field_buffer(fields[count], 0, "Ввод");
 	set_field_fore(fields[count], COLOR_PAIR(BLUE));
 	set_field_opts(fields[count], ~(O_AUTOSKIP | O_BLANK | O_EDIT));
@@ -549,20 +559,39 @@ char **get_input(char *msg, char **desc, int count, int height, int width, char 
 	refresh();
 	update_panels();
 	doupdate();
+	last_y = 5;
 
 	if (desc != NULL) {
-		for (int i = 0; i < count; ++i) {
-			mvwprintw(text_win, 5 + i * (height + 2), 2, desc[i]);
-		}
-		for (int i = 0; i < count; ++i) {
+		if (heights) {
+			for (int i = 0; i < count; ++i) {
+				mvwprintw(text_win, last_y, 2, desc[i]);
+				last_y += heights[i] + 2;
+			}
+			last_y = 4;
+			for (int i = 0; i < count; ++i) {
+				frame_field(text_win,
+						last_y, d,
+						last_y + 1 + heights[i], d + width + 2);
+				last_y += heights[i] + 2;
+			}
 			frame_field(text_win,
-					4 + i * (height + 2), d,
-					5 + i * (height + 2) + height, d + width + 2);
+					last_y, (width + d) / 2 - 1,
+					last_y + 2, (width + d) / 2 + 6);
+		}
+		else {
+			for (int i = 0; i < count; ++i) {
+				mvwprintw(text_win, 5 + i * (height + 2), 2, desc[i]);
+			}
+			for (int i = 0; i < count; ++i) {
+				frame_field(text_win,
+						4 + i * (height + 2), d,
+						5 + i * (height + 2) + height, d + width + 2);
+			}
+			frame_field(text_win,
+					4 + count * (height + 2), (width + d) / 2 - 1,
+					6 + count * (height + 2), (width + d) / 2 + 6);
 		}
 	}
-	frame_field(text_win,
-			4 + count * (height + 2), (width + d) / 2 - 1,
-			6 + count * (height + 2), (width + d) / 2 + 6);
 
 	mvwprintw(text_win, 1, 2, msg);
 	box(text_win, 0, 0);
@@ -577,8 +606,6 @@ char **get_input(char *msg, char **desc, int count, int height, int width, char 
 
 	curs_set(1);
 	while ((c = wgetch(text_win)) != KEY_F(2)) {
-		mvprintw(1,1,"%d", c);
-		refresh();
 		switch(c) {
 			case 9:
 				form_driver(text_form, REQ_NEXT_FIELD);

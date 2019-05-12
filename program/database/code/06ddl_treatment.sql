@@ -6,3 +6,11 @@ CREATE TABLE treatment (
     illness text,
     treatment text
 );
+CREATE TABLE treatment_history (
+    treatid integer NOT NULL PRIMARY KEY,
+    tabid integer NOT NULL,
+    cardid integer NOT NULL,
+    trdate date NOT NULL DEFAULT (date('now')),
+    illness text,
+    treatment text
+);

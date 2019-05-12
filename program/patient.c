@@ -80,6 +80,7 @@ EXIT:
 	delwin(pat->win);
 	free(menu_items);
 	free_menu(main_menu);
+	free(pat);
 }
 
 void init_menu(ITEM ***some_items, char **choices, size_t n_choices) // general function for menu initializing
@@ -93,7 +94,7 @@ void init_menu(ITEM ***some_items, char **choices, size_t n_choices) // general 
 
 void appointment(int regid) //function for appointment creation
 {
-	int tabid = timetable(1);
+	int tabid = timetable(1), new_tabid = 0;
 	int i = 0, dos = 0;
 	time_t now = time(NULL);	
 	char *days[8], tarray[100];
@@ -154,7 +155,7 @@ void appointment(int regid) //function for appointment creation
 	sqlite3_bind_text(stmt, 3, strcat(temp, vacant_times[choice]), -1, SQLITE_STATIC);
 	if (sqlite3_step(stmt) == SQLITE_CONSTRAINT) {
 		sqlite3_finalize(stmt);
-		sql = "SELECT e.fio, a.recdatetime FROM appointment a \
+		sql = "SELECT e.fio, a.recdatetime, a.tabid FROM appointment a \
 			   INNER JOIN employee e ON a.tabid = e.tabid WHERE (a.regid = ? AND a.tabid = ?) OR (a.regid = ? AND a.recdatetime = ?)";
 		sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, NULL);
 		sqlite3_bind_int(stmt, 1, regid);
@@ -165,14 +166,23 @@ void appointment(int regid) //function for appointment creation
 		sprintf(temp, "\tУ вас уже есть запись к врачу\n\t%s\n\tна %s\n\tЗаменить запись?",
 				sqlite3_column_text(stmt, 0),
 				sqlite3_column_text(stmt, 1));
+		new_tabid = sqlite3_column_int(stmt, 2);
 		if (message_box(temp, "Произошла ошибка", -1, -1, 8, 40, 1)) {
 			sqlite3_finalize(stmt);
-			sql = "UPDATE appointment SET recdatetime = ? where regid = ? and tabid = ?";
+			sql = "DELETE FROM appointment WHERE regid = ? AND (recdatetime = ? OR tabid = ?)"; 
 			sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, NULL);
+			sqlite3_bind_text(stmt, 2, strcat(backup, vacant_times[choice]), -1, SQLITE_STATIC);
+			sqlite3_bind_int(stmt, 1, regid);
 			sqlite3_bind_int(stmt, 3, tabid);
-			sqlite3_bind_int(stmt, 2, regid);
-			sqlite3_bind_text(stmt, 1, strcat(backup, vacant_times[choice]), -1, SQLITE_STATIC);
 			sqlite3_step(stmt); 
+			sqlite3_finalize(stmt);
+			sql = "INSERT INTO appointment values(?, ?, ?)";
+			sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, NULL);
+			sqlite3_bind_int(stmt, 1, tabid);
+			sqlite3_bind_int(stmt, 2, regid);
+			sqlite3_bind_text(stmt, 3, backup, -1, SQLITE_STATIC);
+			sqlite3_step(stmt); 
+			mvprintw(1, 1, sqlite3_errmsg(db));
 			message_box("Запись успешно обновлена", "Обновление записи", -1, -1, 3, 40, 0);
 		}
 	}
@@ -512,7 +522,7 @@ int show_receipts(int regid)
 	sqlite3_bind_int(stmt, 1, regid);
 
 	while (sqlite3_step(stmt) != SQLITE_DONE) {
-		sprintf(temp, "RN0%3d - %s - %s",
+		sprintf(temp, "RN0%03d - %s - %s",
 				sqlite3_column_int(stmt, 0),
 				sqlite3_column_text(stmt, 2),
 				sqlite3_column_text(stmt, 3));

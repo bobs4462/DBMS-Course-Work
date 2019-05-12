@@ -13,6 +13,11 @@ int main(void)
 	}
 	sqlite3_create_function( db, "get_time", 1, SQLITE_UTF8, NULL, get_time, NULL, NULL);
 	sqlite3_create_function( db, "vacant_time", 2, SQLITE_UTF8, NULL, vacant_time, NULL, NULL);
+	sqlite3_stmt *stmt;
+	char *sql = "PRAGMA foreign_keys = ON";
+	sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, NULL);
+	sqlite3_step(stmt);
+	sqlite3_finalize(stmt);
 
 	setlocale(LC_ALL, "ru_RU.utf8");
 	int regid;

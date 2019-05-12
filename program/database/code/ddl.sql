@@ -9,6 +9,18 @@ CREATE TABLE patient (
     pnumber text,
     password text NOT NULL DEFAULT (abs(random()))
 );
+
+CREATE TABLE patient_history (
+    regid integer PRIMARY KEY,
+    fio text NOT NULL,
+    insurcomp text,
+    icontract text,
+    birthdate date NOT NULL,
+    gender char(1) NOT NULL DEFAULT 'М' CHECK(gender = 'М' OR gender = 'Ж'),
+    address text,
+    pnumber text,
+    password text NOT NULL DEFAULT (abs(random()))
+);
 CREATE TABLE employee (
     tabid integer PRIMARY KEY,
     fio text NOT NULL,
@@ -22,7 +34,15 @@ CREATE TABLE employee (
 );
 CREATE TABLE medcard (
     cardid integer NOT NULL PRIMARY KEY,
-    regid integer NOT NULL REFERENCES patient(regid),
+    regid integer NOT NULL REFERENCES patient(regid)
+	ON DELETE RESTRICT,
+    crdate date NOT NULL DEFAULT (date('now')),
+    type text,
+    UNIQUE(regid, type)
+);
+CREATE TABLE medcard_history (
+    cardid integer NOT NULL PRIMARY KEY,
+    regid integer NOT NULL,
     crdate date NOT NULL DEFAULT (date('now')),
     type text,
     UNIQUE(regid, type)
@@ -34,6 +54,13 @@ CREATE TABLE visit (
     visdate date NOT NULL DEFAULT (date('now')),
     visgoal text
 );
+CREATE TABLE visit_history (
+    visid integer NOT NULL PRIMARY KEY,
+    tabid integer NOT NULL,
+    cardid integer NOT NULL,
+    visdate date NOT NULL DEFAULT (date('now')),
+    visgoal text
+);
 CREATE TABLE analysis (
     anid integer NOT NULL PRIMARY KEY,
     tabid integer NOT NULL REFERENCES employee(tabid),
@@ -42,9 +69,18 @@ CREATE TABLE analysis (
     type text NOT NULL,
     result text
 );
+CREATE TABLE analysis_history (
+    anid integer NOT NULL PRIMARY KEY,
+    tabid integer NOT NULL,
+    cardid  integer NOT NULL,
+    passdate date NOT NULL DEFAULT (date('now')),
+    type text NOT NULL,
+    result text
+);
 CREATE TABLE appointment (
     tabid integer NOT NULL REFERENCES employee(tabid),
-    regid integer NOT NULL REFERENCES patient(regid),
+    regid integer NOT NULL REFERENCES patient(regid)
+	ON DELETE CASCADE,
     recdatetime datetime,
     PRIMARY KEY(tabid, regid),
     UNIQUE(tabid, recdatetime),
@@ -58,17 +94,27 @@ CREATE TABLE treatment (
     illness text,
     treatment text
 );
+CREATE TABLE treatment_history (
+    treatid integer NOT NULL PRIMARY KEY,
+    tabid integer NOT NULL,
+    cardid integer NOT NULL,
+    trdate date NOT NULL DEFAULT (date('now')),
+    illness text,
+    treatment text
+);
 CREATE TABLE receipt (
     receiptid integer NOT NULL PRIMARY KEY,
     tabid integer NOT NULL REFERENCES employee(tabid),
-	regid integer NOT NULL REFERENCES patient(regid),
+	regid integer NOT NULL REFERENCES patient(regid)
+	ON DELETE CASCADE,
     issuedate date NOT NULL DEFAULT (date('now')),
     medicine text
 );
 CREATE TABLE sickleave (
     sickid integer NOT NULL PRIMARY KEY,
+	sick_code integer NOT NULL,
 	tabid integer NOT NULL REFERENCES employee(tabid),
-    regid integer NOT NULL REFERENCES patient(regid),
+    regid integer NOT NULL REFERENCES patient(regid) ON DELETE CASCADE,
     issuedate date NOT NULL DEFAULT (date('now')),
     stdate date NOT NULL,
     endate date NOT NULL,
@@ -82,4 +128,9 @@ CREATE TABLE timetable (
     shiftend integer NOT NULL,
     break integer NOT NULL,
     PRIMARY KEY(tabid, weekday)
+);
+CREATE TABLE appointment_history (
+    tabid integer NOT NULL REFERENCES employee(tabid),
+    regid integer NOT NULL REFERENCES patient(regid) ON DELETE CASCADE,
+    recdatetime datetime
 );

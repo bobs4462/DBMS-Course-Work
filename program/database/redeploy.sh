@@ -6,3 +6,4 @@ cat ./database/code/*dml* >> ./database/code/dml.sql
 sqlite3 ./database/clinic.db < ./database/code/ddl.sql
 sqlite3 ./database/clinic.db < ./database/code/dml.sql
 sqlite3 ./database/clinic.db < ./database/code/views.sql
+sqlite3 ./database/clinic.db < ./database/code/triggers.sql
