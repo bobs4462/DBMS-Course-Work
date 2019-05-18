@@ -3,6 +3,4 @@ CREATE TABLE appointment (
     regid integer NOT NULL REFERENCES patient(regid),
     recdatetime datetime,
     PRIMARY KEY(tabid, regid),
-    UNIQUE(tabid, recdatetime),
-    UNIQUE(regid, recdatetime)
 );

@@ -279,7 +279,7 @@ void print_timetable(int tabid)
 				sqlite3_column_text(stmt, 2),
 				sqlite3_column_text(stmt, 3));
 	}
-	char *message = "День   Начало\t Конец \tПерерыв";
+	char *message = "День      Начало   Конец  Перерыв";
 	show_menu(days, i + 1, message, -1, -1);
 	for (int i = 0; i < 7; ++i)
 		free(days[i]);

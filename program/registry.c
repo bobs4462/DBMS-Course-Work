@@ -116,7 +116,7 @@ int card_create(int regid)
 	sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, NULL);
 	sqlite3_bind_text(stmt, 2, type[choice], -1, SQLITE_STATIC);
 	sqlite3_bind_int(stmt, 1, regid);
-	if (z = (sqlite3_step(stmt) == SQLITE_DONE)) {
+	if ((z = sqlite3_step(stmt)) == SQLITE_DONE) {
 		sqlite3_finalize(stmt);
 		sql = "SELECT last_insert_rowid()"; 
 		sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, NULL); 
@@ -127,7 +127,6 @@ int card_create(int regid)
 	else if (z == SQLITE_CONSTRAINT)
 		message_box("У пациента уже есть такая карта", "Ошибка", -1, -1, 3, 40, 0);
 	
-
 	sqlite3_finalize(stmt);
 	return 0;
 }
@@ -191,8 +190,6 @@ INPUT:
 			else
 				mvprintw(1,1, sqlite3_errmsg(db));
 	}
-	refresh();
-	getch();
 	for (int i = 0; i < 7; ++i)
 		free(data[i]);
 	free(data);

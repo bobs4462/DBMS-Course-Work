@@ -61,6 +61,18 @@
     stringstyle=\color{cyan},
 }
 \lstset{extendedchars=\true}
+\lstdefinestyle{customc}{
+  belowcaptionskip=1\baselineskip,
+  breaklines=true,
+  xleftmargin=\parindent,
+  language=C,
+  showstringspaces=false,
+  basicstyle=\footnotesize\ttfamily,
+  keywordstyle=\bfseries\color{green!40!black},
+  commentstyle=\itshape\color{purple!40!black},
+  identifierstyle=\color{blue},
+  stringstyle=\color{orange},
+}
 
 \captionsetup[figure]{labelformat=simple, labelsep=space}
 \captionsetup[table]{labelformat=simple, labelsep=space, justification=raggedleft, singlelinecheck=false, skip=10pt}
@@ -872,7 +884,7 @@ SQLite. Такой выбор обоснован спецификой предм
 табл. \ref{table:analysis}).\par
 
 
-На рис. \ref{fig:clinic} можно ознакомиться с общей схемой базы данных созданной в СУБД SQLite. Визуализаация схемы была
+На рис. clinic\ref{fig:clinic} можно ознакомиться с общей схемой базы данных созданной в СУБД SQLite. Визуализаация схемы была
 произведена средствами программного продукта DataGrip версия 2017.2.
 
 \begin{figure}[t!]
@@ -882,6 +894,115 @@ SQLite. Такой выбор обоснован спецификой предм
 \end{figure}
 \vfill
 \phantom{0}
+
+\section{SQL операторы создания таблиц}
+\setcounter{lstlisting}{0}
+
+
+\lstinputlisting[title=1. Создание таблицы «Пациент», label=list:cpat, style=csql]{code/cpatient.sql}
+\lstinputlisting[title=2. Создание таблицы «Сотрудник», label=list:cemp, style=csql]{code/cemployee.sql}
+\lstinputlisting[title=3. Создание таблицы «Запись», label=list:rec, style=csql]{code/cappointment.sql}
+\newpage
+\lstinputlisting[title=4. Создание таблицы «Больничный», label=list:reserv, style=csql]{code/csickleave.sql}
+\lstinputlisting[title=5. Создание таблицы «График», label=list:timetable, style=csql]{code/ctimetable.sql}
+\lstinputlisting[title=6. Создание таблицы «Анализ», label=list:res, style=csql]{code/canalysis.sql}
+\lstinputlisting[title=7. Создание таблицы «Лечение», label=list:treat, style=csql]{code/ctreatment.sql}
+\newpage
+\lstinputlisting[title=8. Создание таблицы «Медкарта», label=list:medc, style=csql]{code/cmedcard.sql}
+\lstinputlisting[title=9. Создание таблицы «Посещения», label=list:visit, style=csql]{code/cvisit.sql}
+\lstinputlisting[title=10. Создание таблицы «Рецепт», label=list:serv, style=csql]{code/creceipt.sql}
+
+\section{Индексы, представления, триггеры необходимые для решеня задач БД}
+\lstinputlisting[title=11. Индексы таблицы «Запись», label=list:idxapp, style=csql]{code/idx-appointment.sql}
+\lstinputlisting[title=12. Индексы таблицы «Медкарта», label=list:idxmedc, style=csql]{code/idx-medcard.sql}
+\lstinputlisting[title=13. Представление «medicalcard» собирающее данные из таблиц «Анализ» «Посещения» «Лечение» «Сотрудник» по фильтру - идентификатор медкарты, label=list:viewmedicalcard, style=csql]{code/view-medicalcard.sql}
+\lstinputlisting[title=14. Представление «patient\_info» собирающее данные из таблицы «Пациент» по фильтру - идентификатор пациента с переименованием полей, label=list:viewpatientinfo, style=csql]{code/view-patient-info.sql}
+\lstinputlisting[title=15. Представление «patient\_medcard» собирающее данные из таблиц «Пациент» «Медкарта» и из представления «medicalcard» по фильтру идентификатор пациента, label=list:viewpatientmedcard, style=csql]{code/view-patient-medcard.sql}
+\lstinputlisting[title=16. Триггер «insert\_visit» срабатывающий после вставки в таблицу «Посещения» и удаляющий запись пациента к врачу, label=list:triginsertvisit, style=csql]{code/trig-insert-visit.sql}
+\lstinputlisting[title=17. Триггер «insert\_treatment» срабатывающий после вставки в таблицу «Лечение» и удаляющий запись пациента к врачу, label=list:triginserttreatment, style=csql]{code/trig-insert-treatment.sql}
+\lstinputlisting[title=18. Триггер «insert\_analysis» срабатывающий после вставки в таблицу «Анализ» и удаляющий запись пациента к врачу, label=list:triginsertanalysis, style=csql]{code/trig-insert-analysis.sql}
+\lstinputlisting[title=19. Триггер «archive\_card» срабатывающий при попытке удаления записи из таблицы «Медкарта» и архивирующий карту, label=list:trigarchivecard, style=csql]{code/trig-archive-card.sql}
+\lstinputlisting[title=20. Триггер «archive\_patient» срабатывающий при попытке удаления записи из таблицы «Пациент» и архивирующий пациента, label=list:trigarchivepatient, style=csql]{code/trig-archive-patient.sql}
+
+\chapter{Описание функционирования БД}
+\section{Назначение и перечень функций базы данных}
+Далее приведены функции, которые предоставляет, реализованный в данной работе программный продукт, пользователям для работы с базой данных.
+\begin{enumerate}
+	\item Поиск по пациентам, используя часть имени пациента в качестве критерия поиска;
+	\item Получение доступа к списку врачей с целью;
+		\begin{itemize}
+				\renewcommand\labelitemi{--}
+			\item ознакомления с расписанием выбранного врача,
+			\item запись на прием к выбранному врачу.
+		\end{itemize}
+	\item Просмотр перечня карт выбранного пациента, и дальнейшее ознакомление с содержимым отдельно взятой карты;
+	\item Просмотр рецептов выписанных конкретному пациенту;
+	\item Просмотр листов нетрудоспособности выданных конкретному пациенту;
+	\item Назначение лечения пациенту c занесением в медицинскую карту;
+	\item Назначение сдачи анализов пациенту с занесением факта назначения и результа анализа в медицинскую карту;
+	\item Выписка рецепта пациенту;
+	\item Выдача листа нетрудоспособности пациенту;
+	\item Создание нового пациента в базе данных;
+	\item Создание новой медицинской карты выбранному пациента;
+	\item Удаление пациента из базы активных пациентов, с последующим перемещение всех его данных в архив;
+	\item Получение доступа к архиву пациентов.
+\end{enumerate}
+\cleardoublepage
+Разграничение доступа к какой-либо отдельно взятой функции, осуществляется на стороне клиентского приложения, в зависимости от роли пользователя (пациент, врач, сотрудник регистратуры).
+
+\section{Описание работы с базой данных}
+\subsection{Вход в систему}
+При попытке входа в систему, программа определяет тип пользоваетеля и делает запрос в базу данных к соответсвующей таблице. В зависимости от ответа базы данных, программа либо запускает необходимый интерфейс пользоваетеля, либо выдает сообщение о неправильности введённых данных.
+\begin{figure}[t!]
+        \includegraphics[width=\textwidth]{prog_int/login-screen}
+        \caption{Окно входа в систему}
+        \label{fig:login}
+\end{figure}
+Запросы которые отправляются в базу данных следующие 
+\begin{lstlisting}[style=csql] 
+1. SELECT * FROM patient where regid = ? AND password = ?
+2. SELECT * FROM employee where tabid = ? AND password = ?
+\end{lstlisting}
+Здесь и далее символ «?» используется для обозначения мест в sql запросах, куда будут подставлены параметры.
+Выбор первого или второго запроса совершает клиентское приложение, в зависимости от введённых пользоваетелем данных.
+Если запрос вернёт кортеж, то такой пользоваетель сущноствуют в базе, и программа открывает для него соответсвующий интерфейс.
+
+\subsection{Интерфейс пациента}
+Интерфейс пациента приведен на рис. \ref{fig:patientint}, перечень доступных функций виден на рисунке в правом окне, в левом окне отображена личная информация пользователя.
+\begin{figure}[h!]
+        \includegraphics[width=\textwidth]{prog_int/patient-interface}
+        \caption{Окно интерфейса пользоваетеля}
+        \label{fig:patientint}
+\end{figure}
+Функция записи к врачу (рис. \ref{fig:appointment1}) состоит из трёх этапов: выбор врача, выбор даты (доступны ближайшие семь дней), выбор времени приёма.
+Если врач имеет выходные в ближайшие семь дней, то эти даты не доступны для выбора (рис. \ref{fig:appointment2}). Также присутствует проверка доступности времени приёма, таким образом из спиcка (рис. \ref{fig:appointment3}) удаляются время перерыва врача, и то время на которое уже существуют записи.
+\begin{figure}[h!]
+        \includegraphics[width=\textwidth]{prog_int/appointment1}
+        \caption{Запись. Этап выбора врача}
+        \label{fig:appointment1}
+\end{figure}
+\begin{figure}[h!]
+        \includegraphics[width=\textwidth]{prog_int/appointment2}
+        \caption{Запись. Этап выбора даты}
+        \label{fig:appointment2}
+\end{figure}
+\begin{figure}[h!]
+        \includegraphics[width=\textwidth]{prog_int/appointment3}
+        \caption{Запись. Этап выбора времени приёма}
+        \label{fig:appointment3}
+\end{figure}
+Запросы которые отправляются в базу данных следующие 
+\begin{lstlisting}[style=csql] 
+1. SELECT vacant_time(?, ?)"
+2. INSERT INTO appointment values(?, ?, ?)"
+3. SELECT e.fio, a.recdatetime, a.tabid FROM appointment a 
+   INNER JOIN employee e ON a.tabid = e.tabid 
+   WHERE (a.regid = ? AND a.tabid = ?) OR (a.regid = ? AND a.recdatetime = ?)
+\end{lstlisting}
+Первый запрос использует пользовательскую функцию для получения всего свободного времени которое доступно у выбранного врача.
+Второй запрос используется для вставки записи в таблицу «Запись».
+Третий запрос срабатывает в том случае если пациент уже имеет запись к какому либо врачу и выбирает то же время к другому врачу, тем самым вызывая нарушение целостности. Запрос уведомляет пользователя что пациент уже имеет запись на данное время.
+
 
 
 \chapter*{Заключение}
@@ -912,38 +1033,14 @@ SQLite. Такой выбор обоснован спецификой предм
         чего все таблицы были заполнены данными.
 \end{enumerate}
 
-    В дальнейшем планируется создание программного продукта, который предоставляет
-        пользователю интерфейс для работы с созданной в данной работе базой данных.
-
-\addcontentsline{toc}{chapter}{Литература}
+\addcontentsline{toc}{chapter}{Список использованных источников}
 \bibliography{b}{}
 
 \newpage
 \hfill\textbf{Приложение А}
-\section*{SQL операторы создания таблиц}
-\addcontentsline{toc}{chapter}{Приложение А. SQL операторы создания таблиц}
-\setcounter{lstlisting}{0}
-
-
-\lstinputlisting[title=1. Создание таблицы «Пациент», label=list:cpat, style=csql]{code/cpatient.sql}
-\lstinputlisting[title=2. Создание таблицы «Сотрудник», label=list:cemp, style=csql]{code/cemployee.sql}
-\lstinputlisting[title=3. Создание таблицы «Запись», label=list:rec, style=csql]{code/cappointment.sql}
-\newpage
-\lstinputlisting[title=4. Создание таблицы «Больничный», label=list:reserv, style=csql]{code/csickleave.sql}
-\lstinputlisting[title=5. Создание таблицы «График», label=list:timetable, style=csql]{code/ctimetable.sql}
-\lstinputlisting[title=6. Создание таблицы «Анализ», label=list:res, style=csql]{code/canalysis.sql}
-\lstinputlisting[title=7. Создание таблицы «Лечение», label=list:treat, style=csql]{code/ctreatment.sql}
-\newpage
-\lstinputlisting[title=8. Создание таблицы «Медкарта», label=list:medc, style=csql]{code/cmedcard.sql}
-\lstinputlisting[title=9. Создание таблицы «Посещения», label=list:medc, style=csql]{code/cvisit.sql}
-\lstinputlisting[title=10. Создание таблицы «Рецепт», label=list:serv, style=csql]{code/creceipt.sql}
-
-
-\newpage
-\hfill\textbf{Приложение Б}
 \setcounter{figure}{0}
 \counterwithout{figure}{chapter}
-\addcontentsline{toc}{chapter}{Приложение Б. Примеры заполнение таблиц данными}
+\addcontentsline{toc}{chapter}{Приложение А. Примеры заполнение таблиц данными}
 
 \section*{Примеры заполнение таблиц данными}
 \setlength{\textfloatsep}{2pt}
@@ -1025,6 +1122,16 @@ SQLite. Такой выбор обоснован спецификой предм
 \vfill
 \phantom{0000}
 
+\cleardoublepage
+\hfill\textbf{Приложение Б}
+\addcontentsline{toc}{chapter}{Приложение Б. Код программы}
+\\
+В связи с тем что полный код программы составляет более двух тысяч пятисот строк, в данном приложении приведены лишь выдержки из общей кодовой базы.
+
+\section*{Код программы}
+\lstinputlisting[title=21. Код интерфейса пациента, label=list:patientint, style=customc]{code/patient.c}
+\lstinputlisting[title=22. Код интерфейса врача, label=list:doctorint, style=customc]{code/doctor.c}
+\lstinputlisting[title=23. Код интерфейса сотрудника регистратуры, label=list:registryint, style=customc]{code/registry.c}
 
 \end{document}
 

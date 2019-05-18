@@ -116,7 +116,7 @@ int annalysis_update(int regid)
 	while(sqlite3_step(stmt) != SQLITE_DONE) {
 		ansis_set = realloc(ansis_set, sizeof(char *) * (z + 2));
 		ansis_set[z] = malloc(strlen(sqlite3_column_text(stmt, 1)) + 11);
-		sprintf(ansis_set[z], "%4d %-s", 
+		sprintf(ansis_set[z], "%04d %-s", 
 				sqlite3_column_int(stmt, 0),
 				sqlite3_column_text(stmt, 1));
 		++z;

@@ -3,5 +3,4 @@ CREATE TABLE medcard (
     regid integer NOT NULL REFERENCES patient(regid),
     crdate date NOT NULL DEFAULT (date('now')),
     type text,
-    UNIQUE(regid, type)
 );
