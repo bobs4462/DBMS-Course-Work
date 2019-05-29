@@ -4,8 +4,8 @@ BEGIN
 	WHERE regid = 
 	(SELECT  regid FROM medcard WHERE cardid = new.cardid)
 		AND date(recdatetime) <= new.passdate;
-	DELETE FROM appointment 
-	WHERE regid = (SELECT  regid FROM medcard WHERE cardid = new.cardid)
+	DELETE FROM appointment WHERE regid = 
+	(SELECT  regid FROM medcard WHERE cardid = new.cardid)
 	AND date(recdatetime) <= new.passdate
 	AND tabid = new.tabid;
 END;

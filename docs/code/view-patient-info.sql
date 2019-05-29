@@ -1,6 +1,5 @@
 CREATE VIEW patient_info AS 
-SELECT 
-	fio AS ФИО,
+SELECT fio AS ФИО,
 	insurcomp AS 'Страховая компания',
 	icontract AS 'Номер полиса страхования',
 	birthdate AS 'Дата рождения',

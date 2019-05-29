@@ -1,6 +1,5 @@
 CREATE VIEW patient_medcard AS 
-SELECT 
-	pat.regid AS regid,
+SELECT pat.regid AS regid,
 	mc.cardid,
 	pat.fio,
 	mc.crdate AS occurence,

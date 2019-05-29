@@ -73,11 +73,10 @@
   identifierstyle=\color{blue},
   stringstyle=\color{orange},
 }
-
 \captionsetup[figure]{labelformat=simple, labelsep=space}
 \captionsetup[table]{labelformat=simple, labelsep=space, justification=raggedleft, singlelinecheck=false, skip=10pt}
 \captionsetup[subtable]{labelformat=empty, labelsep=space, justification=centering, singlelinecheck=false}
-\captionsetup[lstlisting]{labelformat=simple, labelsep=space, justification=raggedright, singlelinecheck=false}
+\captionsetup[lstlisting]{labelformat=simple, labelsep=space, justification=justified, singlelinecheck=false}
 %===========================================
 
 
@@ -99,7 +98,7 @@
      {\textbf{Институт}}\hfill{\textbf{Кафедра\phantom{--00000000000-0--}}}\\
      информационных систем и технологий\hfillинформационных систем\phantom{---0-}\\
     \vspace{1cm} 
-    {\textbf {Отчёт по самостоятельной работе}\par}
+    {\textbf {КУРСОВОЙ ПРОЕКТ}\par}
     {по дисциплине {\textbf{«Управление данными»}}\par}
     на тему: \textbf{Проектирование базы данных поликлиники}
     \vspace{5cm}
@@ -113,7 +112,7 @@
         {Старший преподователь\hfill
         \footnotesize{подпись}\phantom{00000000000000000000000}}\par
     \end{flushleft} 
-    {\vfill Москва 2018}
+    {\vfill Москва 2019 г.}
     \end{small}
 \end{titlepage}
 %==============END TITLEPAGE=============
@@ -440,16 +439,20 @@ ER-модель (от англ. entity-relationship model, модель «сущ
 спроектировать ER-модель данной предметной области, и представить полученую модель с
 помощью стандартной графической нотации ER-диаграммы (диаграммы сущность-связь).
 \cleardoublepage
+Тип связи ``Запись'' - M:N (рис. \ref{fig:patappemp}).
+Класс принадлежности необязательный для обоих экземпляров сущностей.
+Пациент может записаться к нулю или более сотрудникам (врачам), сотрудник может принять ноль или более
+пациентов. 
 \begin{figure}[h!]
         \includegraphics[width=\textwidth]{patappemp}
         \caption{Запись пациента к сотруднику (врачу)}
         \label{fig:patappemp}
 \end{figure}
 
-Тип связи ``Запись'' (рис. \ref{fig:patappemp}) - M:N.
+Тип связи ``Посещения'' - M:N (рис. \ref{fig:medcvisemp}).
 Класс принадлежности необязательный для обоих экземпляров сущностей.
-Пациент может записаться к нулю или более сотрудникам (врачам), сотрудник может принять ноль или более
-пациентов. 
+Сотрудник может принимать нуль или более пациентов по медкарте, медкарта может
+содержать информацию о нуль или более посещениях пациента.
 
 \begin{figure}[h!]
         \includegraphics[width=\textwidth]{medcvisemp}
@@ -457,10 +460,10 @@ ER-модель (от англ. entity-relationship model, модель «сущ
         \label{fig:medcvisemp}
 \end{figure}
 
-Тип связи ``Посещения'' (рис. \ref{fig:medcvisemp}) - M:N.
-Класс принадлежности необязательный для обоих экземпляров сущностей.
-Сотрудник может принимать нуль или более пациентов по медкарте, медкарта может
-содержать информацию о нуль или более посещениях пациента.
+Тип связи ``Владеет'' - 1:M (рис. \ref{fig:medcbelpat}).
+Класс принадлежности обязательный для обоих экземпляров сущностей.
+Пациент может владеть одной или более медкартами, медкарта должна принадлежать
+только одному пациенту.
 
 \begin{figure}[h!]
         \includegraphics[width=\textwidth]{medcbelpat}
@@ -468,52 +471,53 @@ ER-модель (от англ. entity-relationship model, модель «сущ
         \label{fig:medcbelpat}
 \end{figure}
 
-Тип связи ``Владеет'' (рис. \ref{fig:medcbelpat}) - 1:M.
-Класс принадлежности обязательный для обоих экземпляров сущностей.
-Пациент может владеть одной или более медкартами, медкарта должна принадлежать
-только одному пациенту.
 \cleardoublepage
+Тип связи ``Назначает'' - 1:M (рис. \ref{fig:cardan}).
+Класс принадлежности обязательный только для экземпляра сущности Анализ.
+Сотрудник может назначить нуль или более анализов, анализ может
+быть назначен только одним сотрудником.
 
 \begin{figure}[h!]
         \includegraphics[width=\textwidth]{cardan}
         \caption{Назначение анализов пациенту по медкарте}
         \label{fig:cardan}
 \end{figure}
-Тип связи ``Назначает'' (рис. \ref{fig:cardan}) - 1:M.
-Класс принадлежности обязательный только для экземпляра сущности Анализ.
-Сотрудник может назначить нуль или более анализов, анализ может
-быть назначен только одним сотрудником.
 
+Тип связи ``Вноситься'' - 1:M (рис. \ref{fig:newcardan}).
+Класс принадлежности обязательный только для экземпляра сущности Анализ.
+Анализ может быть сдан ровно одним пациентом по медкарте, по
+медкарте пациент может сдать нуль или более анализов
 \begin{figure}[h!]
         \includegraphics[width=\textwidth]{newcardan}
         \caption{Назначение анализов пациенту по медкарте}
         \label{fig:newcardan}
 \end{figure}
 
-Тип связи ``Вноситься'' (рис. \ref{fig:newcardan}) - 1:M.
-Класс принадлежности обязательный только для экземпляра сущности Анализ.
-Анализ может быть сдан ровно одним пациентом по медкарте, по
-медкарте пациент может сдать нуль или более анализов
+Тип связи ``Предписывает'' - 1:M (рис. \ref{fig:empcure}).
+Класс принадлежности обязательный только для экземпляра сущности Лечение.
+Лечение может быть предписано ровно в одним сотрудником, сотрудник
+может предписать нуль или более лечений.
 
 \begin{figure}[h!]
         \includegraphics[width=\textwidth]{empcure}
         \caption{Назначение лечения врачом}
         \label{fig:empcure}
 \end{figure}
-Тип связи ``Предписывает'' (рис. \ref{fig:empcure}) - 1:M.
-Класс принадлежности обязательный только для экземпляра сущности Лечение.
-Лечение может быть предписано ровно в одним сотрудником, сотрудник
-может предписать нуль или более лечений.
 
+Тип связи ``Вносится в'' - 1:M (рис. \ref{fig:medcure}).
+Класс принадлежности обязательный только для экземпляра сущности Лечение.
+Лечение может быть внесено ровно в одну медкарту, в медкарту можно
+внеси нуль или более лечений.
 \begin{figure}[h!]
         \includegraphics[width=\textwidth]{medcure}
         \caption{Внесение записи о лечении в медицинскую карту}
         \label{fig:medcure}
 \end{figure}
-Тип связи ``Вносится в'' (рис. \ref{fig:medcure}) - 1:M.
-Класс принадлежности обязательный только для экземпляра сущности Лечение.
-Лечение может быть внесено ровно в одну медкарту, в медкарту можно
-внеси нуль или более лечений.
+
+Тип связи ``Выписывает'' - 1:M (рис. \ref{fig:receipt}).
+Класс принадлежности обязательный только для экземпляра сущности Рецепт.
+Врач может выписать нуль или более рецептов,
+рецепт может быть выписан ровно одним врачом.\par
 
 \begin{figure}[h!]
         \includegraphics[width=\textwidth]{receipt}
@@ -521,21 +525,20 @@ ER-модель (от англ. entity-relationship model, модель «сущ
         \label{fig:receipt}
 \end{figure}
 
-Тип связи ``Выписывает'' (рис. \ref{fig:receipt}) - 1:M.
-Класс принадлежности обязательный только для экземпляра сущности Рецепт.
-Врач может выписать нуль или более рецептов,
-рецепт может быть выписан ровно одним врачом.\par
-
+Тип связи ``Выдаётся'' - 1:M (рис. \ref{fig:empbolpat}).
+Класс принадлежности обязательный только для экземпляра сущности Больничный.
+Больничный (как документ) может быть выдан ровно одному пациенту,
+пациент может получить нуль или более больничных.
 \begin{figure}[h!]
         \includegraphics[width=\textwidth]{empbolpat}
         \caption{Выдача больничного пациенту}
         \label{fig:empbolpat}
 \end{figure}
 
-Тип связи ``Выдаётся'' (рис. \ref{fig:empbolpat}) - 1:M.
-Класс принадлежности обязательный только для экземпляра сущности Больничный.
-Больничный (как документ) может быть выдан ровно одному пациенту,
-пациент может получить нуль или более больничных.
+Тип связи ``Работает по'' - M:N (рис. \ref{fig:timetable}).
+Класс принадлежности обязательный для экземпляра сущности Сотрудник.
+Сотрудник может работать более одного дня в неделю, в один день
+могут работать нуль или более сотрудников.
 
 \begin{figure}[h!]
         \includegraphics[width=\textwidth]{timetable}
@@ -543,10 +546,6 @@ ER-модель (от англ. entity-relationship model, модель «сущ
         \label{fig:timetable}
 \end{figure}
 
-Тип связи ``Работает по'' (рис. \ref{fig:timetable}) - M:N.
-Класс принадлежности обязательный для экземпляра сущности Сотрудник.
-Сотрудник может работать более одного дня в неделю, в один день
-могут работать нуль или более сотрудников.
 
 \section{Преобразование ER-модели в реляционную}
 \begin{enumerate}[noitemsep]
@@ -657,9 +656,9 @@ SQLite. Такой выбор обоснован спецификой предм
 
 \section{Схема БД поликлиники}
 На основании ER-модели, полученной в конце предыдущей главы, где были описаны таблицы и их атрибуты,
-далее приведены окончательные структуры таблиц (табл. 4.1 - 4.12), созданных в СУБД SQLite. Поля перечислены в
+далее приведены окончательные структуры таблиц, созданных в СУБД SQLite (табл. 4.1 - 4.12). Поля перечислены в
 том же порядке, который был описан ранее. SQL операторы
-использованные для создания таблиц приведены в конце текущей главы, в приложении А приведены примеры их
+использованные для создания таблиц приведены в приложении А, в приложении Б приведены примеры их
 заполнения.
 
 
@@ -855,10 +854,6 @@ SQLite. Такой выбор обоснован спецификой предм
     \label{table:analysis}
 \end{table}
 
-
-
-
-
 \vfill
 Таблица «Сотрудник» содержит информацию о сотрудниках поликлиники (см. табл. \ref{table:emp}).\par
 Таблица «Пациент» содержит персональные данные и контактную информацию пациентов поликлиники (см. табл.
@@ -884,7 +879,7 @@ SQLite. Такой выбор обоснован спецификой предм
 табл. \ref{table:analysis}).\par
 
 
-На рис. clinic\ref{fig:clinic} можно ознакомиться с общей схемой базы данных созданной в СУБД SQLite. Визуализаация схемы была
+На рис. \ref{fig:clinic} можно ознакомиться с общей схемой базы данных созданной в СУБД SQLite. Визуализаация схемы была
 произведена средствами программного продукта DataGrip версия 2017.2.
 
 \begin{figure}[t!]
@@ -894,43 +889,18 @@ SQLite. Такой выбор обоснован спецификой предм
 \end{figure}
 \vfill
 \phantom{0}
-
-\section{SQL операторы создания таблиц}
-\setcounter{lstlisting}{0}
-
-
-\lstinputlisting[title=1. Создание таблицы «Пациент», label=list:cpat, style=csql]{code/cpatient.sql}
-\lstinputlisting[title=2. Создание таблицы «Сотрудник», label=list:cemp, style=csql]{code/cemployee.sql}
-\lstinputlisting[title=3. Создание таблицы «Запись», label=list:rec, style=csql]{code/cappointment.sql}
-\newpage
-\lstinputlisting[title=4. Создание таблицы «Больничный», label=list:reserv, style=csql]{code/csickleave.sql}
-\lstinputlisting[title=5. Создание таблицы «График», label=list:timetable, style=csql]{code/ctimetable.sql}
-\lstinputlisting[title=6. Создание таблицы «Анализ», label=list:res, style=csql]{code/canalysis.sql}
-\lstinputlisting[title=7. Создание таблицы «Лечение», label=list:treat, style=csql]{code/ctreatment.sql}
-\newpage
-\lstinputlisting[title=8. Создание таблицы «Медкарта», label=list:medc, style=csql]{code/cmedcard.sql}
-\lstinputlisting[title=9. Создание таблицы «Посещения», label=list:visit, style=csql]{code/cvisit.sql}
-\lstinputlisting[title=10. Создание таблицы «Рецепт», label=list:serv, style=csql]{code/creceipt.sql}
-
-\section{Индексы, представления, триггеры, созданные для решеня задач БД}
-\lstinputlisting[title=11. Индексы таблицы «Запись», label=list:idxapp, style=csql]{code/idx-appointment.sql}
-\lstinputlisting[title=12. Индексы таблицы «Медкарта», label=list:idxmedc, style=csql]{code/idx-medcard.sql}
-\lstinputlisting[title=13. Представление «medicalcard» собирающее данные из таблиц «Анализ» «Посещения» «Лечение» «Сотрудник» по фильтру - идентификатор медкарты, label=list:viewmedicalcard, style=csql]{code/view-medicalcard.sql}
-\lstinputlisting[title=14. Представление «patient\_info» собирающее данные из таблицы «Пациент» по фильтру - идентификатор пациента с переименованием полей, label=list:viewpatientinfo, style=csql]{code/view-patient-info.sql}
-\lstinputlisting[title=15. Представление «patient\_medcard» собирающее данные из таблиц «Пациент» «Медкарта» и из представления «medicalcard» по фильтру идентификатор пациента, label=list:viewpatientmedcard, style=csql]{code/view-patient-medcard.sql}
-\lstinputlisting[title=16. Триггер «insert\_visit» срабатывающий после вставки в таблицу «Посещения» и удаляющий запись пациента к врачу, label=list:triginsertvisit, style=csql]{code/trig-insert-visit.sql}
-\lstinputlisting[title=17. Триггер «insert\_treatment» срабатывающий после вставки в таблицу «Лечение» и удаляющий запись пациента к врачу, label=list:triginserttreatment, style=csql]{code/trig-insert-treatment.sql}
-\lstinputlisting[title=18. Триггер «insert\_analysis» срабатывающий после вставки в таблицу «Анализ» и удаляющий запись пациента к врачу, label=list:triginsertanalysis, style=csql]{code/trig-insert-analysis.sql}
-\lstinputlisting[title=19. Триггер «archive\_card» срабатывающий при попытке удаления записи из таблицы «Медкарта» и архивирующий карту, label=list:trigarchivecard, style=csql]{code/trig-archive-card.sql}
-\lstinputlisting[title=20. Триггер «archive\_patient» срабатывающий при попытке удаления записи из таблицы «Пациент» и архивирующий пациента, label=list:trigarchivepatient, style=csql]{code/trig-archive-patient.sql}
+\cleardoublepage
 
 \chapter{Описание функционирования БД}
 \section{Назначение и перечень функций базы данных}
+Спроектированная база данных предназначена для хранения и обеспечения доступа ко всей информации, которая появляется в результате деятельности поликлиники.\par
 Далее приведены функции, которые предоставляет, реализованный в данной работе программный продукт, пользователям для работы с базой данных.
-\begin{enumerate}
+\begin{enumerate}[noitemsep]
+\vspace{-5pt}
 	\item Поиск по пациентам, используя часть имени пациента в качестве критерия поиска;
 	\item Получение доступа к списку врачей с целью:
-		\begin{itemize}
+		\begin{itemize}[noitemsep]
+			\vspace{-5pt}
 				\renewcommand\labelitemi{--}
 			\item ознакомления с расписанием выбранного врача,
 			\item запись на прием к выбранному врачу.
@@ -952,36 +922,23 @@ SQLite. Такой выбор обоснован спецификой предм
 
 \section{Описание работы с базой данных}
 \subsection{Вход в систему}
-При попытке входа в систему (рис. \ref{fig:login}), программа определяет тип пользоваетеля и делает запрос в базу данных к соответсвующей таблице. В зависимости от ответа базы данных, программа либо запускает необходимый интерфейс пользоваетеля, либо выдает сообщение о неправильности введённых данных.
+При попытке входа в систему (рис. \ref{fig:login}), программа определяет тип пользоваетеля и делает запрос в базу данных к соответсвующей таблице. В зависимости от ответа базы данных, программа либо запускает необходимый интерфейс пользоваетеля, либо выдает сообщение о неправильности введённых данных. С запросом который отправляется в базу можно ознакомиться в п. 21 приложения А.\par
 \begin{figure}[h!]
         \includegraphics[width=\textwidth]{prog_int/login-screen}
         \caption{Окно входа в систему}
         \label{fig:login}
 \end{figure}
-\noindentЗапросы, которые отправляются в базу данных следующие 
-\begin{lstlisting}[style=csql] 
-1. SELECT * FROM patient where regid = ? AND password = ?
-2. SELECT * FROM employee where tabid = ? AND password = ?
-\end{lstlisting}
-\noindentЗдесь и далее символ «?» используется для обозначения мест в sql запросах, куда будут подставлены параметры.
-Выбор первого или второго запроса совершает клиентское приложение, в зависимости от введённых пользоваетелем данных.
-Если запрос вернёт кортеж, то такой пользоваетель существуют в базе, и программа открывает для него соответсвующий интерфейс.
-
+\cleardoublepage
 \subsection{Интерфейс пациента}
-Интерфейс пациента приведен на рис. \ref{fig:patientint}, перечень доступных функций виден на рисунке в правом окне, в левом окне отображена личная информация пользователя.\par
+Интерфейс пациента приведен на рис. \ref{fig:patientint}, перечень доступных функций виден на рисунке в правом окне, в левом окне отображена личная информация пользователя, собираемая с помощью представления (п. 14 приложение А). Запросы используемые для взаимодействия с БД приведены в п. 21 приложения А. С выдержкой из кода можно ознакомиться в п. 1 приложения В.\par
 \begin{figure}[h!]
         \includegraphics[width=\textwidth]{prog_int/patient-interface}
         \caption{Окно интерфейса пользоваетеля}
         \label{fig:patientint}
 \end{figure}
-Для заполнения данных о пациенте используется следующий запрос:
-\begin{lstlisting}[style=csql] 
-SELECT * from patient_info where regid = ?
-\end{lstlisting}
-\noindentЗапрос обращается к представлению «patient\_info» (листинг \ref{list:viewpatientinfo}) для получения данных.\par\par
 
-Функция записи к врачу (рис. \ref{fig:appointment1}) состоит из трёх этапов: выбор врача, выбор даты (доступны ближайшие семь дней), выбор времени приёма.
-Если врач имеет выходные в ближайшие семь дней, то эти даты не доступны для выбора (рис. \ref{fig:appointment2}). Также присутствует проверка доступности времени приёма, таким образом из спиcка (рис. \ref{fig:appointment3}) удаляются время перерыва врача, и то время на которое уже существуют записи.\par
+Функция записи к врачу состоит из трёх этапов: выбор врача, выбор даты (доступны ближайшие семь дней), выбор времени приёма (рис. \ref{fig:appointment1}).
+Если врач имеет выходные в ближайшие семь дней, то эти даты не доступны для выбора (рис. \ref{fig:appointment2}). Также присутствует проверка доступности времени приёма, таким образом из спиcка удаляются время перерыва врача, и то время на которое уже существуют записи (рис. \ref{fig:appointment3}).\par
 \begin{figure}[h!]
         \includegraphics[width=\textwidth]{prog_int/appointment1}
         \caption{Запись. Этап выбора врача}
@@ -997,31 +954,12 @@ SELECT * from patient_info where regid = ?
         \caption{Запись. Этап выбора времени приёма}
         \label{fig:appointment3}
 \end{figure}
-\newpage
-\noindentЗапросы, которые отправляются в базу данных следующие:
-\begin{lstlisting}[style=csql] 
-1. SELECT vacant_time(?, ?)
-2. INSERT INTO appointment values(?, ?, ?)
-3. SELECT e.fio, a.recdatetime, a.tabid FROM appointment a 
-   INNER JOIN employee e ON a.tabid = e.tabid 
-   WHERE (a.regid = ? AND a.tabid = ?) OR (a.regid = ? AND a.recdatetime = ?)
-\end{lstlisting}
-\noindentПервый запрос использует пользовательскую функцию для получения всего свободного времени которое доступно у выбранного врача.
-Второй запрос используется для вставки записи в таблицу «Запись».
-Третий запрос срабатывает в том случае если пациент уже имеет запись к какому либо врачу и выбирает то же время к другому врачу, тем самым вызывая нарушение целостности. Запрос уведомляет пользователя что пациент уже имеет запись на данное время.\par\par
 
-Функция просмотра записей пациента рис. \ref{fig:appointments-show}
 \begin{figure}[h!]
         \includegraphics[width=\textwidth]{prog_int/appointments-show}
         \caption{Список записей пациента}
         \label{fig:appointments-show}
 \end{figure}
-\noindentЗапросы, которые отправляются в базу данных следующие:
-\begin{lstlisting}[style=csql] 
-1. SELECT a.recdatetime, e.fio, e.position FROM appointment a
-   JOIN employee e on a.tabid = e.tabid WHERE regid = ? 
-\end{lstlisting}
-\noindentДанный запрос возвращает список всех записей, которые на данный момент существуют у пациента в виде ФИО врача, должность врача и время записи.\par\par
 
 Функция просмотра рецептов, выписанных пациенту. Пользоветелю представляется возможности выбрать из списка всех рецептов, после чего программа отображает форму рецепта рис. \ref{fig:receipt-form}.\par
 \begin{figure}[h!]
@@ -1029,15 +967,6 @@ SELECT * from patient_info where regid = ?
         \caption{Форма рецепта, выписанного пациенту}
         \label{fig:receipt-form}
 \end{figure}
-\noindentЗапросы, которые отправляются в базу данных следующие: 
-\begin{lstlisting}[style=csql] 
-1. SELECT r.receiptid, r.medicine, r.issuedate, e.fio, p.fio, 
-	  CAST ((julianday('now') - julianday(p.birthdate)) / 365.25 as INTEGER), 
-	  p.address FROM 
-	  receipt r JOIN employee e ON e.tabid = r.tabid JOIN 
-	  patient p ON p.regid = r.regid where r.regid = ?
-\end{lstlisting}
-\noindentЗапрос возвращает всю необходимую информацию, для заполнения формы рецепта №148-1/у-88.\par\par
 
 Функция просмотра расписание врачей. Пользоветелю представляется возможности выбрать нужного врача из списка, после чего программа отображает расписание выбранного врача (начало смены, конец смены, начало перерыва) рис. \ref{fig:timetable-show}.\par
 \begin{figure}[h!]
@@ -1045,13 +974,8 @@ SELECT * from patient_info where regid = ?
         \caption{Расписание выбранного врача}
         \label{fig:timetable-show}
 \end{figure}
-\noindentЗапросы, которые отправляются в базу данных следующие: 
-\begin{lstlisting}[style=csql] 
-1. SELECT weekday, get_time(shiftst), get_time(shiftend), get_time(break)
-   FROM timetable where tabid = ? and shiftst IS NOT NULL ORDER BY daynum
-\end{lstlisting}
-\noindentЗапрос использует пользовательскую функцию get\_time для конвертирования числового представления времени в формат ЧАСЫ:МИНУТЫ, и возвращает расписание врача, исключив из него выходные дни.\par\par
-Функция просмотра медицинских карт пациента. Пользоветелю представляется возможности выбрать карту из перечня (рис. \ref{fig:medcard-list}), после чего программа отображает содержимое выбранной карты, с возможностью перелистывания (рис. \ref{fig:medcard-view}).\par
+
+Функция просмотра медицинских карт пациента. Пользоветелю представляется возможности выбрать карту из перечня (рис. \ref{fig:medcard-list}), после чего программа отображает содержимое выбранной карты, с возможностью перелистывания (рис. \ref{fig:medcard-view}). Информация о медицинской карте получается из представления (п. 15 приложение А).\par
 \begin{figure}[h!]
         \includegraphics[width=\textwidth]{prog_int/medcard-list}
         \caption{Выбор медицинской карты}
@@ -1062,29 +986,17 @@ SELECT * from patient_info where regid = ?
         \caption{Просмотр содержимого медицинской карты}
         \label{fig:medcard-view}
 \end{figure}
-\noindentЗапросы, которые отправляются в базу данных следующие: 
-\begin{lstlisting}[style=csql] 
-1. SELECT * FROM patient_medcard where regid = ?
-2. SELECT count(*) FROM medcard where regid = ?
-3. SELECT count(*) FROM medicalcard where card GLOB '*00' || ?
-4. SELECT * FROM medicalcard where card GLOB '*00' || ?
-\end{lstlisting}
-\noindentПервый запрос собирает данные о медицинской карте через обращение к представлению «patient\_medcard» (листинг \ref{list:viewpatientmedcard}). Второй запрос получает количество медицинских карт у пациента. Третий запрос обращается к представлению «medicalcard» для получения количества записей в выбранной медицинской карте. Четвёртый запрос обращается к представлению «medicalcard» (листинг \ref{list:viewmedicalcard} для получения содержимого выбранной медицинской карты.\par\par
 
 Функция смены пароля (рис. \ref{fig:pass-change}). Пользователь должен ввести новый пароль два раза, если оба пароля совпадают, то пользователь уведомляется об успешной смене пароля, в противном случае ему будет предложена новая попытка.\par
 \begin{figure}[h!]
         \includegraphics[width=\textwidth]{prog_int/pass-change}
-        \caption{Расписание выбранного врача}
+        \caption{Смена пароля}
 		\label{fig:pass-change}
 \end{figure}
-\noindentЗапросы, которые отправляются в базу данных следующие: 
-\begin{lstlisting}[style=csql] 
-1. UPDATE patient set password = ? where regid = ?
-\end{lstlisting}
 
 \subsection{Интерфейс врача}
 При входе в систему пользователь попадает в окно поиска (рис. \ref{fig:search}), где можно осуществить поиск пациента, с кем будет продолжена работа.
-В поисковое поле можно вводить любую часть имени пациента, и система вернёт все найденные в базе данных совпадения (рис. \ref{fig:search-result}).\par
+В поисковое поле можно вводить любую часть имени пациента, и система вернёт все найденные в базе данных совпадения (рис. \ref{fig:search-result}). Запросы используемые для взаимодействия с БД приведены в п. 22 приложения А. С выдержкой из кода можно ознакомиться в п. 2 приложения В\par
 \begin{figure}[h!]
         \includegraphics[width=\textwidth]{prog_int/search}
         \caption{Окно поиска}
@@ -1095,12 +1007,8 @@ SELECT * from patient_info where regid = ?
         \caption{Результат поиска}
         \label{fig:search-result}
 \end{figure}
-\noindentЗапросы, которые отправляются в базу данных следующие: 
-\begin{lstlisting}[style=csql] 
-1. SELECT regid, fio FROM patient WHERE fio LIKE ?
-\end{lstlisting}
-\noindentЗапрос возвращает всех пациентов чьи ФИО удовлетворяют критерию отбора по маске.\par
-После выбора пациента для работы открывается основной интерфейс, с отображением данных пациента и набором доступных действий (рис. \ref{fig:doctor-interface}).\par\par
+
+После выбора пациента для работы, открывается основной интерфейс с отображением данных пациента и набором доступных действий (рис. \ref{fig:doctor-interface}).\par\par
 \begin{figure}[h!]
         \includegraphics[width=\textwidth]{prog_int/doctor-interface}
         \caption{Основной пользовательский интерфейс врача}
@@ -1120,16 +1028,6 @@ SELECT * from patient_info where regid = ?
         \caption{Внесение результатов анализов}
         \label{fig:analysis-update}
 \end{figure}
-\noindentЗапросы, которые отправляются в базу данных следующие: 
-\begin{lstlisting}[style=csql] 
-1. INSERT INTO analysis(tabid, cardid, type) values(?, ?, ?)
-2. SELECT last_insert_rowid()
-3. SELECT anid, type FROM analysis WHERE cardid IN (SELECT cardid FROM
-   medcard WHERE regid = ?) AND result IS NULL
-4. UPDATE analysis SET result = ? where anid = ?
-\end{lstlisting}
-\noindentВторой запрос возвращает значение счетчика, который используется в качестве идентификатора анализов, в рамках текещуего соединения. Таким образом можно получить номер анализов который был создан посредством первого запроса.
-Третий запрос возвращает все анализы пациента, которые ещё не имеют результата.\par\par
 
 Функция назначения лечения. Позволяет доктору внести в карту пациента диагностированное заболевание и назначенное лечение (рис. \ref{fig:treatment-create}).\par
 \begin{figure}[h!]
@@ -1137,12 +1035,6 @@ SELECT * from patient_info where regid = ?
         \caption{Внесение результатов анализов}
         \label{fig:treatment-create}
 \end{figure}
-\noindentЗапросы, которые отправляются в базу данных следующие: 
-\begin{lstlisting}[style=csql] 
-1. INSERT INTO treatment(tabid, cardid, illness, treatment)
-   values(?, ?, ?, ?)
-2. SELECT last_insert_rowid()
-\end{lstlisting}
 
 Функция выписки рецепта. Пользователю предлагается заполнить перечень лекарств (рис. \ref{fig:receipt-issue}).\par
 \begin{figure}[h!]
@@ -1150,11 +1042,6 @@ SELECT * from patient_info where regid = ?
         \caption{Форма ввода перечня лекарств для рецепта}
         \label{fig:receipt-issue}
 \end{figure}
-\noindentЗапросы, которые отправляются в базу данных следующие: 
-\begin{lstlisting}[style=csql] 
-1. INSERT INTO receipt(tabid, regid, medicine)
-   values(?, ?, ?)
-\end{lstlisting}
 
 Функция выписки листка нетрудоспособности. Пользователю предлагается выбрать причину нетрудоспособности, а после заполнить форму (рис. \ref{fig:sickleave-issue}).\par
 \begin{figure}[h!]
@@ -1162,11 +1049,6 @@ SELECT * from patient_info where regid = ?
         \caption{Заполнение формы нетрудоспособности}
         \label{fig:sickleave-issue}
 \end{figure}
-\noindentЗапросы, которые отправляются в базу данных следующие: 
-\begin{lstlisting}[style=csql] 
-1. INSERT INTO sickleave(regid, tabid, stdate, endate, destn, sick_code)
-   values(?, ?, ?, ?, ?, ?)
-\end{lstlisting}
 
 Функция просмотра листов нетрудоспособности, выданных пациенту. Пользоветелю предоставляется возможности выбрать из списка всех больничных листов, после чего программа отображает форму листа нетрудоспособности (рис. \ref{fig:sickleave-form}).\par
 \begin{figure}[h!]
@@ -1174,23 +1056,9 @@ SELECT * from patient_info where regid = ?
         \caption{Форма листа нетрудоспособности, выданного пациенту}
         \label{fig:sickleave-form}
 \end{figure}
-\noindentЗапросы, которые отправляются в базу данных следующие: 
-\begin{lstlisting}[style=csql] 
-1. SELECT s.sickid, strftime('%d-%m-%Y', s.issuedate),
-   strftime('%d-%m-%Y', s.stdate), 
-   strftime('%d-%m-%Y', s.endate),
-   strftime('%d-%m-%Y',date(s.endate, '+1 day')), 
-   s.destn, e.fio, e.position, p.fio, p.gender,
-   strftime('%d-%m-%Y',p.birthdate), s.sick_code
-   FROM sickleave s \
-   JOIN employee e ON s.tabid = e.tabid \
-   JOIN patient p ON p.regid = s.regid\
-   where s.tabid = ? and s.regid = ?
-\end{lstlisting}
-\noindentЗапрос возвращает всю необходимую информацию для заполнения формы приведенной на рис. \ref{fig:sickleave-form}.
 
 \subsection{Интерфейс сотрудника регистратуры}
-При входе в систему пользователь попадает в основной пользовательский интерфейс сотрудника регистратуры (рис. \ref{fig:registry-interface}).\par
+При входе в систему пользователь попадает в основной пользовательский интерфейс сотрудника регистратуры (рис. \ref{fig:registry-interface}). Запросы используемые для взаимодействия с БД приведены в п. 23 приложения А. С выдержкой из кода можно ознакомиться в п. 3 приложения В\par
 \begin{figure}[h!]
         \includegraphics[width=\textwidth]{prog_int/registry-interface}
         \caption{Основной интерфейс сотрудника регистратуры}
@@ -1198,46 +1066,40 @@ SELECT * from patient_info where regid = ?
 \end{figure}
 
 Функция просмотра карт пациента аналогична той что реализована в пользовательском интерфейсе пациента, для нахождения конкретного пациента используется поисковое окно (рис. \ref{fig:search}).\par
-Функция добавления нового пациента. От пользователя требуется заполнить форму создания нового пациента (рис. \ref{fig:patient-create}), затем программа добавляет нового пациента в систему и возвращает логин и и автоматически сгенерированный пароль.\par
+Функция добавления нового пациента. От пользователя требуется заполнить форму создания нового пациента (рис. \ref{fig:patient-create}), затем программа добавляет нового пациента в систему, после чего возвращает логин и автоматически сгенерированный пароль.\par
 \begin{figure}[h!]
         \includegraphics[width=\textwidth]{prog_int/patient-create}
         \caption{Форма создания нового пациента}
         \label{fig:patient-create}
 \end{figure}
-\noindentЗапросы, которые отправляются в базу данных следующие: 
-\begin{lstlisting}[style=csql] 
-1. INSERT INTO patient(fio, insurcomp, icontract, birthdate, gender, address, pnumber)
-   VALUES(?, ?, ?, ?, ?, ?, ?)
-\end{lstlisting}
-\par
 Функция изменения данных пациента. От пользователя требуется заполнить форму идентичную той которая использовалась для создания нового пациента, за исключением того, что она уже заполнена текущими данными. Пользоветелю необходимо изменить нужные поля.\par
 
 Функция удаление пациента происходит в несколько этапов:
 \begin{enumerate}
 	\item В окне поиска (рис. \ref{fig:search}) необходимо найти пользователя для удаления;
 	\item При его выборе, программа запросит подтверждение на удаление;
-	\item При согласии пользователя система предпринимает попытку удалить пациента из таблицы «Пациент» и перемещения в архив, тем самым приводит в действие триггер «archive\_patient» (листинг \ref{list:trigarchivepatient});
-	\item Триггер делает попытку удаления карт пациента и перемещения их в архив, тем самым приводит в действие ещё один триггер «archive\_card» (листинг \ref{list:trigarchivecard});
+	\item При согласии пользователя система предпринимает попытку удалить пациента из таблицы «Пациент» и перемещения в архив, тем самым приводит в действие триггер «archive\_patient» (п. 20 приложения А);
+	\item Триггер делает попытку удаления карт пациента и перемещения их в архив, тем самым приводит в действие ещё один триггер «archive\_card» (п. 19 приложения А);
 	\item Триггер «archive\_card» перемещает все данные связанные с удаляемой картой в архив;
 	\item Пользоветелю выводится сообщение об успешном перемещении пользователя в архив (рис. \ref{fig:success-archive}).
 \end{enumerate}
-\begin{figure}[h!]
+\noindentРезультатом является что пациент перемещен в архив со всеми своими данными.
+Функции просмотра расписания врачей и создания записи к врачу аналогичны тем что были описаны в интерфейсе пациента.\par
+Функция просмотра архива пациентов, работает так же как и функция просмотра карт пациентов, но обращение идёт уже к архиву, а не к основной базе данных.
+\par
+\newpage
+\begin{figure}[t!]
         \includegraphics[width=\textwidth]{prog_int/success-archive}
         \caption{Уведомление об успешном перемещении пациента в архив}
         \label{fig:success-archive}
 \end{figure}
-\noindentРезультатом является что пациент перемещен в архив со всеми своими данными.
-Запросы, которые отправляются в базу данных следующие: 
-\begin{lstlisting}[style=csql] 
-1. DELETE FROM patient WHERE regid = ?
-\end{lstlisting}
-\par
-Функции просмотра расписания врачей и создания записи к врачу аналогичны тем что были описаны в интерфейсе пациента.\par
-Функция просмотра архива пациентов, работает так же как и функция просмотра карт пациентов, но обращение идёт уже к архиву, а не к основной базе данных.\par
+\vfill
+\phantom{00}
+\cleardoublepage
 
 \chapter*{Заключение}
 \addcontentsline{toc}{chapter}{Заключение}
-Целью данной работы является проектирование базы данных для поликлиники. 
+Целью данной работы являлось проектирование базы данных для поликлиники, и последующая разработка программного продукта для работы с БД. 
 В связи с ростом человеческого населения, и высокой степени бюрократизации поликлиник, проблема
 автоматизации работы подобного рода учреждений особенно актуальна, так как это непосредственно
 сказывается на качестве оказываемых услуг. В ходе выполнения работы были достигнуты следующие цели: 
@@ -1257,9 +1119,11 @@ SELECT * from patient_info where regid = ?
         использованы ER-диаграммы. В завершении данного этапа были построена схема БД в виде набора
         схем отношений. А именно следующие десять отношений: Пациент, Сотрудник, Запись, 
 		Посещения, Больничный, Лечение, Анализ, График, Медкарта, Рецепт.
-    \item Завершающим этапом стало физическое проектирование, в ходе которого в СУБД SQLite была
+    \item Физическое проектирование стало последней стадией проектирования, в ходе которого в СУБД SQLite была
         создана база данных поликлиники со всеми таблицами, определенных на предыдущем этапе, после
         чего все таблицы были заполнены данными.
+	\item По завершению проектирования, было разработано приложение которое предоставляет средства взаимодействия с базой данных.
+		Приложение было написано на языке программирования «Си», с использованием библиотеки «ncurses» для создания псевдографического пользовательского интерфейса.
 \end{enumerate}
 
 \addcontentsline{toc}{chapter}{Список использованных источников}
@@ -1267,9 +1131,45 @@ SELECT * from patient_info where regid = ?
 
 \newpage
 \hfill\textbf{Приложение А}
+\section*{SQL операторы создания таблиц}
+\addcontentsline{toc}{chapter}{Приложение А. SQL операторы использованные в проекте}
+
+\lstinputlisting[title=1. Создание таблицы «Пациент», label=list:cpat, style=csql]{code/cpatient.sql}
+\lstinputlisting[title=2. Создание таблицы «Сотрудник», label=list:cemp, style=csql]{code/cemployee.sql}
+\lstinputlisting[title=3. Создание таблицы «Запись», label=list:rec, style=csql]{code/cappointment.sql}
+\newpage
+\lstinputlisting[title=4. Создание таблицы «Больничный», label=list:reserv, style=csql]{code/csickleave.sql}
+\lstinputlisting[title=5. Создание таблицы «График», label=list:timetable, style=csql]{code/ctimetable.sql}
+\lstinputlisting[title=6. Создание таблицы «Анализ», label=list:res, style=csql]{code/canalysis.sql}
+\lstinputlisting[title=7. Создание таблицы «Лечение», label=list:treat, style=csql]{code/ctreatment.sql}
+\newpage
+\lstinputlisting[title=8. Создание таблицы «Медкарта», label=list:medc, style=csql]{code/cmedcard.sql}
+\lstinputlisting[title=9. Создание таблицы «Посещения», label=list:visit, style=csql]{code/cvisit.sql}
+\lstinputlisting[title=10. Создание таблицы «Рецепт», label=list:serv, style=csql]{code/creceipt.sql}
+
+\section*{Индексы, представления, триггеры, созданные для решеня задач БД}
+\lstinputlisting[title=11. Индексы таблицы «Запись», label=list:idxapp, style=csql]{code/idx-appointment.sql}
+\lstinputlisting[title=12. Индексы таблицы «Медкарта», label=list:idxmedc, style=csql]{code/idx-medcard.sql}
+\lstinputlisting[title={13. Представление «medicalcard» собирающее данные из таблиц «Анализ», «Посещение», «Лечение», «Сотрудник» по фильтру - идентификатор медкарты}, label=list:viewmedicalcard, style=csql]{code/view-medicalcard.sql}
+\cleardoublepage
+\lstinputlisting[title=14. Представление «patient\_info» собирающее данные из таблицы «Пациент» по фильтру - идентификатор пациента с переименованием полей, label=list:viewpatientinfo, style=csql]{code/view-patient-info.sql}
+\lstinputlisting[title={15. Представление «patient\_medcard» собирающее данные из таблиц «Пациент», «Медкарта» и из представления «medicalcard» по фильтру идентификатор пациента}, label=list:viewpatientmedcard, style=csql]{code/view-patient-medcard.sql}
+\lstinputlisting[title=16. Триггер «insert\_visit» срабатывающий после вставки в таблицу «Посещения» и удаляющий запись пациента к врачу, label=list:triginsertvisit, style=csql]{code/trig-insert-visit.sql}
+\lstinputlisting[title=17. Триггер «insert\_treatment» срабатывающий после вставки в таблицу «Лечение» и удаляющий запись пациента к врачу, label=list:triginserttreatment, style=csql]{code/trig-insert-treatment.sql}
+\lstinputlisting[title=18. Триггер «insert\_analysis» срабатывающий после вставки в таблицу «Анализ» и удаляющий запись пациента к врачу, label=list:triginsertanalysis, style=csql]{code/trig-insert-analysis.sql}
+\lstinputlisting[title=19. Триггер «archive\_card» срабатывающий при попытке удаления записи из таблицы «Медкарта» и архивирующий карту, label=list:trigarchivecard, style=csql]{code/trig-archive-card.sql}
+\lstinputlisting[title=20. Триггер «archive\_patient» срабатывающий при попытке удаления записи из таблицы «Пациент» и архивирующий пациента, label=list:trigarchivepatient, style=csql]{code/trig-archive-patient.sql}
+\section*{Запросы использованные в клиентском приложении}
+\noindent\textbf{Примечание}\par
+Далее символ «?», в силу особенностей СУБД SQLite, используется для обозначения мест в sql запросах, куда будут подставлены параметры.
+\lstinputlisting[title=21. Запросы используемые в интерфейсе пациента, label=list:patqr, style=csql]{code/patient_queries.sql}
+\lstinputlisting[title=22. Запросы используемые в интерфейсе врача, label=list:docqr, style=csql]{code/doctor_queries.sql}
+\lstinputlisting[title=23. Запросы используемые в интерфейсе сотрудника регистратуры, label=list:regqr, style=csql]{code/registry_queries.sql}
+\newpage
+\hfill\textbf{Приложение Б}
 \setcounter{figure}{0}
 \counterwithout{figure}{chapter}
-\addcontentsline{toc}{chapter}{Приложение А. Примеры заполнение таблиц данными}
+\addcontentsline{toc}{chapter}{Приложение Б. Примеры заполнение таблиц данными}
 
 \section*{Примеры заполнение таблиц данными}
 \setlength{\textfloatsep}{2pt}
@@ -1352,15 +1252,17 @@ SELECT * from patient_info where regid = ?
 \phantom{0000}
 
 \cleardoublepage
-\hfill\textbf{Приложение Б}
-\addcontentsline{toc}{chapter}{Приложение Б. Код программы}
+\hfill\textbf{Приложение В}
+\addcontentsline{toc}{chapter}{Приложение В. Код программы}
 \\
+\section*{Код программы}
+\noindent\textbf{Примечание}\par
 В связи с тем что полный код программы составляет более двух тысяч пятисот строк, в данном приложении приведены лишь выдержки из общей кодовой базы.
 
-\section*{Код программы}
-\lstinputlisting[title=21. Код интерфейса пациента, label=list:patientint, style=customc]{code/patient.c}
-\lstinputlisting[title=22. Код интерфейса врача, label=list:doctorint, style=customc]{code/doctor.c}
-\lstinputlisting[title=23. Код интерфейса сотрудника регистратуры, label=list:registryint, style=customc]{code/registry.c}
+\lstinputlisting[title=1. Код интерфейса пациента, label=list:patientint, style=customc]{code/patient.c}
+\lstinputlisting[title=2. Код интерфейса врача, label=list:doctorint, style=customc]{code/doctor.c}
+\lstinputlisting[title=3. Код интерфейса сотрудника регистратуры, label=list:registryint, style=customc]{code/registry.c}
+
 
 \end{document}
 

@@ -7,7 +7,8 @@ SELECT
 	an.passdate AS occurence,
 	an.type AS antype,
 	an.result
-	FROM analysis an INNER JOIN employee emp ON emp.tabid = an.tabid 
+	FROM analysis an INNER JOIN employee emp ON 
+	emp.tabid = an.tabid 
 UNION ALL 
 SELECT 
 	"TR00000" || tr.treatid AS type, 
@@ -18,7 +19,8 @@ SELECT
 	tr.trdate AS occurence,
 	tr.illness,
 	tr.treatment
-	FROM treatment tr INNER JOIN employee emp ON emp.tabid = tr.tabid
+	FROM treatment tr INNER JOIN employee emp ON 
+	emp.tabid = tr.tabid
 UNION ALL
 SELECT 
 	"VS00000" || vis.visid AS type,
@@ -29,5 +31,6 @@ SELECT
 	vis.visdate AS occurence,
 	vis.visgoal,
 	' '
-	FROM visit vis INNER JOIN employee emp ON emp.tabid = vis.tabid
+	FROM visit vis INNER JOIN employee emp ON 
+	emp.tabid = vis.tabid
 ORDER BY occurence;
